@@ -5,19 +5,21 @@
 #include "GCP_Delegate.h"
 
 
-
+//Информация о компоненте 
 struct point
 {
 	int x,y;
 	int width,height;
 	std::string icon;
 };
+
+//Структура для сортировки компонетнов
 struct component
 {
 	int draw_order;
-
 };
 
+//событие внутри формы. возвращает состояние самой формы
 struct gcp_formEvent		
 {
 	bool isFormDragged;
@@ -25,7 +27,7 @@ struct gcp_formEvent
 	bool isEventOnFormHead;
 };
 
-
+//Сдлные события
 struct sdl_events
 {
 	SDL_KeyboardEvent keyboard;
@@ -39,11 +41,11 @@ struct sdl_events
 	bool isPassingOnlyGlobalEvent;
 };
 
+//Константы
 const int GCP_SORTBY_DRAWORDER = 1;
 const int GCP_SORTBY_EVENTORDER = 2;
 
-
-
+//event - глобальное событие event+1 - локальное событие
 const int GCP_ON_GLEFT_CLICK = 1;
 const int GCP_ON_LEFT_CLICK = 2;
 const int GCP_ON_GRIGHT_CLICK = 3;
@@ -72,22 +74,20 @@ const int GCP_MAX_FUNC_NUM = 23;
 class GCP_FormComponent
 {
 	protected:
-		std::string _sCaption;
-		IContainer* FUNCTIONS[GCP_MAX_FUNC_NUM];
-
-		
+		std::string _sCaption;						//Надпись
+		IContainer* FUNCTIONS[GCP_MAX_FUNC_NUM];	//Функции навешаные на события	
 
 		bool _isMouseOver;
 		bool _isMouseHold;
 		bool _isDragStarted;
 		string _sTextInput;
-		int _timeMouseOver;
-		
+		int _timeMouseOver;							//Таймер мыши для всплывающей подсказки
 
 	public:
 		//GCP_FormComponent* _OnRightClickContextMenu;
 		bool compare(const GCP_FormComponent* right, int compare, int criteria = -1)
 		{
+			//Метод по которому сравниваются елементы в сортировке кусорт
 			switch (compare)
 			{
 				case 1:	// <
@@ -119,38 +119,39 @@ class GCP_FormComponent
 	
 		GCP_FormComponent()
 		{
-			_sCaption = "";
-			_sTextInput = "";
-			sFontDir = "data\\arial.ttf";
-			INFO = "";
-			options.draw_order = 0;
+			_sCaption = "";									//Надпись
+			_sTextInput = "";								//Введенный текст
+			sFontDir = "data\\arial.ttf";					//Путь к шрифту (умолчание) 
+			INFO = "";										//Всплывающая подсказка
+			options.draw_order = 0;							//Порядок отрисовки
 			_isMouseOver = false;  _isMouseHold = false;
-			isLocalEventsUnderneathBlocking = true;
+			isLocalEventsUnderneathBlocking = true;			//Блокировать обработку локальных событий у других компонет, которые находятся по этим
 			
 
-			isDragable = false;
+			isDragable = false;								//Перетаскивание
 			_isDragStarted = false;		
 
-			for(int i=0; i<GCP_MAX_FUNC_NUM; i++)
+			for(int i=0; i<GCP_MAX_FUNC_NUM; i++)			//Функции надо обнулить иначе память тютю
 				FUNCTIONS[i] = 0;
 
-			collisionBox = GCP_COLLISIONBOX_RECTANGLE;
-			isVisible = true;
-			icon = "";
+			collisionBox = GCP_COLLISIONBOX_RECTANGLE;		//Обработка столкновений
+			isVisible = true;			
+			icon = "";										//Путь к картинке
 			width = 100;
 			height = 20;
 			xPos = 0; 
 			yPos = 0;
 			xPosStart = xPos; //!
 			yPosStart = yPos;
-			iRoundCff = 2;
-			collisionRadius = 5;
+			iRoundCff = 2;									//Округление границ
+			collisionRadius = 5;							//Если рисуется круг
 			_timeMouseOver = 0;
-			setColor(c_black,c_white,c_aquadark,c_white);
+			setColor(c_black,c_white,c_aquadark,c_white);	//Задает цвета
 		}
 
 		~GCP_FormComponent()
 		{
+			//Указатели надо удалить 
 			for(int i=0; i<GCP_MAX_FUNC_NUM; i++)
 				if(FUNCTIONS[i]!=0)
 					delete FUNCTIONS[i];			
@@ -164,6 +165,7 @@ class GCP_FormComponent
 		////////////////////////////////////////
 		/////////////////////////LEFT CLICK
 		////////////////////////////////////////
+		//ТУТ НАВЕШИВАЮТСЯ ОБРАБОТЧИКИ НА СОБЫТИЯ
 		template< class T, class U > void setOnMouseGlobalLeftClick(T* i_class, U i_method )		{
 			if(FUNCTIONS[GCP_ON_GLEFT_CLICK]!=0) delete FUNCTIONS[GCP_ON_GLEFT_CLICK];
 			FUNCTIONS[GCP_ON_GLEFT_CLICK] = new Container< T, U > ( i_class, i_method);
@@ -263,8 +265,9 @@ class GCP_FormComponent
 				FUNCTIONS[GCP_ON_GKEYDOWN] = new Container< T, U > ( i_class, i_method);
 		}
 
+		//РИСУЕМ ВСПЛЫВЮЩУЮ ПОДСКАЗКУ
 		void OnDrawInfo(SDL_Renderer* screen, int formx, int formy, int formw, int formh) {
-
+			//ПОКА ЧТО КРИВО НО РАБОТАЕТ
 			if(INFO!="" && _isMouseOver){
 				int mess_w, mess_h;
 				TTF_Font* font = TTF_OpenFont(getFont().c_str(), 14);

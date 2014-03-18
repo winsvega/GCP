@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-
+//пюаанрю я ббнднл бшбнднл
 class GCP_IO
 {
 	private:

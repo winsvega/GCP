@@ -6,6 +6,7 @@ GCP_Graph::GCP_Graph()	{
 	
 }
 
+//бшбнд цпютхйю (яеивюя пхясер йпсцнбсч дхюцпюллс)
 void GCP_Graph::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh)
 {
 	if(!isVisible)

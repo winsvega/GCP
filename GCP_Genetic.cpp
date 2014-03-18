@@ -1,5 +1,6 @@
 #include "GCP_Math.h"
 
+//цемерхвеяйхи юкцнпхрл наыхи яксвюи
 void GeneticSpecies::breed(GeneticSpecies *other, int devideblocks)
 {
 		int len = values.size();
