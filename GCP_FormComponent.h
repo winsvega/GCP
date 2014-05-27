@@ -3,10 +3,107 @@
 
 #include "GCP_Draw.h"
 #include "GCP_Delegate.h"
+#include "GCP_SPointer.h"
+
+class GCP_FormComponent;
+
+//template<class T>
+//GCP_SPointer<T>::operator GCP_SPointer<GCP_FormComponent> () 
+//{
+//	GCP_SPointer<GCP_FormComponent> sliced = GCP_SPointer<GCP_FormComponent>(static_cast<GCP_FormComponent>_pointee);
+//	return sliced;
+//}
+
+//Информация о стиле 
+struct SStyle : public GCP_SPointerBase
+{
+	public:
+	SStyle(){}
+	SStyle(GCP_Color cBackColor_,GCP_Color cTextColor_,GCP_Color cBackColorHover_,GCP_Color cTextColorHover_,
+		  GCP_Color  cBorderColor_ = c_black, GCP_Color colorHeadMenuBackground_ = c_black, 
+		  GCP_Color colorHeadMenuFade_ = c_grey, GCP_Color colorButtonBackground_ = c_white)		  
+	{
+		setColor(cBackColor_, cTextColor_, cBackColorHover_, cTextColorHover_);
+		iBorderWidth = 2;
+		iRoundCff = 7;
+		//Афтоинициализация параметров для формы
+		cBorderColor = cBorderColor_;
+		colorHeadMenuBackground = colorHeadMenuBackground_;
+		colorHeadMenuFade = colorHeadMenuFade_;
+		colorButtonBackground = colorButtonBackground_;
+	}
+
+	void setColor(GCP_Color cBackColor_,GCP_Color cTextColor_,GCP_Color cBackColorHover_,GCP_Color cTextColorHover_)
+	{
+		cBackColor = cBackColor_;
+		cTextColor = cTextColor_;
+		cBackColorHover = cBackColorHover_;
+		cTextColorHover = cTextColorHover_;
+	}
+	
+	GCP_Color cBackColor;				//Фон
+	GCP_Color cTextColor;				//Цвет текста
+	GCP_Color cBackColorHover;			//Фон при наведении
+	GCP_Color cTextColorHover;			//Цвет текста при наведении
+	GCP_Color cBorderColor;				//Цвет рамки
+	
+	int iBorderWidth;					//Толщина рамки
+	Uint16 iRoundCff;					//Округление углов
+
+	int iTextSize, iMaxTextLength;		//Параметры текста в едитах
+	GCP_Color cTextFieldBackColor;		//Фон поля ввода текстов
+
+										//Параметры для форм
+	GCP_Color colorHeadMenuBackground, colorHeadMenuFade, colorButtonBackground;
+	
+	//string sFontDir;					//Путь к шрифтам !!!REV	
+	static string sFontDir;	
+};
+
+//Сделать как цветовые константы!!//REV
+struct defaultStyles
+{
+	public:
+		defaultStyles()/*:
+			defaultbuttonStyle (new SStyle(c_white,c_black,c_aquadark,c_white)),
+			defaultbuttonInvStyle ( new SStyle(c_black,c_white,c_aquadark,c_white)),
+			defaultMenuStyle  ( new SStyle(c_white, c_black,c_aquadark,c_white)),
+			defaultMenuStyleBlack  ( new SStyle(c_white, c_black,c_aquadark,c_black)),
+			defaultFormHeaderStyle  ( new SStyle(c_black, c_black,c_black,c_black)),
+			defaultFormStyle  (new SStyle(c_white, c_black, c_white, c_black))*/
+		{
+			/*defaultbuttonStyle = new SStyle(c_white,c_black,c_aquadark,c_white);
+			defaultbuttonInvStyle = new SStyle(c_black,c_white,c_aquadark,c_white);
+			defaultMenuStyle  = new SStyle(c_white, c_black,c_aquadark,c_white);
+			defaultMenuStyleBlack  = new SStyle(c_white, c_black,c_aquadark,c_black);
+			defaultFormHeaderStyle  = new SStyle(c_black, c_black,c_black,c_black);
+			defaultFormStyle  =new SStyle(c_white, c_black, c_white, c_black);*/
+
+			defaultbuttonStyle = SStyle(c_white,c_black,c_aquadark,c_white);
+			defaultbuttonInvStyle =  SStyle(c_black,c_white,c_aquadark,c_white);
+			defaultMenuStyle  = SStyle(c_white, c_black,c_aquadark,c_white);
+			defaultMenuStyleBlack  = SStyle(c_white, c_black,c_aquadark,c_black);
+			defaultFormHeaderStyle  =  SStyle(c_black, c_black,c_black,c_black);
+			defaultFormStyle  =SStyle(c_white, c_black, c_white, c_black);
+		}
+		~defaultStyles()
+		{
+			//delete defaultMenuStyle, defaultMenuStyleBlack, defaultFormHeaderStyle, defaultbuttonStyle, defaultFormStyle;
+			//delete defaultbuttonInvStyle;
+		}
+	//Make Private!!!
+	SStyle defaultMenuStyle;
+	SStyle defaultMenuStyleBlack;
+	SStyle defaultFormHeaderStyle;
+	SStyle defaultbuttonStyle, defaultbuttonInvStyle;
+	SStyle defaultFormStyle;
+};
+extern defaultStyles defStyles;
+
 
 
 //Информация о компоненте 
-struct point
+struct SPoint
 {
 	int x,y;
 	int width,height;
@@ -14,7 +111,7 @@ struct point
 };
 
 //Структура для сортировки компонетнов
-struct component
+struct SComponent
 {
 	int draw_order;
 };
@@ -71,7 +168,7 @@ const int GCP_ON_MOUSE_LHMOTION = 22;
 const int GCP_MAX_FUNC_NUM = 23;
 
 
-class GCP_FormComponent
+class GCP_FormComponent: public GCP_SPointerBase
 {
 	protected:
 		std::string _sCaption;						//Надпись
@@ -82,9 +179,10 @@ class GCP_FormComponent
 		bool _isDragStarted;
 		string _sTextInput;
 		int _timeMouseOver;							//Таймер мыши для всплывающей подсказки
+		SStyle *style;
 
-	public:
-		//GCP_FormComponent* _OnRightClickContextMenu;
+	public:		
+		static void initStyles(){defStyles = defaultStyles();}
 		bool compare(const GCP_FormComponent* right, int compare, int criteria = -1)
 		{
 			//Метод по которому сравниваются елементы в сортировке кусорт
@@ -121,7 +219,8 @@ class GCP_FormComponent
 		{
 			_sCaption = "";									//Надпись
 			_sTextInput = "";								//Введенный текст
-			sFontDir = "data\\arial.ttf";					//Путь к шрифту (умолчание) 
+			style = NULL;
+			//sFontDir = "data\\arial.ttf";					//Путь к шрифту (умолчание) 
 			INFO = "";										//Всплывающая подсказка
 			options.draw_order = 0;							//Порядок отрисовки
 			_isMouseOver = false;  _isMouseHold = false;
@@ -136,17 +235,17 @@ class GCP_FormComponent
 
 			collisionBox = GCP_COLLISIONBOX_RECTANGLE;		//Обработка столкновений
 			isVisible = true;			
-			icon = "";										//Путь к картинке
+			//icon = "";										//Путь к картинке
 			width = 100;
 			height = 20;
 			xPos = 0; 
 			yPos = 0;
 			xPosStart = xPos; //!
 			yPosStart = yPos;
-			iRoundCff = 2;									//Округление границ
+			//iRoundCff = 2;									//Округление границ
 			collisionRadius = 5;							//Если рисуется круг
 			_timeMouseOver = 0;
-			setColor(c_black,c_white,c_aquadark,c_white);	//Задает цвета
+			//setColor(c_black,c_white,c_aquadark,c_white);	//Задает цвета
 		}
 
 		~GCP_FormComponent()
@@ -270,6 +369,7 @@ class GCP_FormComponent
 			//ПОКА ЧТО КРИВО НО РАБОТАЕТ
 			if(INFO!="" && _isMouseOver){
 				int mess_w, mess_h;
+				string fonts = getFont().c_str();
 				TTF_Font* font = TTF_OpenFont(getFont().c_str(), 14);
 
 				//Вычисление ширины и высоты текста				
@@ -400,40 +500,53 @@ class GCP_FormComponent
 		}
 
 
-		virtual void setIcon(std::string path)		{	icon = path;	}
+		virtual void setIcon(std::string path)
+		{
+			icon = path;			
+		}
+
 		virtual void setCaption(std::string str)	{	_sCaption = str;	}
 		virtual void setPosition(int x, int y)		{	xPos = x; 	yPos = y;  
-			xPosStart   =x;
+			xPosStart   = x;
 			yPosStart   = y;///!
 		}
 		virtual void setWidthHeight(int w, int h)	{	width = w; 	height = h;	}
 		virtual void setVisible(bool visibility)	{	isVisible = visibility;	}
-		virtual void setFont(string dir)			{	sFontDir = dir;	}
-		virtual string getFont()			{	return sFontDir;	}
+		virtual void setFont(string dir)			{	//if(style!= NULL) style->sFontDir = dir;	//!REV
+													}
+		virtual void setStyle(SStyle *style_)	{
+			style = style_;
+		}
+		virtual SStyle *getStyle()				{	
+			if (style!= NULL)
+			return style;
+			else return &defStyles.defaultbuttonStyle;
+		} 
+
+	
+		virtual string getFont()			{	
+													//Если есть стиль
+													//Если в стиле указан шрифт, используем его
+													//Иначе стиль по умолчанию
+													if (style!= NULL) return style->sFontDir; //!REV													
+													return SStyle::sFontDir;
+		}
+		
 		virtual std::string getCaption()	{	return _sCaption;	}
 
-		virtual point getPosition()		{
-			point Position;
-		
+		virtual SPoint getPosition()		{
+			SPoint Position;		
 			Position.x = xPos;
 			Position.y = yPos;
 			Position.width = width;
 			Position.height = height;
-			Position.icon = icon;
+			Position.icon = icon;	
 			return Position;
-		}
-
-		virtual void setColor(GCP_Color _cBackColor,GCP_Color _cTextColor,GCP_Color _cBackColorHover,GCP_Color _cTextColorHover)
-		{
-			cBackColor = _cBackColor;
-			cTextColor = _cTextColor;
-			cBackColorHover = _cBackColorHover;
-			cTextColorHover = _cTextColorHover;
 		}
 
 		bool checkCollisionBox(double mousex, double mousey)
 		{
-			point compPos = getPosition();
+			SPoint compPos = getPosition();
 			bool flag = false;
 			switch(collisionBox){
 				case GCP_COLLISIONBOX_RECTANGLE: 
@@ -458,24 +571,21 @@ class GCP_FormComponent
 			drawdata.theight = height;			*/
 		}
 
-		GCP_Color cBackColor, cTextColor, cBackColorHover, cTextColorHover;
-		GCP_Color cBorderColor;
-		int iBorderWidth;
 
-		Uint16 iRoundCff;
-		string sFontDir;
 		Sint16 width, height, collisionRadius;
 		int xPos, yPos, xPosStart, yPosStart;
 		int collisionBox;
-		std::string icon;
+		
 		bool isVisible, isDragable;	
 		bool isLocalEventsUnderneathBlocking;
-		component options;
-		
+		SComponent options;
 
-		GCP_DrawData drawdata;
-		std::string INFO;
+		std::string icon;					//Путь к иконке кнопки
+		std::string INFO;					//Всплывающая подсказка
+
+		GCP_DrawData drawdata;		
 		GCP_DrawData drawdatainfo;
+		
 
 };
 

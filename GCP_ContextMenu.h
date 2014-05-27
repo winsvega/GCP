@@ -9,18 +9,19 @@ class GCP_ContextMenu: public GCP_FormComponent
 		bool _isLocked;
 		GCP_Vector<int> _iSeparators;
 	public:
-		GCP_Vector<GCP_Button*> menu;
+		GCP_Vector<GCP_SPointer<GCP_Button>> menu;
 		int iType;
 		bool isContextMenuBlocking;		
 
 		GCP_ContextMenu();
 		~GCP_ContextMenu();
 		void setLock(bool flag);
-		void addButton(GCP_Button* button);
+		void addButton(GCP_SPointer<GCP_Button> &button);
 		void addButton(string type);
 		void open(int x, int y);
-		void initTexture(SDL_Renderer* screen);
+		void initTexture(SDL_Renderer *screen);
 		void close(void* obj);
+		void setFont(std::string str);
 		gcp_formEvent OnMouseGlobalMotion(SDL_MouseMotionEvent motion);
 		bool OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh);
 		gcp_formEvent OnMouseGlobalLeftClick(SDL_MouseButtonEvent mousebutton);

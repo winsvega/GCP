@@ -15,9 +15,7 @@ class GCP_Edit: public GCP_FormComponent
 		int _iTextDrawIndex;
 		void corelateText();
 	public:
-		int iBorderWidth, iTextSize, iMaxTextLength;
-		SDL_Rect textRect, markedRect;
-		GCP_Color cTextFieldBackColor;
+		SDL_Rect textRect, markedRect;		
 		//static enum GCP_InputType_Enum{ DIGITONLY, TEXTONLY, DOUBLEDIGIT, ALL};
 		int inputType;
 

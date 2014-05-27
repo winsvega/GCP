@@ -12,8 +12,8 @@ GCP_ContextMenu::GCP_ContextMenu(){
 
 
 GCP_ContextMenu::~GCP_ContextMenu(){
-	for(int i =0; i<menu.size(); i++)
-		delete menu.at(i);				//удалим все кнопки которые есть в меню. так как указатели на них хранятся только здесь
+	//for(int i =0; i<menu.size(); i++)
+	//	delete menu.at(i);				//удалим все кнопки которые есть в меню. так как указатели на них хранятся только здесь
 }
 
 
@@ -31,8 +31,15 @@ void GCP_ContextMenu::initTexture(SDL_Renderer* screen)
 		menu.at(i)->initTexture(screen);	//Сечас эта функция не делает ничего. но по хорошему должна осуществлять предзагрузку картинок кнопок
 }
 
+void GCP_ContextMenu::setFont(std::string str)
+{
+	unsigned int iMenuSize = menu.size();
+	for(unsigned int i=0; i<iMenuSize; i++){
+		menu.at(i)->setFont(str);
+	}
+}
 
-void GCP_ContextMenu::addButton(GCP_Button* button)	{
+void GCP_ContextMenu::addButton(GCP_SPointer<GCP_Button> &button)	{
 	button->setFont(getFont());				//передаем кнопке путь к файлу шрифтов вообще надо чтобы за шрифты отвечала стуктура с парметрами компонента
 	menu.push_back(button);
 }
@@ -152,14 +159,18 @@ void GCP_ContextMenu::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int f
 	//Рисуем все наши компоненты
 	for(unsigned int i=0; i<iMenuSize; i++){
 		menu.at(i)->setWidthHeight(maxMenuWidth,maxMenuHeight);
-		menu.at(i)->setColor(cBackColor, cTextColor, cBackColorHover, cTextColorHover);
-		menu.at(i)->iRoundCff = iRoundCff;
+		//menu.at(i)->setColor(cBackColor, cTextColor, cBackColorHover, cTextColorHover);
+		//menu.at(i)->iRoundCff = iRoundCff;
 		menu.at(i)->OnDraw(screen, w,h,formx,  formy,  formw,  formh);
 		//if(!isContextMenuBlocking)
 		//_isContextMenuOpened = (menu.at(i)->_isContextMenuOpened || _isContextMenuOpened);
 	}
 
+	//Всплывающие подсказки рисуются поверх компонент
+	for(unsigned int i=0; i<iMenuSize; i++)
+		menu.at(i)->OnDrawInfo(screen, formx,  formy,  formw,  formh);
+
 			
-	GCP_Draw::Draw_Round(screen,xPos, yPos, stackWidth, stackHeight, iRoundCff, c_black); 
+	GCP_Draw::Draw_Round(screen,xPos, yPos, stackWidth, stackHeight, getStyle()->iRoundCff, c_black); 
 			
 }//OnDraw

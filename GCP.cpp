@@ -6,6 +6,7 @@
 GCP_Controller::GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height)
 {
 	GCP_Draw::initConstants();	//дело в том что константы вне функкций почему то не объ€вл€ютс€ на некоторых компил€торах
+	GCP_FormComponent::initStyles();
 	TTF_Init();
 	_screen = sdlRenderer;
 	_width = width;
@@ -17,19 +18,25 @@ GCP_Controller::GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height)
 GCP_Controller::~GCP_Controller()
 {
 	TTF_Quit();
-	if(_mainForm != NULL)
-		delete _mainForm;
+	//if(_mainForm != NULL)
+	//	delete _mainForm;
 }
 
+//FormComponent.cpp
+string SStyle::sFontDir = "";
+defaultStyles defStyles = defaultStyles();
 void GCP_Controller::setFont(string directory_path_string)
 {
 	_sFontDir = directory_path_string;						//путь к файоу шрифтов
+	SStyle::sFontDir = _sFontDir;
+	//defaultMenuStyle->sFontDir = _sFontDir;
+	//GCP_FormComponent::_szukoZapomniUjeDirToYourFont = _sFontDir;
 }
 
-GCP_Form* GCP_Controller::createForm(SDL_Renderer* screen)
+GCP_SPointer<GCP_Form> GCP_Controller::createForm(SDL_Renderer* screen)
 {			
-	_mainForm = new GCP_Form(screen, _width, _height);		
-	_mainForm->setFont(_sFontDir);							//сейчас форма передает этот путь всем своим компонентам
+	_mainForm =GCP_SPointer<GCP_Form>(new GCP_Form(screen, _width, _height));		
+	//_mainForm->setFont(_sFontDir);							//сейчас форма передает этот путь всем своим компонентам
 	_mainForm->setBufferSize(_width,_height);
 	return _mainForm;
 }
@@ -47,8 +54,8 @@ void GCP_Controller::handleEvents(SDL_Event event)
 		case SDL_KEYDOWN:
 			evt.keyboard = event.key;
 			_mainForm->OnEvent(GCP_ON_GKEYDOWN,evt); break;
-		case SDL_TEXTEDITING:
-			_mainForm->OnTextEdit(event.edit);	break;
+		//case SDL_TEXTEDITING:
+		//	_mainForm->OnTextEdit(event.edit);	break;
 		case SDL_TEXTINPUT:
 			_mainForm->OnTextInput(event.text);	break;
 		case SDL_MOUSEMOTION:

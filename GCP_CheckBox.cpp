@@ -21,7 +21,7 @@ void GCP_CheckBox::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int form
 		GCP_Draw::Draw_FillEllipse(screen,xPos+7,yPos+7, 4,4 ,c_black);
 
 	//надпись у чекбокса
-	GCP_Draw::renderText(text,xPos+18,yPos,screen,&drawdata,cTextColor,getFont().c_str(),14);
+	GCP_Draw::renderText(text,xPos+18,yPos,screen,&drawdata,getStyle()->cTextColor,getFont().c_str(),14);
 	
 	basicOnDraw(screen, formx, formy, formw, formh);
 

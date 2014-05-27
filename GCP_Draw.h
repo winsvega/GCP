@@ -38,7 +38,6 @@ struct GCP_Color
 			return false;
 		return true;
 	}
-
 };
 
 

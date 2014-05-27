@@ -32,20 +32,19 @@
 class GCP_Form: public GCP_FormComponent
 {
 	protected:
-		GCP_Vector<GCP_Form*> _subForms;
-		GCP_Vector<GCP_FormComponent*> _components;
-		GCP_Vector<GCP_ContextMenu*> _contextmenus;
-		GCP_FormComponent* _componentThatWasLeftClicked;
+		GCP_Vector<GCP_SPointer<GCP_Form>> _subForms;
+		GCP_Vector<GCP_SPointer<GCP_FormComponent>> _components;
+		GCP_Vector<GCP_SPointer<GCP_ContextMenu>> _contextmenus;
+		GCP_SPointer<GCP_FormComponent> _componentThatWasLeftClicked;
 		int _swidth, _sheight;
 		bool _isLocked, _isClickedOnTopHeader, _isContextMenuOpened, _isComponentClicked;
-		GCP_Button* xbutton, *xpanel;
-		GCP_Form* messagebox;
-		GCP_Label* messagelabel;
-		GCP_ContextMenu *formTopRightButtons;
+		GCP_SPointer<GCP_Button> xbutton, xpanel;
+		GCP_SPointer<GCP_Form> messagebox;
+		GCP_SPointer<GCP_Label> messagelabel;
+		GCP_SPointer<GCP_ContextMenu> formTopRightButtons;
 		SDL_Renderer* sdlRenderer;
 		GCP_Vector<string> messages;
-	public:
-		GCP_Color colorHeadMenuBackground, colorHeadMenuFade, colorButtonBackground;
+	public:		
 		bool isParentLocking;
 		bool isShowTopRightButtons;
 		bool isDraggingSomeComponent;
@@ -61,13 +60,13 @@ class GCP_Form: public GCP_FormComponent
 		void setFont(string dir);
 		~GCP_Form();	
 
-		void addComponent(GCP_ContextMenu* component);
-		void addComponent(GCP_FormComponent* component);
-		void removeComponent(GCP_FormComponent* component);
+		void addComponent(GCP_SPointer<GCP_ContextMenu> &component);
+		void addComponent(GCP_SPointer<GCP_FormComponent> &component);
+		void removeComponent(GCP_SPointer<GCP_FormComponent> &component);
 		void setPosition(int x, int y);
 
 		void toggleVisibility(void* obj);
-		void addSubForm(GCP_Form* form);
+		void addSubForm(GCP_SPointer<GCP_Form> &form);
 		void showmessage(string text, bool block = false);
 		void showmessage(int text, bool block = false);
 

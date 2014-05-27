@@ -4,10 +4,15 @@
 #include <sstream>
 
 //ÐÀÁÁÎÒÀ Ñ ÂÂÎÄÎÌ ÂÛÂÎÄÎÌ
+class GPC_IO_ERROR
+{
+};
+
 class GCP_IO
 {
 	private:
 		std::fstream fs;
+		int _iMode;
 	public:
 		SDL_RWops *io;
 		const static int GCP_IO_INPUT = 0;
@@ -23,6 +28,7 @@ class GCP_IO
 				case GCP_IO_OUTPUTTXT:			
 					io = SDL_RWFromFile(filename.c_str(), "w"); break;
 			}
+			_iMode = mode;
 		}
 
 		~GCP_IO()
@@ -48,6 +54,13 @@ class GCP_IO
 			return value;
 		}
 
+		unsigned int readUInt()
+		{			
+			unsigned int value;
+			readInt(&value);
+			return value;
+		}
+
 		double readDouble()
 		{		
 			double value;
@@ -65,6 +78,11 @@ class GCP_IO
 		void readInt(int *value)
 		{			
 			io->read(io,value,sizeof(int),1);
+		}
+
+		void readInt(unsigned int *value)
+		{			
+			io->read(io,value,sizeof(unsigned int),1);
 		}
 
 		void readDouble(double *value)
@@ -92,8 +110,22 @@ class GCP_IO
 		void writeString(string value)
 		{			
 			char str[256];
-			strncpy(str,value.c_str(),255);			
-			io->write(io,&str,sizeof(str),1);
+			strncpy(str,value.c_str(),255);	
+
+			if(GCP_IO_OUTPUTTXT == _iMode)
+			{
+				size_t len = SDL_strlen(str);				
+				if(SDL_RWwrite(io, str, 1, len) != len)
+					throw GPC_IO_ERROR();
+			}
+			else
+				io->write(io,&str,sizeof(str),1);						
+		}
+
+		void writeln()
+		{
+			char str = '\n';
+			SDL_RWwrite(io, &str, 1, 1);
 		}
 
 		void close()

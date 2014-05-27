@@ -9,6 +9,8 @@ GCP_Edit::GCP_Edit()
 	_iDrawDash = 0;					//Переменная для таймера для вывода текста
 	_iTextDrawIndex = 0;			//С какого индекса выводим текст (если он слишком длинный)
 	inputType = GCP_EDIT_ALL;		//Формат ввода данных
+	style=NULL;
+	setStyle(&defStyles.defaultMenuStyle);
 }
 
 void GCP_Edit::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh)
@@ -20,14 +22,15 @@ void GCP_Edit::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, i
 	//Выводим текст в рамочке 
 	//
 	
-	GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1, cBackColor); 
-	GCP_Draw::Draw_FillRound(screen, xPos+iBorderWidth, yPos+iBorderWidth, width-iBorderWidth*2, height-iBorderWidth*2, 1, cTextFieldBackColor);
+	GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1, getStyle()->cBackColor); 
+	GCP_Draw::Draw_Round(screen, xPos, yPos, width, height, 1, getStyle()->cBorderColor); 
+	GCP_Draw::Draw_FillRound(screen, xPos+getStyle()->iBorderWidth, yPos+getStyle()->iBorderWidth, width-getStyle()->iBorderWidth*2, height-getStyle()->iBorderWidth*2, 1, getStyle()->cTextFieldBackColor);
 	//TTF_Font* font = TTF_OpenFont(getFont().c_str(),14);
 
-	SDL_Rect rect = {xPos+iBorderWidth,yPos+iBorderWidth*2,width-iBorderWidth*2,height-iBorderWidth*2 };
+	SDL_Rect rect = {xPos+getStyle()->iBorderWidth,yPos+getStyle()->iBorderWidth*2,width-getStyle()->iBorderWidth*2,height-getStyle()->iBorderWidth*2 };
 	SDL_SetTextInputRect(&rect); //хз вообще зачем и что оно дает
 	//!! размер шрифта !!!
-	GCP_Draw::renderText(_sTextInputDraw,xPos+iBorderWidth*2,yPos+iBorderWidth*2,screen,&drawdata,cTextColor,getFont().c_str(),14);
+	GCP_Draw::renderText(_sTextInputDraw,xPos+getStyle()->iBorderWidth*2,yPos+getStyle()->iBorderWidth*2,screen,&drawdata,getStyle()->cTextColor,getFont().c_str(),14);
 	basicOnDraw(screen, formx, formy, formw, formh);
 
 
@@ -43,7 +46,7 @@ void GCP_Edit::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, i
 		//Сайчас они обрабатываются в нормальную кодировку функцией CP1251TOUTF но это работатет не на всех устройствах
 
 		//Рисуем подчеркивание
-		GCP_Draw::Draw_Line(screen,xPos+sw+iBorderWidth*2,yPos+iBorderWidth*2,xPos+sw+iBorderWidth*2,yPos+iBorderWidth*2+sh,cTextColor);
+		GCP_Draw::Draw_Line(screen,xPos+sw+getStyle()->iBorderWidth*2,yPos+getStyle()->iBorderWidth*2,xPos+sw+getStyle()->iBorderWidth*2,yPos+getStyle()->iBorderWidth*2+sh,getStyle()->cTextColor);
 		TTF_CloseFont(font);
 		if(_iDrawDash>20)	//!!! таймер мерцания
 			_iDrawDash = 0;
@@ -224,6 +227,10 @@ void GCP_Edit::corelateText()
 {
 	//Если текст слишком большой или наоборот уменьшился после редактирования
 	//Смащаем индекс стартовой позиции с которой он выводится в компоненте 
+	if(getStyle() == NULL)
+		return;
+	if(getStyle()->sFontDir == "")
+		return;
 
 	_sTextInputDraw = _sTextInput;
 	_iTextDrawIndex = 0;
@@ -234,9 +241,10 @@ void GCP_Edit::corelateText()
 		font = TTF_OpenFont(getFont().c_str(), 14);
 		TTF_SizeUTF8(font, _sTextInput.c_str(), &sw, &sh);  //ASSUME ENGLISH CHARS ONLY
 	//
+	style;
+	SStyle* a = getStyle();
 
-
-	while(sw>width-iBorderWidth*2)
+	while(sw>width-getStyle()->iBorderWidth*2)
 	{
 		_sTextInputDraw = "";
 		_iTextDrawIndex++;

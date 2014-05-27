@@ -207,6 +207,10 @@
 			d = (double)(GCP_RADTODEG*atan);			//В градусах
 			return normAngle(d);	
 		}
+		double GCP_Math::pointDirection(GCP_Point A, GCP_Point B)
+		{
+			return pointDirection(A.X,A.Y,B.X,B.Y);
+		}
 ////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////// 
 		 void GCP_Math::lineRefractionAngle(GCP_Point p11, GCP_Point p12, GCP_Point p21, GCP_Point p22, double N1, double N2, double *refractedAngleOX, double *refractedAngle, int *error)
@@ -313,12 +317,16 @@
 //////////////////////////////////////////////////////////////////////////////////////////// 
 		 double GCP_Math::ccos(double value)
 		{
+			//GCP_FastTG.InitFSinCosTable();
+			//return GCP_FastTG.fcosined(value);
 			return cos(GCP_DEGTORAD*value);						//Косинус от значения в градусах
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////// 
 		 double GCP_Math::ssin(double value)
 		{
+			//GCP_FastTG.InitFSinCosTable();
+			//return GCP_FastTG.fsined(value);
 			return sin((double)(GCP_DEGTORAD*value));			//Синус от значения в градусах
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -456,21 +464,57 @@
 		{
 			//GCP_Vector<int>* result = new GCP_Vector<int>();
 			char xx[50]; int i=0, j=0, k=0;
-			bool flag=true;
+			bool isExpectE = false;
+			int iPointJ = 0;
 			
 			while(strline[i] != '\0'){
 				while(strline[i]!= separator ){
 					if(strline[i]>='0' && strline[i]<='9' || strline[i]=='-'){
 						xx[j] = strline[i];
-						if(flag)
-						j++;
+						j++; 
 					}
 					i++; 
 					
-					if(strline[i]=='.')				//Считываем только целые числа
-						flag = false;		
+					//Встретили точку
+					if(strline[i]=='.')			
+					{
+						i++;					//Предположим, мы считываем формат вида 1.24317e+006
+						isExpectE = true;
+						iPointJ = j;
+					}
+
+					//Встретили е
+					if(strline[i]=='e')
+					{
+						i++; //+
+						i++; //firestDigit after e+
+						char eNum[10];
+						int i2=0;
+						while(strline[i]>='0' && strline[i]<='9' )
+						{
+							eNum[i2]=strline[i];
+							i++; i2++;
+						}
+
+						eNum[i2] = '\0';
+						int eParam = GCP_Math::stringToInt(eNum);
+
+						//Допишем к числу необходимое количество знаков после точки, которая для e
+						int eXtend = eParam-(j-iPointJ);
+						for(int j2=0; j2<eXtend; j2++)
+						{
+							xx[j]='0'; j++;
+						}
+						isExpectE = false;
+					}					
 				}
-				xx[j] = '\0'; flag = true; j=0; i++;
+
+				//На случай если мы встретили точку, но не встретили потом e
+				//Вернемся к состоянию до точки (Считываем только целые числа)
+				if(isExpectE == true)
+					j = iPointJ;
+
+				xx[j] = '\0'; j=0; i++; isExpectE = false;	iPointJ = 0;
 				if(xx[0] != 0)
 					arr[k] = GCP_Math::stringToInt(xx);
 				k++;
@@ -716,6 +760,8 @@
 
 			buffer[k] = '\0';
 			out = buffer;
+
+			delete []buffer;
 			//out[k] = '\0';
 			return out;
 		}
@@ -787,3 +833,22 @@
 		}
 
 	
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

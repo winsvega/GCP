@@ -4,6 +4,7 @@
 GCP_Button::GCP_Button(){
 	iType = GCP_BUTTON_SHARPRECT;		//праметр - какие у кнопки углы
 	checked = false;					//состояние кнопки если нажата
+	setStyle(&defStyles.defaultbuttonStyle);
 }
 
 void GCP_Button::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh)
@@ -11,22 +12,22 @@ void GCP_Button::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy,
 	if(!isVisible)
 		return;
 
-	GCP_Color cTColor=cTextColor, cBColor=cBackColor;
+	GCP_Color cTColor=getStyle()->cTextColor, cBColor=getStyle()->cBackColor;
 
 	//Цвета тоже надо в структуру сделать
 	if(_isMouseOver){
-			cBColor = cBackColorHover;
-			cTColor = cTextColorHover;					
+			cBColor = getStyle()->cBackColorHover;
+			cTColor = getStyle()->cTextColorHover;					
 		}
 
 	if(checked)
-		cBColor = cBackColorHover;
+		cBColor = getStyle()->cBackColorHover;
 
 	//Если кнопке присвоен файлик с иконкой 
 	if(icon != "")			{
 		//Рисуем контур
 		if(iType==GCP_BUTTON_ROUNDRECT)
-			GCP_Draw::Draw_FillRound(screen,xPos,yPos,width,height,iRoundCff,cBColor);
+			GCP_Draw::Draw_FillRound(screen,xPos,yPos,width,height,getStyle()->iRoundCff,cBColor);
 		if(iType==GCP_BUTTON_SHARPRECT)
 			GCP_Draw::Draw_FillRect(screen,xPos,yPos,width,height,cBColor);
 
@@ -51,10 +52,18 @@ void GCP_Button::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy,
 		//Просто выводим надпись
 		string sCaption = getCaption();
 		if(iType==GCP_BUTTON_ROUNDRECT)
-			GCP_Draw::Draw_FillRound(screen,xPos,yPos,width,height,iRoundCff,cBColor);
+		{
+			GCP_Draw::Draw_FillRound(screen,xPos,yPos,width,height,getStyle()->iRoundCff,cBColor);
+			GCP_Draw::Draw_Round(screen,xPos,yPos,width,height,getStyle()->iRoundCff, getStyle()->cBorderColor);
+		}
 		if(iType==GCP_BUTTON_SHARPRECT)
-			GCP_Draw::Draw_FillRect(screen,xPos,yPos,width,height,cBColor);			
-		GCP_Draw::renderText(sCaption,xPos+3,yPos+3,screen,&drawdata,cTColor,getFont(),14);
+		{
+			GCP_Draw::Draw_FillRect(screen,xPos,yPos,width,height,cBColor);	
+			GCP_Draw::Draw_Rect(screen,xPos,yPos,width,height,getStyle()->cBorderColor);
+		}
+		string font = getFont();
+		if(font != "")
+		GCP_Draw::renderText(sCaption,xPos+3,yPos+3,screen,&drawdata,cTColor,font,14);
 		//TTF_CloseFont(font);
 	}
 

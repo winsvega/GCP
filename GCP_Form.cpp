@@ -28,46 +28,47 @@ GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
 	//_sdlPixelFormat = screen->format;
 	_isContextMenuOpened = false;				//Открыто ли контекстное меню  на форме?
 	isLocked = false;							//Можно заблокировать обработку компонент на форме
+	setStyle(&defStyles.defaultFormStyle);
 
-
-	cBackColor = c_white;						//Цвет задника
-	colorHeadMenuBackground = c_black;			//Фон верхней полоски
-	colorHeadMenuFade = c_grey;					//Фон верхней полоски если форма не активна
-	colorButtonBackground = c_white;			//Фон кнопок????
+	//cBackColor = c_white;						//Цвет задника
+	//colorHeadMenuBackground = c_black;			//Фон верхней полоски
+	//colorHeadMenuFade = c_grey;					//Фон верхней полоски если форма не активна
+	//colorButtonBackground = c_white;			//Фон кнопок????
 	
 	
 	//Крестики нолики
-	formTopRightButtons = new GCP_ContextMenu();	
+	formTopRightButtons = GCP_SPointer<GCP_ContextMenu>(new GCP_ContextMenu());	
 	formTopRightButtons->setPosition(xPos+width-20,yPos+5);
 	formTopRightButtons->iType = GCP_MENU_MHORIZONTAL;
 	formTopRightButtons->isContextMenuBlocking = false;			//Меню не блокирует другие компоненты на форме
-	formTopRightButtons->setColor(c_white,	c_black,  c_aquadark, c_white);
+	formTopRightButtons->setStyle(&defStyles.defaultMenuStyle);
 
 
-	xbutton = new GCP_Button();			
+	xbutton = GCP_SPointer<GCP_Button> (new GCP_Button());			
 	xbutton->setCaption("X");
 	xbutton->setWidthHeight(15,20);	
+	xbutton->setStyle(&defStyles.defaultbuttonStyle);
 	xbutton->setOnMouseLeftClick(this,&GCP_Form::toggleVisibility);
 	xbutton->options.draw_order = -1000;
 	formTopRightButtons->addButton(xbutton);
 	addComponent(formTopRightButtons);
 
 	//Верхняя полоска на форме (для обработки драгендроп)
-	xpanel = new GCP_Button();
+	xpanel = GCP_SPointer<GCP_Button> (new GCP_Button());
 	xpanel->setWidthHeight(width,30);			
 	xpanel->setPosition(xPos,yPos);	
 	xpanel->options.draw_order = -999;
-	xpanel->cBackColor = c_black;
-	xpanel->cBackColorHover = c_black;
-	addComponent(xpanel);
+	xpanel->setStyle(&defStyles.defaultFormHeaderStyle);
+	addComponent((GCP_SPointer<GCP_FormComponent>)xpanel);
 
 	//Сообщение с алармом
-	messagebox = new GCP_MessageBox(screen,300,150);
+	messagebox = GCP_SPointer<GCP_Form>(new GCP_MessageBox(screen,450,150));
 	messagebox->isParentLocking = true;
 	messagebox->isVisible = false;
 	messagebox->isDragable = false;	
+	messagebox->options.draw_order = -100;
 	messagebox->setPosition(width/2-messagebox->width/2,height/2-messagebox->height/2);
-	messagebox->setCaption(GCP_Math::RUSCP1251_TO_WCHAR("АХТУНГ!"));
+	messagebox->setCaption(GCP_Math::RUSCP1251_TO_WCHAR("УВЕДОМЛЕНИЕ"));
 	//setFont("arial.ttf");
 	addSubForm(messagebox);
 	
@@ -93,33 +94,33 @@ void GCP_Form::setBufferSize(int screenw, int screenh)
 
 void GCP_Form::setFont(string dir)			{	
 	//!!! передаем шрифт своим компонентам
-	sFontDir = dir; 
-	xbutton->setFont(sFontDir);	
-	xpanel->setFont(sFontDir);
-	messagebox->setFont(sFontDir);
+	/*getStyle()->sFontDir = dir; 
+	xbutton->setFont(getStyle()->sFontDir);	
+	xpanel->setFont(getStyle()->sFontDir);
+	messagebox->setFont(getStyle()->sFontDir);*/
 }
 
 GCP_Form::~GCP_Form()	{ 
 	//!!!Удаляем указатели из памяти по уничтожению формы!!!!!
-	for(int i=0; i<_subForms.size(); i++)
+	/*for(int i=0; i<_subForms.size(); i++)
 		delete _subForms.at(i);
 
 	for(int i=0; i<_components.size(); i++)
 		delete _components.at(i);
 
 	for(int i=0; i<_contextmenus.size(); i++)
-		delete _contextmenus.at(i);
+		delete _contextmenus.at(i);*/
 
 }		
 
-void GCP_Form::addComponent(GCP_ContextMenu* component)
+void GCP_Form::addComponent(GCP_SPointer<GCP_ContextMenu> &component)
 {
 	//!!! Шрифт передаем!!!
-	component->setFont(getFont());
+	//component->setFont(getFont());
 	_contextmenus.push_back(component);
 }
 
-void GCP_Form::addComponent(GCP_FormComponent* component)
+void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> &component)
 {
 	for(int i=0; i<_components.size(); i++)
 		if(component == _components.at(i))			//Два раза одно и тоже не принимаем
@@ -127,11 +128,12 @@ void GCP_Form::addComponent(GCP_FormComponent* component)
 
 	//Координаты компонента идут оносительно левого верхнего угла формы
 	component->setPosition(xPos+component->xPos,yPos+component->yPos);
-	component->setFont(getFont());
+	//component->setFont(getFont());
 	_components.push_back(component);
+	GCP_Math::quickSort<GCP_SPointer<GCP_FormComponent>>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
 }
 
-void GCP_Form::removeComponent(GCP_FormComponent* component)
+void GCP_Form::removeComponent(GCP_SPointer<GCP_FormComponent> &component)
 {
 	for(unsigned int i=0; i<_components.size(); i++)
 		if(_components.at(i) == component){
@@ -145,12 +147,13 @@ void GCP_Form::toggleVisibility(void* obj)
 	isVisible = !isVisible;
 }
 
-void GCP_Form::addSubForm(GCP_Form* form)
+void GCP_Form::addSubForm(GCP_SPointer<GCP_Form> &form)
 {
 	//!!! Шрифт передаем!!!
-	form->setFont(getFont());
+	//form->setFont(getFont());
 	form->setBufferSize(_swidth,_sheight);
 	_subForms.push_back(form);
+	GCP_Math::quickSort<GCP_SPointer<GCP_Form>>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
 }
 
 void GCP_Form::setPosition(int x, int y)
@@ -179,18 +182,18 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 
 	//!!! это надо один раз сообразить а не в цикле
 	xpanel->setWidthHeight(width,30);
-	xpanel->cBackColor = colorHeadMenuBackground;
-	xpanel->cBackColorHover = colorHeadMenuBackground;
+	//xpanel->cBackColor = colorHeadMenuBackground;
+	//xpanel->cBackColorHover = colorHeadMenuBackground;
 	//!!!!
 			
 
 	if(!isTransparent)
-		GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1,  cBackColor);
-	GCP_Draw::Draw_Round(screen, xPos, yPos, width, height, 1,  colorHeadMenuBackground);
+		GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1,  getStyle()->cBackColor);
+	GCP_Draw::Draw_Round(screen, xPos, yPos, width, height, 1,  getStyle()->colorHeadMenuBackground);
 	
 	
 	//!!! Сортировку тоже надо один раз сообразить 
-	GCP_Math::quickSort<GCP_FormComponent*>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
+	//GCP_Math::quickSort<GCP_FormComponent*>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
 	for(unsigned int i=0; i<_components.size(); i++)
 			_components.at(i)->OnDraw(screen,_swidth,_sheight,xPos,yPos,width,height);
 			
@@ -199,7 +202,9 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 		_components.at(i)->OnDrawInfo(screen,xPos,yPos,width,height);
 
 	//Загаловок формы
-	GCP_Draw::renderText(_sCaption,xPos+width/2-55,yPos+xpanel->height/5,screen,&drawdata,c_white,getFont(),20);
+	string font = getFont();
+	if(font != "")
+	GCP_Draw::renderText(_sCaption,xPos+width/2-65,yPos+xpanel->height/5,screen,&drawdata,c_white,font,20);
 
 	//Рисуем Контекстные меню
 	_isContextMenuOpened = false;
@@ -221,13 +226,17 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 		}
 
 	//!!! Сортировку тоже надо один раз сообразить 
-	GCP_Math::quickSort<GCP_Form*>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
+	GCP_Math::quickSort<GCP_SPointer<GCP_Form>>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
 	bool isHavingSubformsThatLocking = false;
 	for(unsigned int i=0; i<_subForms.size(); i++){
 		_subForms.at(i)->OnDraw(screen, width, height);
 		if(_subForms.at(i)->isParentLocking && _subForms.at(i)->isVisible)
 			isHavingSubformsThatLocking = true;
 	}
+
+	//По хорошему месадж бокс должен блокировать другие формы с
+	//следовательно рисоваться и обрабатываться он должен отдельно
+	//messagebox->OnDraw(screen, width, height);
 
 	_isLocked = false;
 	if(isHavingSubformsThatLocking||isLocked)
@@ -295,7 +304,7 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 				return evt;
 			
 			//WHY?  EVENTORDER = DRAWORDER^-1
-			GCP_Math::quickSort<GCP_Form*>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
+			GCP_Math::quickSort<GCP_SPointer<GCP_Form>>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
 			//Передаем всем дочерним формам глобальное событие
 			for(unsigned int i=0; i<_subForms.size(); i++){
 				other_evt = _subForms.at(i)->OnEvent(GCP_EVENT, events);
@@ -383,7 +392,7 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 		return evt;
 
 	//WHY?  EVENTORDER = DRAWORDER^-1
-	GCP_Math::quickSort<GCP_Form*>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
+	GCP_Math::quickSort<GCP_SPointer<GCP_Form>>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
 	bool isDragged = false;		
 	bool isEventInsideChildForm = false;
 	if(!_isDragStarted || _isLocked){
@@ -416,12 +425,12 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 					int deltaX = xPos - xPosStart;
 					int deltaY = yPos - yPosStart;
 					for(unsigned int i=0; i<_components.size(); i++){
-						point previousPos = _components.at(i)->getPosition();
+						SPoint previousPos = _components.at(i)->getPosition();
 						_components.at(i)->setPosition(previousPos.x+deltaX,previousPos.y+deltaY); 
 					}
 					for(unsigned int i=0; i<_contextmenus.size(); i++){
 						if(!_contextmenus.at(i)->isContextMenuBlocking)		{
-						point previousPos = _contextmenus.at(i)->getPosition();
+						SPoint previousPos = _contextmenus.at(i)->getPosition();
 						_contextmenus.at(i)->setPosition(previousPos.x+deltaX,previousPos.y+deltaY); 
 						}
 					}

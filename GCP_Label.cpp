@@ -12,8 +12,9 @@ void GCP_Label::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, 
 	if(!isVisible)
 		return;						
 	
-
-	GCP_Draw::renderText(text,xPos,yPos,screen,&drawdata,cTextColor,getFont().c_str(),14);
+	string fontPath = getFont();
+	if(fontPath != "")
+		GCP_Draw::renderText(text,xPos,yPos,screen,&drawdata,getStyle()->cTextColor,fontPath.c_str(),14);
 	
 	basicOnDraw(screen, formx, formy, formw, formh);
 
