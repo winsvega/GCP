@@ -12,7 +12,7 @@ Genetic Aproximation
 String to Int/Double Convertion  
 
 
-### Workng Example: ###
+### Working Example: ###
 https://github.com/winsvega/GCP/issues/1  
 
 ### Screenshots: ###
