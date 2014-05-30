@@ -17,3 +17,6 @@ https://github.com/winsvega/GCP/issues/1
 
 ### Screenshots: ###
 https://forums.libsdl.org/viewtopic.php?p=42697  
+
+### Support & Donate: ###
+Bitcoin: 13Er51KkcvDdgEmm2DutXzT8JCw9CpR2oR  
