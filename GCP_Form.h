@@ -28,13 +28,14 @@
 #include "GCP_CheckBox.h"
 #include "GCP_Select.h"
 
-
+class GCP_Form;
+typedef GCP_SPointer<GCP_Form> gcp_spForm;
 class GCP_Form: public GCP_FormComponent
 {
 	protected:
-		GCP_Vector<GCP_SPointer<GCP_Form>> _subForms;
-		GCP_Vector<GCP_SPointer<GCP_FormComponent>> _components;
-		GCP_Vector<GCP_SPointer<GCP_ContextMenu>> _contextmenus;
+        GCP_Vector<gcp_spForm> _subForms;
+        GCP_Vector<gcp_spFormCmpnt> _components;
+        GCP_Vector<gcp_spContextMenu> _contextmenus;
 		GCP_SPointer<GCP_FormComponent> _componentThatWasLeftClicked;
 		int _swidth, _sheight;
 		bool _isLocked, _isClickedOnTopHeader, _isContextMenuOpened, _isComponentClicked;
@@ -60,9 +61,9 @@ class GCP_Form: public GCP_FormComponent
 		void setFont(string dir);
 		~GCP_Form();	
 
-		void addComponent(GCP_SPointer<GCP_ContextMenu> &component);
-		void addComponent(GCP_SPointer<GCP_FormComponent> &component);
-		void removeComponent(GCP_SPointer<GCP_FormComponent> &component);
+        void addComponent(GCP_SPointer<GCP_ContextMenu> const &component);
+        void addComponent(GCP_SPointer<GCP_FormComponent> const &component);
+        void removeComponent(GCP_SPointer<GCP_FormComponent> const &component);
 		void setPosition(int x, int y);
 
 		void toggleVisibility(void* obj);

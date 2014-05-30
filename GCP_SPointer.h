@@ -44,7 +44,7 @@ class GCP_SPointer
 					_pointee = NULL;
 			}
 		};
-		GCP_SPointer(GCP_SPointer& pnt): _pointee(NULL) {
+        GCP_SPointer(GCP_SPointer const& pnt): _pointee(NULL) {
 			release();			
 			_pointee = pnt.getPointer();
 			if(_pointee != NULL)
@@ -58,18 +58,19 @@ class GCP_SPointer
 			
 		T* getPointer() const  {return _pointee;}	//Опасно отдавать указатель наружу!
 	
-		GCP_SPointer&  operator=(GCP_SPointer& rhs)			//Присваиваем один указатель ругому
-		{			
-			if(_pointee != rhs.getPointer())		//Разные указатели. Отпускаем наш указатель. Новому добавляем ссылку.
-			{				
-				release();
-				_pointee = rhs.getPointer();
-				_pointee ->AddRef();
-			}			
-			return *this;
-		}
 
-		GCP_SPointer&  operator=(int rhs)		{		_pointee = NULL;	return *this;	}
+        GCP_SPointer& operator=(GCP_SPointer const &rhs)			//Присваиваем один указатель другому
+        {
+            if(_pointee != rhs.getPointer())		//Разные указатели. Отпускаем наш указатель. Новому добавляем ссылку.
+            {
+                release();
+                _pointee = rhs.getPointer();
+                _pointee ->AddRef();
+            }
+            return *this;
+        }
+
+        GCP_SPointer&  operator=(const int rhs)		{		_pointee = NULL;	return *this;	}
 
 		~GCP_SPointer(){		release();				};
 

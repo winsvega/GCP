@@ -73,7 +73,7 @@ class GCP_MessageBox: public GCP_Form
 		messagelabel = GCP_SPointer<GCP_Label> (new GCP_Label());
 		messagelabel->setPosition(25,50);
 		messagelabel->setStyle(&defStyles.defaultFormHeaderStyle);
-		addComponent((GCP_SPointer<GCP_FormComponent>)messagelabel);
+        addComponent(static_cast<gcp_spFormCmpnt>(messagelabel));
 
 		messagebox = NULL;
 	}

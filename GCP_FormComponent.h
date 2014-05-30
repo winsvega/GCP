@@ -5,8 +5,12 @@
 #include "GCP_Delegate.h"
 #include "GCP_SPointer.h"
 
-class GCP_FormComponent;
 
+
+
+
+class GCP_FormComponent;
+typedef GCP_SPointer<GCP_FormComponent> gcp_spFormCmpnt;
 //template<class T>
 //GCP_SPointer<T>::operator GCP_SPointer<GCP_FormComponent> () 
 //{

@@ -9,7 +9,7 @@ class GCP_Select: public GCP_FormComponent
 {
 	private:
 		GCP_SPointer<GCP_Button> _dropdownButton;
-		GCP_Vector<GCP_SPointer<GCP_Button>> items;
+        GCP_Vector<gcp_spButton> items;
 		int _iSelectedItem;
 		bool _isDrawingDropDown;
 		string _sSelectedText;
@@ -20,7 +20,7 @@ class GCP_Select: public GCP_FormComponent
 		{
 			_iSelectedItem = -1;
 			_isDrawingDropDown = false;
-			_dropdownButton = GCP_SPointer<GCP_Button>(new GCP_Button());
+            _dropdownButton = GCP_SPointer<GCP_Button>(new GCP_Button());
 			_dropdownButton->setWidthHeight(15,15);
 			_dropdownButton->setCaption("\\/");	
 			_dropdownButton->setOnMouseLeftClick(this,&GCP_Select::OnDropDown);
@@ -34,7 +34,7 @@ class GCP_Select: public GCP_FormComponent
 
 		void addItem(string s)
 		{
-			GCP_SPointer<GCP_Button> button = GCP_SPointer<GCP_Button>(new GCP_Button());
+            gcp_spButton button = GCP_SPointer<GCP_Button>(new GCP_Button());
 			button->setWidthHeight(width,height);
 			button->setStyle(&defStyles.defaultbuttonStyle);
 			button->setCaption(s);

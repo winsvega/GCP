@@ -2,14 +2,15 @@
 #define GCP_ContextMenuH
 #include "GCP_Button.h"
 #include "GCP_Vector.h"
-
+class GCP_ContextMenu;
+typedef GCP_SPointer<GCP_ContextMenu> gcp_spContextMenu;
 class GCP_ContextMenu: public GCP_FormComponent
 {
 	private:
 		bool _isLocked;
 		GCP_Vector<int> _iSeparators;
 	public:
-		GCP_Vector<GCP_SPointer<GCP_Button>> menu;
+        GCP_Vector<gcp_spButton> menu;
 		int iType;
 		bool isContextMenuBlocking;		
 

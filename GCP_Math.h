@@ -1,11 +1,9 @@
 #ifndef GCP_MathH
 #define GCP_MathH
  
-#include <string>
+#include <string.h>
 #include <sstream>
-#ifndef M_PI
 #include <cmath>
-#endif
 #include <cstdio> 
 #include <ctype.h>
 #include "GCP_Vector.h"
@@ -177,7 +175,7 @@ class GCP_Math
 				}
 				else {
 					flag = 1;
-					if(strstr("+_-/*!@#$%^&()¹;:?{}[]|'\\~\"",s)!=NULL)
+                    if(strstr("+_-/*!@#$%^&()¹;:?{}[]|'\\~\"",s)!=NULL)
 						flag = 0;
 					
 				}
@@ -199,7 +197,7 @@ class GCP_Math
 		
 		///////////// Genetic /////////////
 		int bin2dec(const string* binary);
-		int GCP_Math::bin2dec(const char* binary);
+        int bin2dec(const char* binary);
 		string* binchar_set_length(const string *buff, int size);
 		int *binaryStringTointegers(string binary, int size, int *arr);
 		string integersToBinaryString(int *arr, int size);

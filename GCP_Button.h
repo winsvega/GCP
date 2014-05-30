@@ -2,6 +2,8 @@
 #define GCP_ButtonH
 #include "GCP_FormComponent.h"
 
+class GCP_Button;
+typedef GCP_SPointer<GCP_Button> gcp_spButton;
 class GCP_Button: public GCP_FormComponent
 {
 

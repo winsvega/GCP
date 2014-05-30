@@ -113,14 +113,14 @@ GCP_Form::~GCP_Form()	{
 
 }		
 
-void GCP_Form::addComponent(GCP_SPointer<GCP_ContextMenu> &component)
+void GCP_Form::addComponent(GCP_SPointer<GCP_ContextMenu> const &component)
 {
 	//!!! Шрифт передаем!!!
 	//component->setFont(getFont());
 	_contextmenus.push_back(component);
 }
 
-void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> &component)
+void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> const &component)
 {
 	for(int i=0; i<_components.size(); i++)
 		if(component == _components.at(i))			//Два раза одно и тоже не принимаем
@@ -130,10 +130,10 @@ void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> &component)
 	component->setPosition(xPos+component->xPos,yPos+component->yPos);
 	//component->setFont(getFont());
 	_components.push_back(component);
-	GCP_Math::quickSort<GCP_SPointer<GCP_FormComponent>>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
+    GCP_Math::quickSort<gcp_spFormCmpnt>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
 }
 
-void GCP_Form::removeComponent(GCP_SPointer<GCP_FormComponent> &component)
+void GCP_Form::removeComponent(GCP_SPointer<GCP_FormComponent> const &component)
 {
 	for(unsigned int i=0; i<_components.size(); i++)
 		if(_components.at(i) == component){
@@ -153,7 +153,7 @@ void GCP_Form::addSubForm(GCP_SPointer<GCP_Form> &form)
 	//form->setFont(getFont());
 	form->setBufferSize(_swidth,_sheight);
 	_subForms.push_back(form);
-	GCP_Math::quickSort<GCP_SPointer<GCP_Form>>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
+    GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
 }
 
 void GCP_Form::setPosition(int x, int y)
@@ -226,7 +226,7 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 		}
 
 	//!!! Сортировку тоже надо один раз сообразить 
-	GCP_Math::quickSort<GCP_SPointer<GCP_Form>>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
+    GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
 	bool isHavingSubformsThatLocking = false;
 	for(unsigned int i=0; i<_subForms.size(); i++){
 		_subForms.at(i)->OnDraw(screen, width, height);
@@ -304,7 +304,7 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 				return evt;
 			
 			//WHY?  EVENTORDER = DRAWORDER^-1
-			GCP_Math::quickSort<GCP_SPointer<GCP_Form>>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
+            GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
 			//Передаем всем дочерним формам глобальное событие
 			for(unsigned int i=0; i<_subForms.size(); i++){
 				other_evt = _subForms.at(i)->OnEvent(GCP_EVENT, events);
@@ -392,7 +392,7 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 		return evt;
 
 	//WHY?  EVENTORDER = DRAWORDER^-1
-	GCP_Math::quickSort<GCP_SPointer<GCP_Form>>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
+    GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
 	bool isDragged = false;		
 	bool isEventInsideChildForm = false;
 	if(!_isDragStarted || _isLocked){

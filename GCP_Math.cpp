@@ -414,7 +414,6 @@
      gcp_reverse(s);
  } 
 
-#include <GlobalVariables.h>
  
 		 string GCP_Math::intToString(int value)
 		{
