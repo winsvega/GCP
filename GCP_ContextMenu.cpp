@@ -3,10 +3,10 @@
 #include "GCP_Vector.h"
 
 
-// онтекстное меню это набор кнопок, которые открываютс€ например на правый клик по формочке	
+// онтекстное меню это набор кнопок, которые открываютс€ например на правый клик по формочке
 GCP_ContextMenu::GCP_ContextMenu(){
-	bool isVisible = false;
-	int iType = GCP_MENU_MVERTICAL;		//меню может быть вертикальным либо горизонтальным
+	isVisible = false;
+	iType = GCP_MENU_MVERTICAL;		//меню может быть вертикальным либо горизонтальным
 }
 
 
@@ -23,11 +23,11 @@ void GCP_ContextMenu::setLock(bool flag)
 	_isLocked = flag;					//отключает обработку событий конктекстного меню. (нужно например чтобы заморозить интерфейс)
 }
 
-	     
+
 void GCP_ContextMenu::initTexture(SDL_Renderer* screen)
 {
-	unsigned int iMenuSize = menu.size();	
-	for(unsigned int i=0; i<iMenuSize; i++)	
+	unsigned int iMenuSize = menu.size();
+	for(unsigned int i=0; i<iMenuSize; i++)
 		menu.at(i)->initTexture(screen);	//—ечас эта функци€ не делает ничего. но по хорошему должна осуществл€ть предзагрузку картинок кнопок
 }
 
@@ -44,7 +44,7 @@ void GCP_ContextMenu::addButton(GCP_SPointer<GCP_Button> &button)	{
 	menu.push_back(button);
 }
 
-void GCP_ContextMenu::addButton(string type)	{			
+void GCP_ContextMenu::addButton(string type)	{
 	_iSeparators.push_back( menu.size());	//¬ меню можно добавл€ть разделители. –азделитель не кнопка, а отступ / либо лини€
 }
 
@@ -60,7 +60,7 @@ void GCP_ContextMenu::close(void *obj)
 	isVisible = false;
 }
 
-	
+
 bool GCP_ContextMenu::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh)	{
 	//Context menu is not dragable
 	return false;
@@ -88,11 +88,11 @@ gcp_formEvent GCP_ContextMenu::OnEvent( const int GCP_EVENT, sdl_events events)
 	return evt;
 }
 
-		
+
 
 void GCP_ContextMenu::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh)
 {
-	if(!isVisible) 
+	if(!isVisible)
 		return;
 
 	//¬ывод кнопок на экран
@@ -121,15 +121,15 @@ void GCP_ContextMenu::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int f
 	//ƒвигаем меню если оно выходит за буфер / форму
 	GCP_Point normPos = GCP_Math::normalizeRectInRect(GCP_Point(formx,formy),
 						GCP_Point(formx+formw,formy+formh),xPos,yPos,stackWidth+iMenuSize,stackHeight+iMenuSize,1);
-	xPos = (int)normPos.X; 
+	xPos = (int)normPos.X;
 	yPos = (int)normPos.Y;
 
 
 	//“еперь когда мы его подвинули нам надо подвинуть все компоненты уже с учетом того что сдвинули наше меню
-	//!!! разделители не учитывались в цикле выше!!! 
+	//!!! разделители не учитывались в цикле выше!!!
 	stackWidth=0;   //recalc for calculationg drawing coordinates
-	stackHeight=0;  
-	int currentSeparator=0;
+	stackHeight=0;
+	unsigned int currentSeparator=0;
 	for(unsigned int i=0; i<iMenuSize; i++)	{
 
 		if(iType==GCP_MENU_MVERTICAL){
@@ -150,7 +150,7 @@ void GCP_ContextMenu::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int f
 			menu.at(i)->setPosition(xPos + stackWidth, yPos);
 			stackWidth += menu.at(i)->getPosition().width+1;
 			stackHeight =  maxMenuHeight;
-		}			
+		}
 	}
 
 	//if(!isContextMenuBlocking)
@@ -170,7 +170,7 @@ void GCP_ContextMenu::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int f
 	for(unsigned int i=0; i<iMenuSize; i++)
 		menu.at(i)->OnDrawInfo(screen, formx,  formy,  formw,  formh);
 
-			
-	GCP_Draw::Draw_Round(screen,xPos, yPos, stackWidth, stackHeight, getStyle()->iRoundCff, c_black); 
-			
+
+	GCP_Draw::Draw_Round(screen,xPos, yPos, stackWidth, stackHeight, getStyle()->iRoundCff, c_black);
+
 }//OnDraw

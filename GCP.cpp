@@ -11,7 +11,7 @@ GCP_Controller::GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height)
 	_screen = sdlRenderer;
 	_width = width;
 	_height = height;
-	_mainForm = NULL;			
+	_mainForm = 0;
 	_isLeftHold = false;
 }
 
@@ -34,8 +34,8 @@ void GCP_Controller::setFont(string directory_path_string)
 }
 
 GCP_SPointer<GCP_Form> GCP_Controller::createForm(SDL_Renderer* screen)
-{			
-	_mainForm =GCP_SPointer<GCP_Form>(new GCP_Form(screen, _width, _height));		
+{
+	_mainForm =GCP_SPointer<GCP_Form>(new GCP_Form(screen, _width, _height));
 	//_mainForm->setFont(_sFontDir);							//сейчас форма передает этот путь всем своим компонентам
 	_mainForm->setBufferSize(_width,_height);
 	return _mainForm;
@@ -62,7 +62,7 @@ void GCP_Controller::handleEvents(SDL_Event event)
 			evt.mousex = event.motion.x;
 			evt.mousey = event.motion.y;
 			evt.mousemotion = event.motion;
-			_mainForm->OnEvent(GCP_ON_MOUSE_GMOTION,evt); 
+			_mainForm->OnEvent(GCP_ON_MOUSE_GMOTION,evt);
 			if (_isLeftHold)
 				_mainForm->OnMouseGlobalLeftHoldMotion(event.motion);
 			break;
@@ -74,12 +74,12 @@ void GCP_Controller::handleEvents(SDL_Event event)
 			else
 				_mainForm->OnEvent(GCP_ON_WHELL_GDOWN,evt);
 			break;
-		case SDL_MOUSEBUTTONDOWN:	
+		case SDL_MOUSEBUTTONDOWN:
 			  evt.mousex = event.button.x;
 			  evt.mousey = event.button.y;
 			  evt.mousebutton = event.button;
 
-			  _mainForm->OnEvent(GCP_ON_MOUSE_GDOWN,evt);	
+			  _mainForm->OnEvent(GCP_ON_MOUSE_GDOWN,evt);
 			  if (event.button.button == SDL_BUTTON_LEFT){
 					_mainForm->OnEvent(GCP_ON_MOUSE_GLDOWN,evt);
 					_isLeftHold = true;
@@ -92,12 +92,12 @@ void GCP_Controller::handleEvents(SDL_Event event)
 
 				_mainForm->OnEvent(GCP_ON_MOUSE_GUP,evt);
 
-				if( event.button.button == SDL_BUTTON_RIGHT ) 
+				if( event.button.button == SDL_BUTTON_RIGHT )
 					_mainForm->OnEvent(GCP_ON_GRIGHT_CLICK,evt);
 				if( event.button.button == SDL_BUTTON_LEFT ) {
 					_mainForm->OnEvent(GCP_ON_GLEFT_CLICK,evt);
 					_isLeftHold = false;
-				}						
+				}
 			break;
 	}
 }

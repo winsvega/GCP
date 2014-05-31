@@ -8,11 +8,11 @@ class GCP_ContextMenu: public GCP_FormComponent
 {
 	private:
 		bool _isLocked;
-		GCP_Vector<int> _iSeparators;
+		GCP_Vector<unsigned int> _iSeparators;
 	public:
         GCP_Vector<gcp_spButton> menu;
 		int iType;
-		bool isContextMenuBlocking;		
+		bool isContextMenuBlocking;
 
 		GCP_ContextMenu();
 		~GCP_ContextMenu();

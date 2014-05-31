@@ -22,8 +22,14 @@ template< class T1 = NIL, class T2 = NIL>
 //////////////////////////////////////////////////////////////////
 //  Контейнер для хранения указателя на метод.
 //////////////////////////////////////////////////////////////////
- class IContainer { public: virtual void* Call(void* arg){return (void*)0;};};
-template< class T, class M> class Container : public IContainer {};
+ class IContainer {
+      public:
+           virtual void* Call(void* arg){return (void*)0;};
+           virtual ~IContainer(){};
+};
+
+template< class T, class M>
+class Container : public IContainer {};
 //////////////////////////////////////////////////////////////////
 //  Специализация для метода c входным аргументом void*
 //////////////////////////////////////////////////////////////////
@@ -36,10 +42,10 @@ template< class T>
   public:
    void* Call(void* i_arg1)
   {
-	  (m_class->*m_method)(i_arg1);	
+	  (m_class->*m_method)(i_arg1);
 	  return (void*)0;
   }
-   ~Container(){delete m_class;}
+  //~Container(){delete m_class;}
 };
 //////////////////////////////////////////////////////////////////
 //  Специализация для метода c входным аргументом void* и выходным аргументом void*
@@ -53,9 +59,9 @@ template< class T>
   public:
   void* Call(void* i_arg1)
   {
-	  return (m_class->*m_method)(i_arg1);		
+	  return (m_class->*m_method)(i_arg1);
   }
-   ~Container(){delete m_class;}
+  //~Container(){delete m_class;}
 };
 //////////////////////////////////////////////////////////////////
 //  Специализация для метода с одним аргументом.
@@ -87,8 +93,8 @@ template< class T>
 {
   typedef void (T::*M)(A1,A2);
   typedef Arguments<A1,A2> A;
-  public: Container( T* c, M m ) : m_class( c ), m_method( m ) {}    
-  private: T* m_class; M m_method; 
+  public: Container( T* c, M m ) : m_class( c ), m_method( m ) {}
+  private: T* m_class; M m_method;
   public: void Call( IArguments* i_args )
   {
     A* a = dynamic_cast< A* >( i_args );
@@ -101,7 +107,7 @@ template< class T>
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //////////This Class is redisigned to assign and call
-//////////functions with 1, 2 or 0 parametrs 
+//////////functions with 1, 2 or 0 parametrs
 //////////on basic form events
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -110,7 +116,7 @@ template< class T>
 //	private:
 //		IContainer* m_container;
 //public:
-//	
+//
 //  Delegate() : m_container( 0 ) {}
 //  ~Delegate() { if( m_container ) delete m_container; }
 //

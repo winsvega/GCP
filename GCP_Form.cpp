@@ -14,13 +14,13 @@ GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
 	isDraggingSomeComponent = false;			//перетаскивается ли компонент в данный момент?
 	isTransparent = false;						//Рисовать форму прозрачно поверх других?
 	isDragable = true;							//Можно ли таскать форму по буферу или другой форме?
-	iPosition = 0;								
+	iPosition = 0;
 
 	isParentLocking = false;					//Блокировать родительскую форму если работает эта форма
 	isVisible = true;							//Можно вообще форму не рисовать
 	isShowTopRightButtons = true;				//Показывать крестики нолики в правом верхнем углу
 	xPos = 0; yPos = 0;							//Верхний левый угол
-	width = _width;								//Ширина 
+	width = _width;								//Ширина
 	height = _height;							//Высота
 	_swidth = _width;							//Ширина буфера на котором рисуем
 	_sheight = _height;							//Высота буфера на котором рисуем
@@ -34,19 +34,20 @@ GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
 	//colorHeadMenuBackground = c_black;			//Фон верхней полоски
 	//colorHeadMenuFade = c_grey;					//Фон верхней полоски если форма не активна
 	//colorButtonBackground = c_white;			//Фон кнопок????
-	
-	
+
+
 	//Крестики нолики
-	formTopRightButtons = GCP_SPointer<GCP_ContextMenu>(new GCP_ContextMenu());	
+	formTopRightButtons = GCP_SPointer<GCP_ContextMenu>(new GCP_ContextMenu());
 	formTopRightButtons->setPosition(xPos+width-20,yPos+5);
 	formTopRightButtons->iType = GCP_MENU_MHORIZONTAL;
 	formTopRightButtons->isContextMenuBlocking = false;			//Меню не блокирует другие компоненты на форме
 	formTopRightButtons->setStyle(&defStyles.defaultMenuStyle);
+	formTopRightButtons->setVisible(true);
 
 
-	xbutton = GCP_SPointer<GCP_Button> (new GCP_Button());			
+	xbutton = GCP_SPointer<GCP_Button> (new GCP_Button());
 	xbutton->setCaption("X");
-	xbutton->setWidthHeight(15,20);	
+	xbutton->setWidthHeight(15,20);
 	xbutton->setStyle(&defStyles.defaultbuttonStyle);
 	xbutton->setOnMouseLeftClick(this,&GCP_Form::toggleVisibility);
 	xbutton->options.draw_order = -1000;
@@ -55,8 +56,8 @@ GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
 
 	//Верхняя полоска на форме (для обработки драгендроп)
 	xpanel = GCP_SPointer<GCP_Button> (new GCP_Button());
-	xpanel->setWidthHeight(width,30);			
-	xpanel->setPosition(xPos,yPos);	
+	xpanel->setWidthHeight(width,30);
+	xpanel->setPosition(xPos,yPos);
 	xpanel->options.draw_order = -999;
 	xpanel->setStyle(&defStyles.defaultFormHeaderStyle);
 	addComponent((GCP_SPointer<GCP_FormComponent>)xpanel);
@@ -65,42 +66,43 @@ GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
 	messagebox = GCP_SPointer<GCP_Form>(new GCP_MessageBox(screen,450,150));
 	messagebox->isParentLocking = true;
 	messagebox->isVisible = false;
-	messagebox->isDragable = false;	
+	messagebox->isDragable = false;
 	messagebox->options.draw_order = -100;
 	messagebox->setPosition(width/2-messagebox->width/2,height/2-messagebox->height/2);
-	messagebox->setCaption(GCP_Math::RUSCP1251_TO_WCHAR("УВЕДОМЛЕНИЕ"));
+	const char *caprion = "УВЕДОМЛЕНИЕ";
+	messagebox->setCaption(GCP_Math::RUSCP1251_TO_WCHAR(caprion));
 	//setFont("arial.ttf");
 	addSubForm(messagebox);
-	
+
 }
 
 void GCP_Form::showmessage(string text, bool block)
 {
-	messages.push_back(text);	
+	messages.push_back(text);
 }
 
 void GCP_Form::showmessage(int text, bool block)
-{		
-	messages.push_back(GCP_Math::intToString(text));	
+{
+	messages.push_back(GCP_Math::intToString(text));
 }
 void GCP_Form::setBufferSize(int screenw, int screenh)
 {
-	_swidth = screenw; 
-	_sheight = screenh;	
+	_swidth = screenw;
+	_sheight = screenh;
 	//if(width > screenw || width < 0 || height > screenh || height < 0 )
 	//	throw "Form size doesn't match screen size";
 
 }
 
-void GCP_Form::setFont(string dir)			{	
+void GCP_Form::setFont(string dir)			{
 	//!!! передаем шрифт своим компонентам
-	/*getStyle()->sFontDir = dir; 
-	xbutton->setFont(getStyle()->sFontDir);	
+	/*getStyle()->sFontDir = dir;
+	xbutton->setFont(getStyle()->sFontDir);
 	xpanel->setFont(getStyle()->sFontDir);
 	messagebox->setFont(getStyle()->sFontDir);*/
 }
 
-GCP_Form::~GCP_Form()	{ 
+GCP_Form::~GCP_Form()	{
 	//!!!Удаляем указатели из памяти по уничтожению формы!!!!!
 	/*for(int i=0; i<_subForms.size(); i++)
 		delete _subForms.at(i);
@@ -111,18 +113,18 @@ GCP_Form::~GCP_Form()	{
 	for(int i=0; i<_contextmenus.size(); i++)
 		delete _contextmenus.at(i);*/
 
-}		
+}
 
 void GCP_Form::addComponent(GCP_SPointer<GCP_ContextMenu> const &component)
 {
 	//!!! Шрифт передаем!!!
-	//component->setFont(getFont());
+	component->setFont(getFont());
 	_contextmenus.push_back(component);
 }
 
 void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> const &component)
 {
-	for(int i=0; i<_components.size(); i++)
+	for(unsigned int i=0; i<_components.size(); i++)
 		if(component == _components.at(i))			//Два раза одно и тоже не принимаем
 			return;
 
@@ -157,9 +159,9 @@ void GCP_Form::addSubForm(GCP_SPointer<GCP_Form> &form)
 }
 
 void GCP_Form::setPosition(int x, int y)
-{		
-	int xPosNow = xPos;
-	int yPosNow = yPos;
+{
+	//int xPosNow = xPos;
+	//int yPosNow = yPos;
 	int deltaX = x-xPos;
 	int deltaY = y-yPos;
 	xPos = x;
@@ -168,15 +170,15 @@ void GCP_Form::setPosition(int x, int y)
 		_components.at(i)->setPosition(	_components.at(i)->xPos+deltaX,	_components.at(i)->yPos+deltaY);
 	for(unsigned int i=0; i<_contextmenus.size(); i++)
 		_contextmenus.at(i)->setPosition(	_contextmenus.at(i)->xPos+deltaX,	_contextmenus.at(i)->yPos+deltaY);
-			
-			
+
+
 }
 
 bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 {
 	if(!isVisible)
 		return false;
-			
+
 	if(!isShowTopRightButtons)
 		xbutton->isVisible = false;
 
@@ -185,18 +187,18 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 	//xpanel->cBackColor = colorHeadMenuBackground;
 	//xpanel->cBackColorHover = colorHeadMenuBackground;
 	//!!!!
-			
+
 
 	if(!isTransparent)
 		GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1,  getStyle()->cBackColor);
 	GCP_Draw::Draw_Round(screen, xPos, yPos, width, height, 1,  getStyle()->colorHeadMenuBackground);
-	
-	
-	//!!! Сортировку тоже надо один раз сообразить 
+
+
+	//!!! Сортировку тоже надо один раз сообразить
 	//GCP_Math::quickSort<GCP_FormComponent*>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
 	for(unsigned int i=0; i<_components.size(); i++)
 			_components.at(i)->OnDraw(screen,_swidth,_sheight,xPos,yPos,width,height);
-			
+
 	//Всплывающие подсказки рисуются поверх компонент
 	for(unsigned int i=0; i<_components.size(); i++)
 		_components.at(i)->OnDrawInfo(screen,xPos,yPos,width,height);
@@ -214,18 +216,18 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 		if(_contextmenus.at(i)->isVisible && _contextmenus.at(i)->isContextMenuBlocking)
 			_isContextMenuOpened = true;	//будем блокировать компоненты пока открыто это меню
 	}
-			
+
 	basicOnDraw(screen,xPos,yPos,width,height);
 
 	//Сообщения можно сделать с потоками. тогда они могут блокировать всю программу пока не нажмешь кнопку ОК
 	//Но тогда надо отделять интерфейс от главного потока обработки событий SDL
 	if(messages.size())
-		if(messagebox->isVisible == false){			
+		if(messagebox->isVisible == false){
 			messagebox->messagelabel->text = messages.pop_first();
 			messagebox->isVisible = true;
 		}
 
-	//!!! Сортировку тоже надо один раз сообразить 
+	//!!! Сортировку тоже надо один раз сообразить
     GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
 	bool isHavingSubformsThatLocking = false;
 	for(unsigned int i=0; i<_subForms.size(); i++){
@@ -249,25 +251,25 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 ////////////////////////////////////////////KEY EVENTS
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////OnKeyDown
-////////////////////////////////////////////////////////////////////////////////////////////	
+////////////////////////////////////////////////////////////////////////////////////////////
 bool GCP_Form::OnTextInput(SDL_TextInputEvent text)
 {
 	if(!isVisible)
 		return false;
 
 	for(unsigned int i=0; i<_subForms.size(); i++){
-		_subForms.at(i)->OnTextInput(text);	
+		_subForms.at(i)->OnTextInput(text);
 	}
 
 	if(_isLocked)
 		return false;
 
-	if(!_isContextMenuOpened)				
+	if(!_isContextMenuOpened)
 		for(unsigned int i=0; i<_components.size(); i++)
 			_components.at(i)->OnTextInput(text);
 
 	basicOnTextInput(text);
-			
+
 	return true;
 }
 
@@ -277,13 +279,13 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 		return false;
 
 	for(unsigned int i=0; i<_subForms.size(); i++){
-		_subForms.at(i)->OnTextEdit(edit);	
+		_subForms.at(i)->OnTextEdit(edit);
 	}
 
 	if(_isLocked)
 		return false;
 
-	if(!_isContextMenuOpened)				
+	if(!_isContextMenuOpened)
 		for(unsigned int i=0; i<_components.size(); i++)
 			_components.at(i)->OnTextEdit(edit);
 
@@ -298,11 +300,11 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 			//Будем возвращать где находился курсор когда произошло событие
 			gcp_formEvent evt, other_evt;
 			evt.isEventInsideForm = events.isPassingOnlyGlobalEvent;
-			evt.isEventOnFormHead = false;	
+			evt.isEventOnFormHead = false;
 
 			if(!isVisible)
 				return evt;
-			
+
 			//WHY?  EVENTORDER = DRAWORDER^-1
             GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
 			//Передаем всем дочерним формам глобальное событие
@@ -311,35 +313,35 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 				//Запоминаем если это событие произошло внутри хоть одной из активных форм
 				evt.isEventInsideForm = evt.isEventInsideForm || other_evt.isEventInsideForm;
 				//Все остальные формы получат только глобальные события если хоть на одной мы обработаем локальные
-				events.isPassingOnlyGlobalEvent = events.isPassingOnlyGlobalEvent || evt.isEventInsideForm; 
+				events.isPassingOnlyGlobalEvent = events.isPassingOnlyGlobalEvent || evt.isEventInsideForm;
 			}
 
 			if(_isLocked){
 				evt.isEventInsideForm = false;
-				evt.isEventOnFormHead = false;	
-				return evt;			
+				evt.isEventOnFormHead = false;
+				return evt;
 			}
 
 			if(GCP_EVENT == GCP_ON_MOUSE_GUP){
 				_isDragStarted = false;
-				isDraggingSomeComponent = false;				
+				isDraggingSomeComponent = false;
 			}
-			
+
 			//ОПТИМИЗИРОВАТЬ КАК ТО ОБРАБОТКУ БОЛЬШОГО ЧИСЛА КОМПОНЕНТ? ВРОДЕ ДО 1000-2000 работает нормально
 			//РАСЧЕТ НА ТО ЧТО КОМПОНЕНТ БУДЕТ МНОГО > 400
-			///СОРТИРОВКА КОМПОНЕНТ И НА ВЫХОДЕ СПИСОК ТОЛЬКО ТЕХ У КОТОРЫХ КЛЮЧЕНА ПРОСЛУШКА 
+			///СОРТИРОВКА КОМПОНЕНТ И НА ВЫХОДЕ СПИСОК ТОЛЬКО ТЕХ У КОТОРЫХ КЛЮЧЕНА ПРОСЛУШКА
 			///GCP_EVENT или GCP_EVENT+1
 			///НАДО ЛИ?
 
 
 			//Предположим мы не обрабатываем никакое локальное событие у компонент
-			bool isMouseOverSomeComponent = false;					
-			if(!_isContextMenuOpened && !isDraggingSomeComponent){					
+			bool isMouseOverSomeComponent = false;
+			if(!_isContextMenuOpened && !isDraggingSomeComponent){
 				for(unsigned int i=0; i<_components.size(); i++){
 					_components.at(i)->OnEvent(GCP_EVENT, events);		//Вызываем глобальное событие у наших компонент
-					
+
 					//Если глобальное событие произошло над дочерней формой, локальные события для наших компонент не обрабатываем
-					if(!isLocalEventsLocked) 
+					if(!isLocalEventsLocked)
 					if(!isMouseOverSomeComponent && !evt.isEventInsideForm)	{
 						if(_components.at(i)->checkCollisionBox(events.mousex, events.mousey)){
 							_components.at(i)->OnEvent(GCP_EVENT+1, events);
@@ -348,7 +350,7 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 
 							if(_components.at(i)->isLocalEventsUnderneathBlocking)
 								isMouseOverSomeComponent = true;
-							//Передали локальное событие компоненту по этим координатам. 
+							//Передали локальное событие компоненту по этим координатам.
 							//Далее локальные события более не передаем
 						}
 					}
@@ -356,12 +358,12 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 			}
 
 			events.isPassingOnlyGlobalEvent = evt.isEventInsideForm;
-			if(!isLocalEventsLocked) 
+			if(!isLocalEventsLocked)
 			for(unsigned int i=0; i<_contextmenus.size(); i++)
 				_contextmenus.at(i)->OnEvent(GCP_EVENT, events);
 
 			if(GCP_EVENT == GCP_ON_MOUSE_GUP)
-				_componentThatWasLeftClicked = 0; 
+				_componentThatWasLeftClicked = 0;
 			if(GCP_EVENT == GCP_ON_MOUSE_GLDOWN)
 				_isClickedOnTopHeader = false;
 
@@ -372,7 +374,7 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 				mouse_x = events.mousex;
 				mouse_y =  events.mousey;
 				evt.isEventInsideForm = true;
-				basicOnEvent(GCP_EVENT+1, events); 
+				basicOnEvent(GCP_EVENT+1, events);
 				if(events.mousey<yPos+xpanel->height){
 					if(GCP_EVENT == GCP_ON_MOUSE_GLDOWN)
 						_isClickedOnTopHeader = true;
@@ -393,14 +395,14 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 
 	//WHY?  EVENTORDER = DRAWORDER^-1
     GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
-	bool isDragged = false;		
+	bool isDragged = false;
 	bool isEventInsideChildForm = false;
 	if(!_isDragStarted || _isLocked){
 	for(unsigned int i=0; i<_subForms.size(); i++){
 		evt = _subForms.at(i)->OnMouseGlobalLeftHoldMotion(motion);
 		isDragged = evt.isFormDragged; //If child form is dragged
 		isEventInsideChildForm = evt.isEventInsideForm;
-				
+
 		if(isDragged) {
 			isDraggingSomeComponent = true; //Consider sub form as dragging component
 			break;
@@ -426,12 +428,12 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 					int deltaY = yPos - yPosStart;
 					for(unsigned int i=0; i<_components.size(); i++){
 						SPoint previousPos = _components.at(i)->getPosition();
-						_components.at(i)->setPosition(previousPos.x+deltaX,previousPos.y+deltaY); 
+						_components.at(i)->setPosition(previousPos.x+deltaX,previousPos.y+deltaY);
 					}
 					for(unsigned int i=0; i<_contextmenus.size(); i++){
 						if(!_contextmenus.at(i)->isContextMenuBlocking)		{
 						SPoint previousPos = _contextmenus.at(i)->getPosition();
-						_contextmenus.at(i)->setPosition(previousPos.x+deltaX,previousPos.y+deltaY); 
+						_contextmenus.at(i)->setPosition(previousPos.x+deltaX,previousPos.y+deltaY);
 						}
 					}
 					_isDragStarted = true;
@@ -443,12 +445,12 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 		}
 
 		bool isComponentClicked = false;
-		if(!_isDragStarted){			
+		if(!_isDragStarted){
 			for(unsigned int i=0; i<_components.size(); i++){
 				_components.at(i)->OnMouseGlobalLeftHoldMotion(motion,xPos,yPos+xpanel->height,width,height-xpanel->height);
 				/*if(!isComponentClicked && !isDraggingSomeComponent)
 				if(_components.at(i)==_componentThatWasLeftClicked){
-					_components.at(i)->OnMouseLeftHoldMotion(motion,xPos,yPos+xpanel->height,width,height-xpanel->height);			
+					_components.at(i)->OnMouseLeftHoldMotion(motion,xPos,yPos+xpanel->height,width,height-xpanel->height);
 					isComponentClicked = true;
 					isDraggingSomeComponent = true;
 				}*/
@@ -457,7 +459,7 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 			///REFACTOR THIS!!!!
 			if(_componentThatWasLeftClicked)
 				if(_componentThatWasLeftClicked->isDragable&& !isComponentClicked && !isDraggingSomeComponent){
-					_componentThatWasLeftClicked->OnMouseLeftHoldMotion(motion,xPos,yPos+xpanel->height,width,height-xpanel->height);			
+					_componentThatWasLeftClicked->OnMouseLeftHoldMotion(motion,xPos,yPos+xpanel->height,width,height-xpanel->height);
 					isComponentClicked = true;
 					isDraggingSomeComponent = true;
 				}

@@ -10,11 +10,11 @@ class GCP_MessageBox: public GCP_Form
 
 	private:
 	GCP_SPointer<GCP_Button> buttonOk;
-	public:		
-	
+	public:
+
 	GCP_MessageBox(SDL_Renderer* screen, int _width, int _height)
 	{
-		_componentThatWasLeftClicked = NULL;
+		_componentThatWasLeftClicked = 0;
 		isLocalEventsLocked = false;
 		_isLocked = false;
 		isLocked = false;
@@ -28,7 +28,7 @@ class GCP_MessageBox: public GCP_Form
 		isVisible = true;
 		isShowTopRightButtons = true;
 		xPos = 0; yPos = 0;
-		width = _width; 
+		width = _width;
 		height = _height;
 		sdlRenderer = screen;
 		_isContextMenuOpened = false;
@@ -38,26 +38,26 @@ class GCP_MessageBox: public GCP_Form
 		//colorHeadMenuBackground = c_black;
 		//colorHeadMenuFade = c_grey;
 		//colorButtonBackground = c_white;
-		
-		
+
+
 		formTopRightButtons = GCP_SPointer<GCP_ContextMenu>(new GCP_ContextMenu());
 		formTopRightButtons->setPosition(xPos+width-20,yPos+5);
 		formTopRightButtons->iType = GCP_MENU_MHORIZONTAL;
 		formTopRightButtons->isContextMenuBlocking = false;
 		formTopRightButtons->setStyle(&defStyles.defaultMenuStyle);
-		
 
-		xbutton = GCP_SPointer<GCP_Button> (new GCP_Button());			
+
+		xbutton = GCP_SPointer<GCP_Button> (new GCP_Button());
 		xbutton->setCaption("X");
-		xbutton->setWidthHeight(15,20);	
+		xbutton->setWidthHeight(15,20);
 		xbutton->setOnMouseLeftClick(this,&GCP_MessageBox::toggleBoxVisibility);
 		xbutton->options.draw_order = -1000;
 		formTopRightButtons->addButton(xbutton);
 		addComponent(formTopRightButtons);
 
 		xpanel = GCP_SPointer<GCP_Button> (new GCP_Button());
-		xpanel->setWidthHeight(width,30);			
-		xpanel->setPosition(xPos,yPos);		
+		xpanel->setWidthHeight(width,30);
+		xpanel->setPosition(xPos,yPos);
 		xpanel->options.draw_order = -999;
 		xpanel->setStyle(&defStyles.defaultFormHeaderStyle);
 		addComponent((GCP_SPointer<GCP_FormComponent>)xpanel);
@@ -75,7 +75,7 @@ class GCP_MessageBox: public GCP_Form
 		messagelabel->setStyle(&defStyles.defaultFormHeaderStyle);
         addComponent(static_cast<gcp_spFormCmpnt>(messagelabel));
 
-		messagebox = NULL;
+		messagebox = 0;
 	}
 
 	void toggleBoxVisibility(void* obj)
@@ -83,10 +83,10 @@ class GCP_MessageBox: public GCP_Form
 			isVisible = !isVisible;
 	}
 
-	void setFont(string dir)			
-	{	
-		/*sFontDir = dir; 
-		xbutton->setFont(sFontDir);	
+	void setFont(string dir)
+	{
+		/*sFontDir = dir;
+		xbutton->setFont(sFontDir);
 		xpanel->setFont(sFontDir);
 		buttonOk->setFont(sFontDir);
 		messagelabel->setFont(sFontDir);*/

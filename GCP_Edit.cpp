@@ -17,13 +17,13 @@ void GCP_Edit::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, i
 {
 	if(!isVisible)
 		return;
-	
-	
-	//¬ыводим текст в рамочке 
+
+
+	//¬ыводим текст в рамочке
 	//
-	
-	GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1, getStyle()->cBackColor); 
-	GCP_Draw::Draw_Round(screen, xPos, yPos, width, height, 1, getStyle()->cBorderColor); 
+
+	GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1, getStyle()->cBackColor);
+	GCP_Draw::Draw_Round(screen, xPos, yPos, width, height, 1, getStyle()->cBorderColor);
 	GCP_Draw::Draw_FillRound(screen, xPos+getStyle()->iBorderWidth, yPos+getStyle()->iBorderWidth, width-getStyle()->iBorderWidth*2, height-getStyle()->iBorderWidth*2, 1, getStyle()->cTextFieldBackColor);
 	//TTF_Font* font = TTF_OpenFont(getFont().c_str(),14);
 
@@ -52,7 +52,7 @@ void GCP_Edit::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, i
 			_iDrawDash = 0;
 	}
 
-}	
+}
 
 gcp_formEvent GCP_Edit::OnEvent( const int GCP_EVENT, sdl_events events)
 {
@@ -66,10 +66,10 @@ gcp_formEvent GCP_Edit::OnEvent( const int GCP_EVENT, sdl_events events)
 	switch(GCP_EVENT)
 	{
 		case GCP_ON_LEFT_CLICK:
-			_isEditingText = true;	
+			_isEditingText = true;
 			break;
 		case GCP_ON_GLEFT_CLICK:
-			_isEditingText = false;	
+			_isEditingText = false;
 			break;
 		case GCP_ON_GKEYDOWN:
 			OnKeyDown(events.keyboard);
@@ -83,8 +83,8 @@ gcp_formEvent GCP_Edit::OnEvent( const int GCP_EVENT, sdl_events events)
 	if(!isVisible)
 		return false;
 
-	_isEditingText = true;		
-	
+	_isEditingText = true;
+
 
 	basicOnMouseLeftClick(mousebutton);
 	return true;
@@ -98,7 +98,7 @@ gcp_formEvent GCP_Edit::OnEvent( const int GCP_EVENT, sdl_events events)
 	if(!isVisible)
 		return evt;
 
-	_isEditingText = false;	
+	_isEditingText = false;
 
 	basicOnMouseGlobalLeftClick(mousebutton);
 	return evt;
@@ -119,7 +119,7 @@ void GCP_Edit::OnKeyDown(SDL_KeyboardEvent keybevent){
 				//—ейчас удал€етс€ только один байт. т.е  русские буквы стираютс€ за 2 нажати€ бакспейс
 				if(_sTextInput.size()>0)
 					_sTextInput.erase(_sTextInput.size() - 1);
-				corelateText();			
+				corelateText();
              }
              break;
     }
@@ -133,7 +133,7 @@ void GCP_Edit::OnKeyDown(SDL_KeyboardEvent keybevent){
 //Ќе фига не получилось
 union byte
 {
-	unsigned char chr;			
+	unsigned char chr;
 	struct bit
 	{
 		bool b1;
@@ -145,7 +145,7 @@ union byte
 		bool b7;
 		bool b8;
 	}bits;
-		
+
 };
 union rusdigit
 {
@@ -153,8 +153,8 @@ union rusdigit
 	struct b
 	{
 		byte byte1;
-		byte byte2;	
-	}bytes;	
+		byte byte2;
+	}bytes;
 };
 //////////////////////////////////////////
 //////////////////////////////////////////
@@ -164,12 +164,12 @@ bool GCP_Edit::OnTextInput(SDL_TextInputEvent textevent)
 {
 	if(!isVisible || !_isEditingText)
 		return false;
-	
-	unsigned int i = 0;	
+
+	unsigned int i = 0;
 	while(textevent.text[i]!=0)
 		i++;
 
-	
+
 	///This convert two digits from unicode input to one digit that point to russian ASCI
 	///Of course it is not. but some of digits
 	///Find the function to convert this
@@ -188,26 +188,26 @@ bool GCP_Edit::OnTextInput(SDL_TextInputEvent textevent)
 		s[0] = textevent.text[1]-textevent.text[0]; //заметил что иногда эта штука есть правильное смещене из 2 байт в 1 байт русский символ
 		s[1] = 0;
 	}
-	else{ 
+	else{
 		s[0] =	textevent.text[0];
 		s[1] =	0;
 	}*/
 
-	
-	string s =  textevent.text;	
+
+	string s =  textevent.text;
 	switch(inputType)
 	{
 		case GCP_EDIT_DIGITONLY:
 			if(!GCP_Math::isNum((char*)s.c_str()))
 				return false;
 			break;
-		
+
 		case GCP_EDIT_DOUBLEDIGIT:
 			if(!GCP_Math::isNum((char*)s.c_str()) && s[0]!= '.')
 				return false;
 			if(s[0]== '.'){
-				for(int i=0; i<_sTextInput.size(); i++)
-					if(_sTextInput.at(i) == '.')				
+				for(unsigned int i=0; i<_sTextInput.size(); i++)
+					if(_sTextInput.at(i) == '.')
 						return false;
 			}
 			break;
@@ -218,7 +218,7 @@ bool GCP_Edit::OnTextInput(SDL_TextInputEvent textevent)
 			break;
 		//case GCP_Edit_InputType_Enum::ALL:
 	}
-	_sTextInput.append(s.c_str());	
+	_sTextInput.append(s.c_str());
 	corelateText();
 
 	return true;
@@ -226,7 +226,7 @@ bool GCP_Edit::OnTextInput(SDL_TextInputEvent textevent)
 void GCP_Edit::corelateText()
 {
 	//≈сли текст слишком большой или наоборот уменьшилс€ после редактировани€
-	//—мащаем индекс стартовой позиции с которой он выводитс€ в компоненте 
+	//—мащаем индекс стартовой позиции с которой он выводитс€ в компоненте
 	if(getStyle() == NULL)
 		return;
 	if(getStyle()->sFontDir == "")
@@ -241,8 +241,8 @@ void GCP_Edit::corelateText()
 		font = TTF_OpenFont(getFont().c_str(), 14);
 		TTF_SizeUTF8(font, _sTextInput.c_str(), &sw, &sh);  //ASSUME ENGLISH CHARS ONLY
 	//
-	style;
-	SStyle* a = getStyle();
+	//style;
+	//SStyle* a = getStyle();
 
 	while(sw>width-getStyle()->iBorderWidth*2)
 	{
@@ -251,19 +251,19 @@ void GCP_Edit::corelateText()
 		char buffer[100];
 		_sTextInput.copy(buffer,_sTextInput.size()-_iTextDrawIndex,_iTextDrawIndex);
 		buffer[_sTextInput.size()-_iTextDrawIndex]='\0';
-		_sTextInputDraw.append(buffer);		
+		_sTextInputDraw.append(buffer);
 
-		
+
 		TTF_SizeUTF8(font, _sTextInputDraw.c_str(), &sw, &sh);  //ASSUME ENGLISH CHARS ONLY
 	}
 	TTF_CloseFont(font);
 
 }
-bool GCP_Edit::OnTextEdit(SDL_TextEditingEvent edit) 
+bool GCP_Edit::OnTextEdit(SDL_TextEditingEvent edit)
 {
 	if(!isVisible || !_isEditingText)
 		return false;
-	
+
 	return true;
 }
 

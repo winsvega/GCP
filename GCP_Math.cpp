@@ -1,18 +1,18 @@
-#include <cstring> 
+#include <cstring>
 #include <sstream>
 #include <cmath>
-#include <cstdio> 
-#include <string> 
+#include <cstdio>
+#include <string>
 #include "GCP_Vector.h"
 #include "GCP_Math.h"
 
 
 /////////////////////////////////////////////////////////////////////////
-		 bool GCP_Math::isPointBelowLine(GCP_Point P, GCP_Line L)			 
-		{	
+		 bool GCP_Math::isPointBelowLine(GCP_Point P, GCP_Line L)
+		{
 			// Возвращает находится ли точка снизу от линии или сверху
 			bool isBelow = ((long double)(L.pointB.X - L.pointA.X)*(P.Y - L.pointA.Y) - (long double)(L.pointB.Y - L.pointA.Y)*(P.X - L.pointA.X) > 0);
-			if (lineAngle(L)>90) return  isBelow;							 
+			if (lineAngle(L)>90) return  isBelow;
 			return !isBelow;
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,14 +24,14 @@
 /////////////////////////////////////////////////////////////////////////
 		 bool GCP_Math::isInRadius(double x1,double y1, double x2, double y2, double r)		{
 			//Расстояние от точки (x1,y1) до точки (x2,y2)
-			return (sqrt(pow(x2-x1,2)+pow(y2-y1,2)) < r);	
+			return (sqrt(pow(x2-x1,2)+pow(y2-y1,2)) < r);
 		}
 /////////////////////////////////////////////////////////////////////////
 ////////////////////Is In Rect
 /////////////////////////////////////////////////////////////////////////
 		 bool GCP_Math::isInRect(double pointX, double pointY, double rectTopx, double rectTopy, double rectWidth, double rectHeight)		{
 			if(GCP_Math::compareDouble(pointX, rectTopx) && GCP_Math::compareDouble( rectTopx+rectWidth, pointX) && GCP_Math::compareDouble(pointY, rectTopy) && GCP_Math::compareDouble(rectTopy + rectHeight,pointY))
-				return true;			
+				return true;
 			return false;
 		}
 		 bool GCP_Math::isPointInRect(GCP_Point TopLeft, GCP_Point BottomRight, GCP_Point point)
@@ -40,7 +40,7 @@
 		}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::lineAngle(GCP_Point p11, GCP_Point p12)
 		{
 			double N1 = (double)(p12.X - p11.X);										//Направление линии относительно абсцисс
@@ -53,7 +53,7 @@
 		 GCP_Point GCP_Math::normalizeRectInRect(GCP_Point TopLeft, GCP_Point BottomRight, double x, double y, int width, int height, int offset){
 			GCP_Point drawPoint = GCP_Point(x,y);
 			if(drawPoint.X+width+offset>BottomRight.X)
-				drawPoint.X -= drawPoint.X+width+offset - BottomRight.X;		
+				drawPoint.X -= drawPoint.X+width+offset - BottomRight.X;
 			if(drawPoint.Y+height+offset>BottomRight.Y)
 				drawPoint.Y -= drawPoint.Y+height+offset - BottomRight.Y;
 			if(drawPoint.X	<	TopLeft.X+offset)
@@ -64,17 +64,17 @@
 		}
 /////////////////////////////////////////////////////////////////////////
 ////////////////////Normalze Point Inside Rect
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 GCP_Point GCP_Math::normalizePointInRect(GCP_Point point, GCP_Point pmin, GCP_Point pmax)
-		{	
-			GCP_Point normPoint;			
+		{
+			GCP_Point normPoint;
 			normPoint.X = max(min(point.X,(double)pmax.X),(double)pmin.X);
 			normPoint.Y = max(min(point.Y,(double)pmax.Y),(double)pmin.Y);
 			return normPoint;
 		}
 /////////////////////////////////////////////////////////////////////////
 ////////////////////Round Double Value
-/////////////////////////////////////////////////////////////////////////		
+/////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::round(double value)
 		{
 			if(GCP_Math::compareDouble(value-floor(value),0.5))
@@ -87,25 +87,26 @@
 		 bool GCP_Math::lineIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double *Px, double *Py, bool round)
 		{
 			//Пересечение двух линий L1(x1,y1,x2,y2) L2(x3,y3,x4,y4) в точке (Px,Py)
-			long double fDevide = (long double)((x1-x2)*(y3-y4)) - (long double)((y1-y2)*(x3-x4));			
+			long double fDevide = (long double)((x1-x2)*(y3-y4)) - (long double)((y1-y2)*(x3-x4));
 			if (fDevide != 0)
 			{
 				long double statmentx = (x3-x4)*((long double)x1*y2 - (long double)y1*x2)
-									   -(x1-x2)*((long double)x3*y4 - (long double)y3*x4);				
+									   -(x1-x2)*((long double)x3*y4 - (long double)y3*x4);
 				*Px =  statmentx / fDevide;
 				long double statmenty = (y3-y4)*((long double)x1*y2 - (long double)y1*x2)
-									   -(y1-y2)*((long double)x3*y4 - (long double)y3*x4);		
+									   -(y1-y2)*((long double)x3*y4 - (long double)y3*x4);
 				*Py = statmenty / fDevide;
 
 				if(round)		{
 					*Px = floor(*Px);
-					*Py = floor(*Py);			
-				}		
+					*Py = floor(*Py);
+				}
 				return true;
 			}
 			else {
-				*Px = NULL; *Py = NULL; return false;
-			}	
+				*Px = 0; *Py = 0;
+				return false;
+			}
 		}
 		 bool GCP_Math::lineIntersection(GCP_Point p11, GCP_Point p12, GCP_Point p21, GCP_Point p22, GCP_Point *R, bool round)
 		{
@@ -116,7 +117,7 @@
 		}
 		 bool GCP_Math::lineIntersection(GCP_Line A, GCP_Line B, GCP_Point *R,bool round)
 		{
-			return lineIntersection(A.pointA,A.pointB,B.pointA,B.pointB, R,round);	
+			return lineIntersection(A.pointA,A.pointB,B.pointA,B.pointB, R,round);
 		}
 /////////////////////////////////////////////////////////////////////////
 ////////////////////Round Double Value
@@ -158,7 +159,7 @@
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-		 bool GCP_Math::compareDouble(double x, double y)		{	
+		 bool GCP_Math::compareDouble(double x, double y)		{
 			//x > y ?
 			double eps = 1e-5;
 			if( x-y > -eps)
@@ -173,22 +174,22 @@
 			return (double)rand()/RAND_MAX;
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////             
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::rnd(const char *dist, double a, double b)
 		{
 			if (strcmp(dist,"norm")==0)
 			{
-				//Подпрограмма нормального распределения - возв СВ по гауссу с МО a и дисп 1.   
-				 double r;
-				double v1,v2,s;
+				//Подпрограмма нормального распределения - возв СВ по гауссу с МО a и дисп 1.
 				while(1)
 				{
+                    double v1,v2,s;
 					v1=(double)(2.*rnd())-1.;
 					v2=(double)(2.*rnd())-1.;
 					s=v1*v1+v2*v2;
 					if((s<=1.)&&(s>0.))
 					{
-					  r=v1*sqrt((-2.)*log(s)/s); //за один раз получаем 2 СВ
+                      //double r;
+					  //r=v1*sqrt((-2.)*log(s)/s); //за один раз получаем 2 СВ
 					  return a+(v2*sqrt((-2.)*log(s)/s));
 					}
 				}
@@ -203,27 +204,27 @@
 			double d;
 			double yd = y1 - y2;
 			double xd = x2 - x1;
-			double atan = atan2(yd, xd);	
+			double atan = atan2(yd, xd);
 			d = (double)(GCP_RADTODEG*atan);			//В градусах
-			return normAngle(d);	
+			return normAngle(d);
 		}
 		double GCP_Math::pointDirection(GCP_Point A, GCP_Point B)
 		{
 			return pointDirection(A.X,A.Y,B.X,B.Y);
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 void GCP_Math::lineRefractionAngle(GCP_Point p11, GCP_Point p12, GCP_Point p21, GCP_Point p22, double N1, double N2, double *refractedAngleOX, double *refractedAngle, int *error)
 		{
 			double alpha = lineAngle(p21,p22);								 // Угол стенки относительно ОX
 			if (alpha < 90) alpha += 180;									 // Берем самый большой наклон
 			double Nalpha = alpha - 90;                                      // Угол нормали к этой стенке
 			double alpha2 = pointDirection(0,0,p12.X-p11.X,p12.Y - p11.Y);   // Угол падающего луча относительно ОX
-			double alpha3 = norm_dir_dif(alpha2,Nalpha);					 // угол падения луча относительно линии 
+			double alpha3 = norm_dir_dif(alpha2,Nalpha);					 // угол падения луча относительно линии
 
 
 			double x = (N1 * ssin(alpha3))/N2;
-			if(x < -1 || x > 1)	{		//wrong asin				
+			if(x < -1 || x > 1)	{		//wrong asin
 				*refractedAngleOX = 0;
 				*refractedAngle = 0;
 				*error =-1;
@@ -235,20 +236,20 @@
 			if(isBelowLine)
 				*refractedAngleOX = Nalpha+180-reflectedAngle;
 			else *refractedAngleOX = Nalpha+reflectedAngle;
-			
+
 			*refractedAngle = abs(reflectedAngle);
 			*error = 1;
 		}
 		 void GCP_Math::lineReflectionAngle(GCP_Point p11, GCP_Point p12, GCP_Point p21, GCP_Point p22, double *reflectedAngleOX, double *reflectedAngle)
 		{
-			double alpha = lineAngle(p21,p22);	
+			double alpha = lineAngle(p21,p22);
 			double Nalpha = alpha + 90;										// Угол нормали к этой стенке OX
 			double alpha2 = pointDirection(0,0,p12.X-p11.X,p12.Y - p11.Y);  // Угол падающего луча относительно ОX
 			*reflectedAngleOX = alpha2 - 2*(alpha2 - Nalpha);				// Угол отражения падающего луча от стенки
 
-			//Угол падения на стенку относительно перпендикуляра к ней	
-			*reflectedAngle = abs(norm_dir_dif(alpha2,Nalpha)); 
-			if(*reflectedAngle > 90) *reflectedAngle = 180 - *reflectedAngle;	
+			//Угол падения на стенку относительно перпендикуляра к ней
+			*reflectedAngle = abs(norm_dir_dif(alpha2,Nalpha));
+			if(*reflectedAngle > 90) *reflectedAngle = 180 - *reflectedAngle;
 		}
 		 void GCP_Math::lineReflectionAngle(GCP_Line A, GCP_Line B, double *d, double *d2)
 		{
@@ -261,29 +262,29 @@
 			return d;
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::pointDistance(double x1, double y1, double x2, double y2)
-		{	
+		{
 			return sqrt(pow(x2-x1,2)+pow(y2-y1,2));	//Расстояние от точки (x1,y1) до точки (x2,y2)
 		}
 		 double GCP_Math::pointDistance(GCP_Point X, GCP_Point Y)
-		{	
-			return pointDistance(X.X,X.Y,Y.X,Y.Y);	
+		{
+			return pointDistance(X.X,X.Y,Y.X,Y.Y);
 		}
 		////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::lineAngle(GCP_Line L)
 		{
 			return lineAngle(L.pointA,L.pointB);
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 void GCP_Math::lineRefractionAngle(GCP_Line L1, GCP_Line L2, double N1, double N2, double *refractedAngleOX, double *refractedAngle, int *error)
 		{
 			lineRefractionAngle(L1.pointA, L1.pointB, L2.pointA, L2.pointB, N1, N2, refractedAngleOX, refractedAngle, error);
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 		// template< class A>
@@ -308,13 +309,13 @@
 		//	}
 		//	if (i<r)
 		//				quickSort<A>(a,i, r, criteria);
-		//   
-		//	if (l<j)   
-		//		quickSort<A>(a,l, j, criteria);    
+		//
+		//	if (l<j)
+		//		quickSort<A>(a,l, j, criteria);
 		//}
 		//
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::ccos(double value)
 		{
 			//GCP_FastTG.InitFSinCosTable();
@@ -322,7 +323,7 @@
 			return cos(GCP_DEGTORAD*value);						//Косинус от значения в градусах
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::ssin(double value)
 		{
 			//GCP_FastTG.InitFSinCosTable();
@@ -330,18 +331,18 @@
 			return sin((double)(GCP_DEGTORAD*value));			//Синус от значения в градусах
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::arcsin(double value)
 		{
 			return asin(value);
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 bool GCP_Math::isPointInLine(GCP_Line line, GCP_Point checkPoint)
-		{	
+		{
 			GCP_Point TopLeft(min(line.pointA.X,line.pointB.X),min(line.pointA.Y,line.pointB.Y));
 			GCP_Point BottomRight(max(line.pointA.X,line.pointB.X),max(line.pointA.Y,line.pointB.Y));
-			return isPointInRect(TopLeft,BottomRight,checkPoint);	
+			return isPointInRect(TopLeft,BottomRight,checkPoint);
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -350,7 +351,7 @@
 			return isPointInRect(GCP_Point(pointB.X-dist/2,pointB.Y-dist/2),GCP_Point(pointB.X+dist/2,pointB.Y+dist/2),pointA);
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::normAngle(double value)
 		{
 			value = fmod(value,360);		//Нормировка угла в отрезок [0,360)
@@ -364,7 +365,7 @@
 			return value;
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 string GCP_Math::normAngleS(double value)
 		{
 			int degree = (int)floor(value);
@@ -372,25 +373,25 @@
 			int minutes = (int)floor(tempvalue);
 			int seconds = (int)floor(60 * (tempvalue-minutes));
 
-			return intToString(degree)+"'"+intToString(minutes)+"'"+intToString(seconds);		
+			return intToString(degree)+"'"+intToString(minutes)+"'"+intToString(seconds);
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 double GCP_Math::norm_dir_dif(double dir1, double dir2)
 		{
 			double dif  = (double)dir1-dir2;											//Кратчайшее расстояние от направления dir1 к направлению dir2
-			if (dif > 180) {return(dif - 360);}											//Пример: из направления 90 в направлениее 300/-60 =  -150  
+			if (dif > 180) {return(dif - 360);}											//Пример: из направления 90 в направлениее 300/-60 =  -150
 			if (dif < -180) {return(dif + 360);}										//Пример: из направления 90 в направлениее 240/-120 =  150
 			return dif; //if (dif<=180 && dif>=-180) {return dif;}
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////
 		 /* reverse:  переворачиваем строку s на месте */
  void gcp_reverse(char s[])
  {
      int i, j;
      char c;
- 
+
      for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
          c = s[i];
          s[i] = s[j];
@@ -401,7 +402,7 @@
  void gcp_itoa(int n, char s[])
  {
      int i, sign;
- 
+
      if ((sign = n) < 0)  /* записываем знак */
          n = -n;          /* делаем n положительным числом */
      i = 0;
@@ -412,9 +413,9 @@
          s[i++] = '-';
      s[i] = '\0';
      gcp_reverse(s);
- } 
+ }
 
- 
+
 		 string GCP_Math::intToString(int value)
 		{
 			 char buff[256];
@@ -425,19 +426,20 @@
 		 string GCP_Math::doubleToString(double value)
 		{
 			char buffer[32];
-			
-			#ifdef __WIN32__
+            sprintf (buffer, "%g", value);
+            //gcp_itoa(value,buffer);
+			/*#ifdef __WIN32__
 				sprintf_s(buffer,32, "%g", value);
 			#else
 				//snprintf(buffer, sizeof(buffer), "%.10g", value);
 				//sprintf_s(buffer,32, "%g", value);
 				sprintf (buffer, "%g", 8, value);
 				gcp_itoa(value,buffer);
-			#endif
-				
-			string str(buffer);			
+			#endif*/
+
+			string str(buffer);
 			return str;
-		}	
+		}
 		int GCP_Math::stringToInt(char* str)
 		{
 			return atoi(str);
@@ -453,7 +455,7 @@
 			for(unsigned int i=0; i<vector->size(); i++)
 			{
 				if(vector->at(i) == sTextIn)
-					return i;		
+					return i;
 			}
 			return -1;
 		}
@@ -465,17 +467,19 @@
 			char xx[50]; int i=0, j=0, k=0;
 			bool isExpectE = false;
 			int iPointJ = 0;
-			
+
 			while(strline[i] != '\0'){
 				while(strline[i]!= separator ){
-					if(strline[i]>='0' && strline[i]<='9' || strline[i]=='-'){
+					if((strline[i]>='0' && strline[i]<='9')
+                        || strline[i]=='-')
+                    {
 						xx[j] = strline[i];
-						j++; 
+						j++;
 					}
-					i++; 
-					
+					i++;
+
 					//Встретили точку
-					if(strline[i]=='.')			
+					if(strline[i]=='.')
 					{
 						i++;					//Предположим, мы считываем формат вида 1.24317e+006
 						isExpectE = true;
@@ -505,7 +509,7 @@
 							xx[j]='0'; j++;
 						}
 						isExpectE = false;
-					}					
+					}
 				}
 
 				//На случай если мы встретили точку, но не встретили потом e
@@ -581,7 +585,7 @@
 		 void GCP_Math::Font_StrToEng(string sTextIn, char* sTextOut,bool special_symbols)
 		{
 			string *RusToEng =	GCP_Math::DefineRusToEng();
-			unsigned int i,j; 
+			unsigned int i,j;
 			for(i=0,j=0; i<sTextIn.size(); i++,j++)
 			{
 				if ((sTextIn[j]=='\\')&&(sTextIn[j+1]=='n'))
@@ -615,7 +619,7 @@
 							sTextOut[i+2] = 'm';
 							sTextOut[i+3] = 'p';
 							sTextOut[i+4] = ';';
-							i+=4;					 //&amp;					
+							i+=4;					 //&amp;
 						}
 						else
 						{
@@ -631,14 +635,14 @@
 			RusToEng = NULL;
 		}
 
-	
 
-		string GCP_Math::RUSCP1251_TO_WCHAR(wchar_t* str)
+
+		string GCP_Math::RUSCP1251_TO_WCHAR(const wchar_t* str)
 		{
 			/*АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯ*/
 			/*"абвгдеёжзийклмнопрстуфхцчшщьыъэюя1234567890"*/
 			/*"!@#$%^&*()_+{}[]\":';\\.№?"*/
-			
+
 			wstring s = str;
 			int value;
 			char buffer[10000];
@@ -646,11 +650,11 @@
 				buffer[i] = '1';
 			string out=buffer;
 
-			
+
 			int k=0;
 			int shift = 1152;
 			char a = -48;
-			for(int i=0; i< s.size(); i++)
+			for(unsigned int i=0; i< s.size(); i++)
 			{
 				value = str[i];
 
@@ -660,16 +664,16 @@
 				else
 				{
 					a = -48;
-					shift = 1152;	
+					shift = 1152;
 					char b = value-shift;
 					if(value >= 1088){
 						a = -47;
 						shift = 1216;
 						if(value==1105) //"ё"
-							b = -111;						
-						b = value-shift;						
+							b = -111;
+						b = value-shift;
 					}
-					
+
 					if(value==8470)//"№"
 					{
 						a = -30;
@@ -689,24 +693,24 @@
 			out[k] = '\0';
 			return out;
 		}
-		string GCP_Math::RUSCP1251_TO_WCHAR(char* str)
+		string GCP_Math::RUSCP1251_TO_WCHAR(const char* str)
 		{
 			/*АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯ*/
 			/*"абвгдеёжзийклмнопрстуфхцчшщьыъэюя1234567890"*/
 			/*"`~!@#$%^&*()_+{}[]\":';\\.№?"*/
-		
+
 			string s = str;
 			int value;
 			char *buffer;
 			buffer = new char[s.size()*3+1];
-		
+
 			string out;
 
-			
+
 			int k=0;
 			int shift = 1152;
 			char a = -48;
-			for(int i=0; i< s.size(); i++)
+			for(unsigned int i=0; i< s.size(); i++)
 			{
 				value = str[i];
 
@@ -716,7 +720,7 @@
 				else
 				{
 					a = -48;
-					shift = -a;	
+					shift = -a;
 					if(value >= -16)
 					{
 						a = -47;
@@ -726,21 +730,21 @@
 					if(value < -64 && value != -88){
 						a = -47;
 						shift = -a;
-						
 
-						b = value-shift;	
+
+						b = value-shift;
 						if(value == -72) //"ё"
 							b = -111;
-						
+
 					}
 
-					
+
 
 					if(value == -88) //"Ё"
 						b = -127;
-									
-					
-					
+
+
+
 					if(value==-71)//"№"
 					{
 						a = -30;
@@ -780,7 +784,7 @@
 			RusToEng[300+'К']= 'K';	RusToEng[300+'к']= 'k';
 			RusToEng[300+'Л']= 'L';	RusToEng[300+'л']= 'l';
 			RusToEng[300+'М']= 'M';	RusToEng[300+'м']= 'm';
-			RusToEng[300+'Н']= 'N';	RusToEng[300+'н']= '#'; 
+			RusToEng[300+'Н']= 'N';	RusToEng[300+'н']= '#';
 			RusToEng[300+'О']= 'O';	RusToEng[300+'о']= 'o';
 			RusToEng[300+'П']= 'P';	RusToEng[300+'п']= 'p';
 			RusToEng[300+'Р']= 'Q';	RusToEng[300+'р']= 'q';
@@ -825,13 +829,13 @@
 			RusToEng[300+' ']= ' ';
 			RusToEng[300+'"']= '"';
 			RusToEng[300+'*']= '*';
-			RusToEng[300+'\'']= '\'';	
+			RusToEng[300+'\'']= '\'';
 			RusToEng[300+'/']= '/';
-			RusToEng[300+'\\']= '\\';	
+			RusToEng[300+'\\']= '\\';
 			return RusToEng;
 		}
 
-	
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 

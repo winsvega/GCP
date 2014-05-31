@@ -4,12 +4,12 @@
 template <class T>
 class GCP_SPointer;
 class GCP_SPointerBase
-{	
+{
 	private:
-		bool _isEmpty;
-		int  _nRef;	
+	    int  _nRef;
+	    bool _isEmpty;
 		void AddRef() 	{	_nRef++;	}
-		int DelRef()	{	_nRef--;		return _nRef;	}	
+		int DelRef()	{	_nRef--;		return _nRef;	}
 	public:
 		GCP_SPointerBase(): _nRef(0),_isEmpty(false){}
 		template <class T>
@@ -17,47 +17,47 @@ class GCP_SPointerBase
 };
 
 template <class T>
-class GCP_SPointer 
+class GCP_SPointer
 {
 	private:
 		T* _pointee;
 		void release(){
-			if(_pointee != NULL)			{		
+			if(_pointee != NULL)			{
 				assert(_pointee->_nRef > 0);
 				if(_pointee->DelRef()==0)				{
-					delete _pointee; 
+					delete _pointee;
 					_pointee=NULL;
-				}			
+				}
 			}
 		}
 
 	public:
 		explicit GCP_SPointer() : _pointee(NULL){}
 		GCP_SPointer(int n) : _pointee(NULL){}
-		explicit GCP_SPointer(T* pointee) : _pointee(pointee) 	
+		explicit GCP_SPointer(T* pointee) : _pointee(pointee)
 		{
 			if(pointee!=NULL)
 			{
 				if (!(_pointee->_isEmpty))
-					_pointee->AddRef();			
+					_pointee->AddRef();
 				else
 					_pointee = NULL;
 			}
 		};
         GCP_SPointer(GCP_SPointer const& pnt): _pointee(NULL) {
-			release();			
+			release();
 			_pointee = pnt.getPointer();
 			if(_pointee != NULL)
 			{
-				if (!(_pointee->_isEmpty))				
+				if (!(_pointee->_isEmpty))
 					_pointee ->AddRef();
-				else 
+				else
 					_pointee = NULL;
 			}
 		}
-			
+
 		T* getPointer() const  {return _pointee;}	//ќпасно отдавать указатель наружу!
-	
+
 
         GCP_SPointer& operator=(GCP_SPointer const &rhs)			//ѕрисваиваем один указатель другому
         {
@@ -74,7 +74,7 @@ class GCP_SPointer
 
 		~GCP_SPointer(){		release();				};
 
-		
+
 		void setEmpty(bool empty)
 		{
 			//«астваить все окружение и все смартпоинтеры думать, что класс удален (потом пожно отключить)
@@ -85,17 +85,17 @@ class GCP_SPointer
 			}
 		}
 
-		bool isEmpty()		
+		bool isEmpty()
 		{
-			if(_pointee != NULL)			
+			if(_pointee != NULL)
 				return  _pointee->_isEmpty;
 
 			return true;
 		}
-				
+
 		//оператор *
 		T& operator*() const	{	return *_pointee;	}
-	
+
 		//оператор ->
 		T* operator->() const	{	return _pointee;	}
 
@@ -103,13 +103,13 @@ class GCP_SPointer
 		operator T* ()	{	return _pointee;	}
 
 		/*template <class D>
-		operator GCP_SPointer<D> () 
+		operator GCP_SPointer<D> ()
 		{
 			GCP_SPointer<D> sliced = GCP_SPointer<D>(static_cast<D>_pointee);
 			return sliced;
 		}*/
 
-		//оператор вз€ти€ адреса 
+		//оператор вз€ти€ адреса
 		//T** operator& () {	return &_pointee;	}
 
 		//операторы сравнени€

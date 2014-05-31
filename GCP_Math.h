@@ -1,17 +1,18 @@
 #ifndef GCP_MathH
 #define GCP_MathH
- 
+
 #include <string.h>
 #include <sstream>
+#include <stdlib.h>
 #include <cmath>
-#include <cstdio> 
+#include <cstdio>
 #include <ctype.h>
 #include "GCP_Vector.h"
 const double GCP_RADTODEG = (double)180/3.14;
 const double GCP_DEGTORAD = (double)3.14/180;
 using namespace std;
 #include "GCP_Delegate.h"
-//typedef enum {false, true} bool; 
+//typedef enum {false, true} bool;
 //#define bool int
 //#define true 1
 //#define false 0
@@ -23,12 +24,12 @@ using namespace std;
 /////////////////////////////////////////////////////////////////////////
 struct GCP_Point
 {
-	double X,Y;		
+	double X,Y;
 	//GCP_Point(int x, int y) {X = x; Y = y;}
 	GCP_Point(double x, double y) {X = x; Y = y;}
 	GCP_Point(int x, int y) {X = (double)x; Y = (double)y;}
 	GCP_Point(){};
-	GCP_Point(GCP_Point* point) 
+	GCP_Point(GCP_Point* point)
 	{
 		X = point->X;
 		Y = point->Y;
@@ -69,15 +70,15 @@ class GeneticSpecies
 class GCP_Math
 {
 	public:
-		static string RUSCP1251_TO_WCHAR(wchar_t* str);
-		static string RUSCP1251_TO_WCHAR(char* str);
+		static string RUSCP1251_TO_WCHAR(const wchar_t* str);
+		static string RUSCP1251_TO_WCHAR(const char* str);
 		static bool isPointBelowLine(GCP_Point P, GCP_Line L);
 		static bool isInRadius(double x1,double y1, double x2, double y2, double r);
 		static bool isInRect(double pointX, double pointY, double rectTopx, double rectTopy, double rectWidth, double rectHeight);
 		static bool isPointInRect(GCP_Point TopLeft, GCP_Point BottomRight, GCP_Point point);
 		static double lineAngle(GCP_Point p11, GCP_Point p12);
 		static GCP_Point normalizeRectInRect(GCP_Point TopLeft, GCP_Point BottomRight, double x, double y, int width, int height, int offset);
-		static GCP_Point normalizePointInRect(GCP_Point point, GCP_Point pmin, GCP_Point pmax);		
+		static GCP_Point normalizePointInRect(GCP_Point point, GCP_Point pmin, GCP_Point pmax);
 		static double round(double value);
 		static bool lineIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double *Px, double *Py, bool round);
 		static bool lineIntersection(GCP_Point p11, GCP_Point p12, GCP_Point p21, GCP_Point p22, GCP_Point *R, bool round);
@@ -117,7 +118,7 @@ class GCP_Math
 					i++;
 					if(i >= Text.size())
 						break;
-					str = Text.at(i);				
+					str = Text.at(i);
 				}
 				strings->push_back(line);
 				i++;
@@ -148,9 +149,9 @@ class GCP_Math
 			}
 			if (i<r)
 						quickSort(a,i, r, criteria);
-		   
-			if (l<j)   
-				quickSort(a,l, j, criteria);  
+
+			if (l<j)
+				quickSort(a,l, j, criteria);
 		}
 		static double ccos(double value);
 		static double ssin(double value);
@@ -177,9 +178,9 @@ class GCP_Math
 					flag = 1;
                     if(strstr("+_-/*!@#$%^&()¹;:?{}[]|'\\~\"",s)!=NULL)
 						flag = 0;
-					
+
 				}
-				
+
 				i++;
 			}
 			if (flag == 1) return true;
@@ -194,7 +195,7 @@ class GCP_Math
 		static string Font_StrToEng(string text);
 		static void Font_StrToEng(string sTextIn, char* sTextOut,bool special_symbols);
 		static string* DefineRusToEng();
-		
+
 		///////////// Genetic /////////////
 		int bin2dec(const string* binary);
         int bin2dec(const char* binary);
@@ -213,7 +214,7 @@ class GCP_Math
 		{
 			IContainer* func = new  Container< T, U > ( i_class, i_method);
 
-			GCP_Vector<GeneticSpecies*> generation;	
+			GCP_Vector<GeneticSpecies*> generation;
 			GCP_Vector<GeneticSpecies*> next_generation;
 			for(int i=0; i<populationsize; i++){
 				GeneticSpecies *specie = new GeneticSpecies();
@@ -221,7 +222,7 @@ class GCP_Math
 				specie->result = 1;
 			    generation.push_back(specie);
 			}
-			
+
 			//Iteration
 			int iK=0,spawn=0;
 			double dBestResult = (int)func->Call((void*)&baseInput);
@@ -236,17 +237,17 @@ class GCP_Math
                     if (obj->result < dBestResult)
                        dBestResult = obj->result;
                 }
-							
+
 				//Clear previous pointers
 				for(int i=0; i<next_generation.size(); i++)
 					delete next_generation.at(i);
 				next_generation.clear();
-				
-				iK = 0;	
+
+				iK = 0;
                 for (int i = 0; i < generation.size(); i++)
-                {                   			
+                {
                     if (generation.at(i)->result <= dBestResult)
-                    {						
+                    {
 						int iRandomElement = GCP_Math::rnd()*(generation.size()-1);
 						GeneticSpecies *obj = new GeneticSpecies();
 						obj->result =  generation.at(i)->result;
@@ -257,20 +258,20 @@ class GCP_Math
 						obj->result =  (int)func->Call((void*)&obj->values);
 
 						if(obj->result < generation.at(i)->result)
-							next_generation.push_back(obj);	
-						else 
-						{							
+							next_generation.push_back(obj);
+						else
+						{
 							obj->result =  generation.at(i)->result;
 							obj->values =  generation.at(i)->values;
-							next_generation.push_back(obj);							
-						}						
-                        iK++; 
+							next_generation.push_back(obj);
+						}
+                        iK++;
                     }
                 }
 
 				//Clear previous pointers
 				for(int i=0; i<generation.size(); i++)
-					delete generation.at(i);				
+					delete generation.at(i);
 				generation.clear();
 
 				for(int i=0; i<next_generation.size(); i++)
@@ -282,9 +283,9 @@ class GCP_Math
 				}
                 spawn++;
             } while (iK > 1 && spawn < 100);
-			
-			
-			int minResult = 500000;	//! MAX REWARD 
+
+
+			int minResult = 500000;	//! MAX REWARD
 			int minResultIndex = -1;
 			for(int i=0; i<generation.size(); i++)
 			{
@@ -301,13 +302,13 @@ class GCP_Math
 			if (iRandomElement > -1 && iRandomElement < generation.size())
 				RetVal = generation.at(iRandomElement)->values;
 			else RetVal = baseInput;
-			
+
 			//Clear All pointers
 			for(int i=0; i<generation.size(); i++)
 					delete generation.at(i);
 			for(int i=0; i<next_generation.size(); i++)
 					delete next_generation.at(i);
-					
+
 			generation.clear();
 			next_generation.clear();
 			delete func;
