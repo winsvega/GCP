@@ -6,16 +6,15 @@ GCP_Label::GCP_Label()	{
 	
 }
 
-void GCP_Label::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh)
+void GCP_Label::OnDraw(const GCP_Event &event)
 {
 	//isVisible = false;
-	if(!isVisible)
+	if(!isVisible())
 		return;						
 	
-	string fontPath = getFont();
-	if(fontPath != "")
-		GCP_Draw::renderText(text,xPos,yPos,screen,&drawdata,getStyle()->cTextColor,fontPath.c_str(),14);
+   const GCP_Rect pos = getPosition();
+   GCP_Draw::Render()->Draw_Text(text, pos.x(), pos.y(), getStyle(), &drawdata);
 	
-	basicOnDraw(screen, formx, formy, formw, formh);
+	basicOnDraw(event);
 
 }

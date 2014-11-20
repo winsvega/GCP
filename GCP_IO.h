@@ -110,7 +110,7 @@ class GCP_IO
 		void writeString(string value)
 		{			
 			char str[256];
-			strncpy(str,value.c_str(),255);	
+			strncpy_s(str,value.c_str(),255);	
 
 			if(GCP_IO_OUTPUTTXT == _iMode)
 			{

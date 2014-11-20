@@ -4,70 +4,59 @@
 GCP_Button::GCP_Button(){
 	iType = GCP_BUTTON_SHARPRECT;		//праметр - какие у кнопки углы
 	checked = false;					//состояние кнопки если нажата
-	setStyle(&defStyles.defaultbuttonStyle);
+	setStyle(GCP_ButtonWhiteStyle);
 }
 
-void GCP_Button::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh)
+void GCP_Button::OnDraw(const GCP_Event &event)
 {
-	if(!isVisible)
+	if(!isVisible())
 		return;
 
-	GCP_Color cTColor=getStyle()->cTextColor, cBColor=getStyle()->cBackColor;
+   gcp_spStyle ptrStyle = getStyle();
+   GCP_Color cTColor = ptrStyle->textColor;
+   GCP_Color cBColor = ptrStyle->backgroundColor;
 
 	//Цвета тоже надо в структуру сделать
-	if(_isMouseOver){
-			cBColor = getStyle()->cBackColorHover;
-			cTColor = getStyle()->cTextColorHover;					
-		}
-
+	if(_isMouseOver)
+   {
+         cBColor = ptrStyle->backgroundMouseHoverColor;
+         cTColor = ptrStyle->textMouseHoverColor;
+	}
+   
 	if(checked)
-		cBColor = getStyle()->cBackColorHover;
+      cBColor = ptrStyle->backgroundMouseHoverColor;
 
 	//Если кнопке присвоен файлик с иконкой 
 	if(icon != "")			{
 		//Рисуем контур
 		if(iType==GCP_BUTTON_ROUNDRECT)
-			GCP_Draw::Draw_FillRound(screen,xPos,yPos,width,height,getStyle()->iRoundCff,cBColor);
+         GCP_Draw::Render()->Draw_FillRound(_position, ptrStyle->roundCff, cBColor);
 		if(iType==GCP_BUTTON_SHARPRECT)
-			GCP_Draw::Draw_FillRect(screen,xPos,yPos,width,height,cBColor);
+         GCP_Draw::Render()->Draw_FillRect(_position, cBColor);
 
-		SDL_Surface *bmp = SDL_LoadBMP(icon.c_str());	
-		if(bmp != NULL){
-			//SDL_Rect recta = {(Sint16)xPos+2,(Sint16)yPos+2,width,height}; 
-			//SDL_BlitSurface( hello, NULL, screen, &recta );
-			//грузим картинку в текстуру и выводим ее на буфер
-			SDL_Texture *tex = SDL_CreateTextureFromSurface(screen, bmp);
-			GCP_Draw::applySurface(xPos+2,yPos+2,tex,screen);
-			SDL_FreeSurface( bmp );
-			SDL_DestroyTexture(tex); //Create texture should be once !!!!!!!!! not dynamic!!!!!
-			//!!!!!!!  создание текстуры и загрузка картинки каждый раз это затратно
-			//!!!!!!!  надо делать это один раз, а потом просто выводить текстуру на буффер
-		}
-		else
-		{
-			//Картинка не загрузилась
-		}
+      GCP_Draw::Render()->Draw_Image(icon, _position.x() + 2, _position.y() + 2);
 	}
 	else			{
 		//Просто выводим надпись
 		string sCaption = getCaption();
 		if(iType==GCP_BUTTON_ROUNDRECT)
 		{
-			GCP_Draw::Draw_FillRound(screen,xPos,yPos,width,height,getStyle()->iRoundCff,cBColor);
-			GCP_Draw::Draw_Round(screen,xPos,yPos,width,height,getStyle()->iRoundCff, getStyle()->cBorderColor);
+         GCP_Draw::Render()->Draw_FillRound(_position, ptrStyle->roundCff, cBColor);
+         GCP_Draw::Render()->Draw_Round(_position, ptrStyle->roundCff, ptrStyle->borderColor);
 		}
 		if(iType==GCP_BUTTON_SHARPRECT)
 		{
-			GCP_Draw::Draw_FillRect(screen,xPos,yPos,width,height,cBColor);	
-			GCP_Draw::Draw_Rect(screen,xPos,yPos,width,height,getStyle()->cBorderColor);
+         GCP_Draw::Render()->Draw_FillRect(_position, cBColor);
+         GCP_Draw::Render()->Draw_Rect(_position, ptrStyle->borderColor);
 		}
-		string font = getFont();
-		if(font != "")
-		GCP_Draw::renderText(sCaption,xPos+3,yPos+3,screen,&drawdata,cTColor,font,14);
-		//TTF_CloseFont(font);
+		
+      gcp_spStyle color = gcp_spStyle(new GCP_Style());
+      color->textColor = cTColor;
+      color->font = ptrStyle->font;
+      GCP_Draw::Render()->Draw_Text(sCaption,_position, color, &drawdata);
 	}
 
 	//Базовый метод он драв для всех компоннт
-	basicOnDraw(screen, formx, formy, formw, formh);
+	basicOnDraw( event);
 }	
 

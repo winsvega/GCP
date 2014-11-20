@@ -30,24 +30,25 @@
 #define GCP_MainH
 #include "GCP_Form.h"
 #include "GCP_Button.h"
-#include "SDL_ttf.h"
 #include "SDL.h"
 
 class GCP_Controller: public GCP_SPointerBase
 {
-	protected:
-		SDL_Renderer *_screen;				//то на что рисуем. надо бы определить структуру. ведь рисовать мы можем на сдл а можем и на что-то совсем другое 
-		int _width, _height;				//размер буфера экрана. некоторые системы валятся если пробуешь нарисовать за буфер. GCP будет учитывать это.
-		GCP_SPointer<GCP_Form> _mainForm;				//Главная форма интерфейса
-		bool _isLeftHold;					//переключатель для события драг ен дроп
-		string _sFontDir;					//путь к шрифту для TTF
+	protected:		
+		int _width, _height;				      //размер буфера экрана. некоторые системы валятся если пробуешь нарисовать за буфер. GCP будет учитывать это.
+		GCP_SPointer<GCP_Form> _mainForm;	//Главная форма интерфейса
+		bool _isLeftHold;					      //переключатель для события драг ен дроп      
 	public: 
 		GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height);	
 		~GCP_Controller();
 		void setFont(string directory_path_string);
-		GCP_SPointer<GCP_Form> createForm(SDL_Renderer* screen);
+		GCP_SPointer<GCP_Form> createForm();
 		void handleEvents(SDL_Event event);
-		void draw();
+		void draw();      
+      void deInit()
+      {
+         GCP_Draw::DeInit();
+      }
 };
 
 

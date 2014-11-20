@@ -2,13 +2,11 @@
 #include "GCP_Form.h"
 #include "GCP_Button.h"
 
-
+string GCP_Draw::_sDefaultFontPath = "";
 GCP_Controller::GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height)
-{
-	GCP_Draw::initConstants();	//дело в том что константы вне функкций почему то не объ€вл€ютс€ на некоторых компил€торах
-	GCP_FormComponent::initStyles();
-	TTF_Init();
-	_screen = sdlRenderer;
+{	
+   GCP_Draw::InitSDL2(sdlRenderer);   
+
 	_width = width;
 	_height = height;
 	_mainForm = 0;
@@ -17,94 +15,120 @@ GCP_Controller::GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height)
 
 GCP_Controller::~GCP_Controller()
 {
-	TTF_Quit();
-	//if(_mainForm != NULL)
-	//	delete _mainForm;
+   GCP_Draw::DeInit();
 }
 
-//FormComponent.cpp
-string SStyle::sFontDir = "";
-defaultStyles defStyles = defaultStyles();
-void GCP_Controller::setFont(string directory_path_string)
+
+void GCP_Controller::setFont(string sFontPath)
 {
-	_sFontDir = directory_path_string;						//путь к файоу шрифтов
-	SStyle::sFontDir = _sFontDir;
-	//defaultMenuStyle->sFontDir = _sFontDir;
-	//GCP_FormComponent::_szukoZapomniUjeDirToYourFont = _sFontDir;
+   GCP_Draw::setFontPath(GCPE_FontType::E_ARIAL, sFontPath);   
 }
 
-GCP_SPointer<GCP_Form> GCP_Controller::createForm(SDL_Renderer* screen)
+GCP_SPointer<GCP_Form> GCP_Controller::createForm()
 {
-	_mainForm =GCP_SPointer<GCP_Form>(new GCP_Form(screen, _width, _height));
-	//_mainForm->setFont(_sFontDir);							//сейчас форма передает этот путь всем своим компонентам
+	_mainForm = GCP_SPointer<GCP_Form>(new GCP_Form(_width, _height));
 	_mainForm->setBufferSize(_width,_height);
 	return _mainForm;
 }
 
 void GCP_Controller::handleEvents(SDL_Event event)
 {
-	sdl_events evt;											//ќбработка событий от SDL
-	evt.mousex = _mainForm->mouse_x;
-	evt.mousey = _mainForm->mouse_y;
-	evt.isPassingOnlyGlobalEvent = false;
+   //ќбработка событий от SDL
+   GCP_Event baseEvent;
+   baseEvent.eventType = GCP_EVENT_NONE;
+   baseEvent.mousex = _mainForm->mouse_x;
+   baseEvent.mousey = _mainForm->mouse_y;   
+   baseEvent.isPassingOnlyGlobalEvent = false;
 
-	if( event.type == SDL_QUIT ) {}
+  	if( event.type == SDL_QUIT ) {}
+
 	switch(event.type)
 	{
 		case SDL_KEYDOWN:
-			evt.keyboard = event.key;
-			_mainForm->OnEvent(GCP_ON_GKEYDOWN,evt); break;
+         baseEvent.eventType = GCP_ON_KEYDOWN;
+         //evt.keyboard = event.key;
+         _mainForm->OnEvent(baseEvent);
+         break;			
+
 		//case SDL_TEXTEDITING:
-		//	_mainForm->OnTextEdit(event.edit);	break;
+		      //	_mainForm->OnTextEdit(event.edit);	break;
+
 		case SDL_TEXTINPUT:
-			_mainForm->OnTextInput(event.text);	break;
+			   //_mainForm->OnTextInput(event.text);	break;
+
 		case SDL_MOUSEMOTION:
-			evt.mousex = event.motion.x;
-			evt.mousey = event.motion.y;
-			evt.mousemotion = event.motion;
-			_mainForm->OnEvent(GCP_ON_MOUSE_GMOTION,evt);
-			if (_isLeftHold)
-				_mainForm->OnMouseGlobalLeftHoldMotion(event.motion);
+         baseEvent.eventType = GCP_ON_MOUSE_GMOTION;
+         baseEvent.mousex = event.motion.x;
+         baseEvent.mousey = event.motion.y;
+         baseEvent.iMouseXRel = event.motion.xrel;
+         baseEvent.iMouseYRel = event.motion.yrel;
+			//evt.mousemotion = event.motion;
+         _mainForm->OnEvent(baseEvent);
+         if (_isLeftHold)
+         {
+            GCP_Event evt = baseEvent;
+            evt.eventType = GCP_ON_MOUSE_GLHMOTION;
+            _mainForm->OnMouseGlobalLeftHoldMotion(evt);
+         }
 			break;
+
 		case SDL_MOUSEWHEEL:
-			evt.mouswheel = event.wheel;
-
-			if(event.wheel.y >= 0)
-				_mainForm->OnEvent(GCP_ON_WHELL_GUP,evt);
+         if (event.wheel.y >= 0)
+            baseEvent.eventType = GCP_ON_WHELL_GUP;
 			else
-				_mainForm->OnEvent(GCP_ON_WHELL_GDOWN,evt);
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			  evt.mousex = event.button.x;
-			  evt.mousey = event.button.y;
-			  evt.mousebutton = event.button;
+            baseEvent.eventType = GCP_ON_WHELL_GDOWN;
 
-			  _mainForm->OnEvent(GCP_ON_MOUSE_GDOWN,evt);
+         _mainForm->OnEvent(baseEvent);
+			break;
+
+		case SDL_MOUSEBUTTONDOWN:
+           baseEvent.mousex = event.button.x;
+           baseEvent.mousey = event.button.y;
+			  //evt.mousebutton = event.button;
+           baseEvent.eventType = GCP_ON_MOUSE_GDOWN;
+           _mainForm->OnEvent(baseEvent);
+
 			  if (event.button.button == SDL_BUTTON_LEFT){
-					_mainForm->OnEvent(GCP_ON_MOUSE_GLDOWN,evt);
+               GCP_Event evt = baseEvent;
+               evt.eventType = GCP_ON_MOUSE_GLDOWN;
+					_mainForm->OnEvent(evt);
 					_isLeftHold = true;
 				}
+
 			break;
 		case SDL_MOUSEBUTTONUP:
-				evt.mousex = event.button.x;
-				evt.mousey = event.button.y;
-				evt.mousebutton = event.button;
+            baseEvent.mousex = event.button.x;
+            baseEvent.mousey = event.button.y;
+				//evt.mousebutton = event.button;
+            baseEvent.eventType = GCP_ON_MOUSE_GUP;
+            _mainForm->OnEvent(baseEvent);
 
-				_mainForm->OnEvent(GCP_ON_MOUSE_GUP,evt);
+            if (event.button.button == SDL_BUTTON_RIGHT)
+            {
+               GCP_Event evt = baseEvent;
+               evt.eventType = GCP_ON_GRIGHT_CLICK;
+               _mainForm->OnEvent(evt);
+            }
 
-				if( event.button.button == SDL_BUTTON_RIGHT )
-					_mainForm->OnEvent(GCP_ON_GRIGHT_CLICK,evt);
-				if( event.button.button == SDL_BUTTON_LEFT ) {
-					_mainForm->OnEvent(GCP_ON_GLEFT_CLICK,evt);
+				if( event.button.button == SDL_BUTTON_LEFT ) 
+            {
+               GCP_Event evt = baseEvent;
+               evt.eventType = GCP_ON_GLEFT_CLICK;
+               _mainForm->OnEvent(evt);
 					_isLeftHold = false;
 				}
+
 			break;
-	}
+	}  
 }
+
 
 void GCP_Controller::draw()
 {
-	_mainForm->OnDraw(_screen,_width,_height);
+   GCP_Event drawEvent;
+   drawEvent.eventType = GCP_ON_GDRAW;
+   drawEvent.drawRect = GCP_Rect(0, 0, _width, _height);
+   _mainForm->OnDraw(drawEvent);
 }
 
 

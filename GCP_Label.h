@@ -10,7 +10,7 @@ class GCP_Label: public GCP_FormComponent
 
 		GCP_Label();
 
-		void OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh);
+      void OnDraw(const GCP_Event &event);
 };
 
 #endif

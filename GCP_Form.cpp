@@ -5,7 +5,7 @@
 #include "GCP_Form.h"
 #include "GCP_MessageBox.h"
 
-GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
+GCP_Form::GCP_Form(int _width, int _height)
 {
 	_componentThatWasLeftClicked = 0;			//код указателя на компонент по которому мы кликнули
 	_isLocked = false;							//заблокирована форма?
@@ -13,22 +13,19 @@ GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
 	isLocalEventsLocked = false;				//заблокировать обработку локальных событий на форме?
 	isDraggingSomeComponent = false;			//перетаскивается ли компонент в данный момент?
 	isTransparent = false;						//Рисовать форму прозрачно поверх других?
-	isDragable = true;							//Можно ли таскать форму по буферу или другой форме?
+	_isDragable = true;							//Можно ли таскать форму по буферу или другой форме?
 	iPosition = 0;
 
 	isParentLocking = false;					//Блокировать родительскую форму если работает эта форма
-	isVisible = true;							//Можно вообще форму не рисовать
+	_isVisible = true;							//Можно вообще форму не рисовать
 	isShowTopRightButtons = true;				//Показывать крестики нолики в правом верхнем углу
-	xPos = 0; yPos = 0;							//Верхний левый угол
-	width = _width;								//Ширина
-	height = _height;							//Высота
-	_swidth = _width;							//Ширина буфера на котором рисуем
+   setPosition(0, 0, _width, _height);
+	_swidth = _width;							   //Ширина буфера на котором рисуем
 	_sheight = _height;							//Высота буфера на котором рисуем
-	sdlRenderer = screen;
 	//_sdlPixelFormat = screen->format;
 	_isContextMenuOpened = false;				//Открыто ли контекстное меню  на форме?
 	isLocked = false;							//Можно заблокировать обработку компонент на форме
-	setStyle(&defStyles.defaultFormStyle);
+	setStyle(GCP_DefaultStyle);
 
 	//cBackColor = c_white;						//Цвет задника
 	//colorHeadMenuBackground = c_black;			//Фон верхней полоски
@@ -38,17 +35,17 @@ GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
 
 	//Крестики нолики
 	formTopRightButtons = GCP_SPointer<GCP_ContextMenu>(new GCP_ContextMenu());
-	formTopRightButtons->setPosition(xPos+width-20,yPos+5);
+   formTopRightButtons->setPosition(_position.x() + _position.width() - 20, _position.y() + 5);
 	formTopRightButtons->iType = GCP_MENU_MHORIZONTAL;
 	formTopRightButtons->isContextMenuBlocking = false;			//Меню не блокирует другие компоненты на форме
-	formTopRightButtons->setStyle(&defStyles.defaultMenuStyle);
+	formTopRightButtons->setStyle(GCP_ButtonWhiteStyle);
 	formTopRightButtons->setVisible(true);
 
 
 	xbutton = GCP_SPointer<GCP_Button> (new GCP_Button());
 	xbutton->setCaption("X");
 	xbutton->setWidthHeight(15,20);
-	xbutton->setStyle(&defStyles.defaultbuttonStyle);
+	xbutton->setStyle(GCP_ButtonWhiteStyle);
 	xbutton->setOnMouseLeftClick(this,&GCP_Form::toggleVisibility);
 	xbutton->options.draw_order = -1000;
 	formTopRightButtons->addButton(xbutton);
@@ -56,22 +53,21 @@ GCP_Form::GCP_Form(SDL_Renderer* screen, int _width, int _height)
 
 	//Верхняя полоска на форме (для обработки драгендроп)
 	xpanel = GCP_SPointer<GCP_Button> (new GCP_Button());
-	xpanel->setWidthHeight(width,30);
-	xpanel->setPosition(xPos,yPos);
+   xpanel->setWidthHeight(_position.width(), 30);
+   xpanel->setPosition(_position.x(), _position.y());
 	xpanel->options.draw_order = -999;
-	xpanel->setStyle(&defStyles.defaultFormHeaderStyle);
-	addComponent((GCP_SPointer<GCP_FormComponent>)xpanel);
+   xpanel->setStyle(GCP_PanelBlackStyle);
+ 	addComponent((GCP_SPointer<GCP_FormComponent>)xpanel);
 
 	//Сообщение с алармом
-	messagebox = GCP_SPointer<GCP_Form>(new GCP_MessageBox(screen,450,150));
+	messagebox = GCP_SPointer<GCP_Form>(new GCP_MessageBox(450,150));
 	messagebox->isParentLocking = true;
-	messagebox->isVisible = false;
-	messagebox->isDragable = false;
+	messagebox->setVisible(false);
+	messagebox->setDragable(false);
 	messagebox->options.draw_order = -100;
-	messagebox->setPosition(width/2-messagebox->width/2,height/2-messagebox->height/2);
+   messagebox->setPosition(_position.width() / 2 - messagebox->_position.width() / 2, _position.height() / 2 - messagebox->_position.height() / 2);
 	const char *caprion = "УВЕДОМЛЕНИЕ";
-	messagebox->setCaption(GCP_Math::RUSCP1251_TO_WCHAR(caprion));
-	//setFont("arial.ttf");
+	messagebox->setCaption(GCP_Math::RUSCP1251_TO_WCHAR(caprion));   
 	addSubForm(messagebox);
 
 }
@@ -117,8 +113,6 @@ GCP_Form::~GCP_Form()	{
 
 void GCP_Form::addComponent(GCP_SPointer<GCP_ContextMenu> const &component)
 {
-	//!!! Шрифт передаем!!!
-	component->setFont(getFont());
 	_contextmenus.push_back(component);
 }
 
@@ -129,10 +123,13 @@ void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> const &component)
 			return;
 
 	//Координаты компонента идут оносительно левого верхнего угла формы
-	component->setPosition(xPos+component->xPos,yPos+component->yPos);
+   const GCP_Rect formPos = _position;
+   const GCP_Rect compPos = component->getPosition();
+
+   component->setPosition(formPos.x() + compPos.x(), formPos.y() + compPos.y());
 	//component->setFont(getFont());
 	_components.push_back(component);
-    GCP_Math::quickSort<gcp_spFormCmpnt>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
+    GCP_Math::quickSort<gcp_spFormComponent>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
 }
 
 void GCP_Form::removeComponent(GCP_SPointer<GCP_FormComponent> const &component)
@@ -146,7 +143,7 @@ void GCP_Form::removeComponent(GCP_SPointer<GCP_FormComponent> const &component)
 
 void GCP_Form::toggleVisibility(void* obj)
 {
-	isVisible = !isVisible;
+	setVisible(!isVisible());
 }
 
 void GCP_Form::addSubForm(GCP_SPointer<GCP_Form> &form)
@@ -158,81 +155,85 @@ void GCP_Form::addSubForm(GCP_SPointer<GCP_Form> &form)
     GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
 }
 
+void GCP_Form::setPosition(int x, int y, int width, int height)
+{
+   _position.bottomRight.X = width;
+   _position.bottomRight.Y = height;
+   setPosition(x, y);
+}
+
 void GCP_Form::setPosition(int x, int y)
 {
-	//int xPosNow = xPos;
-	//int yPosNow = yPos;
-	int deltaX = x-xPos;
-	int deltaY = y-yPos;
-	xPos = x;
-	yPos = y;
-	for(unsigned int i=0; i<_components.size(); i++)
-		_components.at(i)->setPosition(	_components.at(i)->xPos+deltaX,	_components.at(i)->yPos+deltaY);
-	for(unsigned int i=0; i<_contextmenus.size(); i++)
-		_contextmenus.at(i)->setPosition(	_contextmenus.at(i)->xPos+deltaX,	_contextmenus.at(i)->yPos+deltaY);
-
+   int deltaX = x - _position.x();
+   int deltaY = y - _position.y();
+   _position.topLeft.X = x;
+   _position.topLeft.Y = y;
+   for (unsigned int i = 0; i<_components.size(); i++)
+      _components.at(i)->setPosition(_components.at(i)->getPosition().x() + deltaX, _components.at(i)->getPosition().y() + deltaY);
+   for (unsigned int i = 0; i<_contextmenus.size(); i++)
+      _contextmenus.at(i)->setPosition(_contextmenus.at(i)->getPosition().x() + deltaX, _contextmenus.at(i)->getPosition().y() + deltaY);
 
 }
 
-bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
+void GCP_Form::setCaption(const std::string& str)
 {
-	if(!isVisible)
-		return false;
+   xpanel->setCaption(str);
+   xpanel->setWidthHeight(getPosition().width(), 30);
+}
+
+void GCP_Form::OnDraw(const GCP_Event &event)
+{
+	if(!isVisible())
+		return;
 
 	if(!isShowTopRightButtons)
-		xbutton->isVisible = false;
+		xbutton->setVisible(false);
 
-	//!!! это надо один раз сообразить а не в цикле
-	xpanel->setWidthHeight(width,30);
-	//xpanel->cBackColor = colorHeadMenuBackground;
-	//xpanel->cBackColorHover = colorHeadMenuBackground;
-	//!!!!
-
+   GCP_Event drawEvent = event;
+   drawEvent.drawRect = _position;
 
 	if(!isTransparent)
-		GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1,  getStyle()->cBackColor);
-	GCP_Draw::Draw_Round(screen, xPos, yPos, width, height, 1,  getStyle()->colorHeadMenuBackground);
+      GCP_Draw::Render()->Draw_FillRound(_position, 1, getStyle()->backgroundColor);
+   GCP_Draw::Render()->Draw_Round(_position, 1, getStyle()->headBackground);
 
 
 	//!!! Сортировку тоже надо один раз сообразить
 	//GCP_Math::quickSort<GCP_FormComponent*>(&_components,0,_components.size()-1, GCP_SORTBY_DRAWORDER);
 	for(unsigned int i=0; i<_components.size(); i++)
-			_components.at(i)->OnDraw(screen,_swidth,_sheight,xPos,yPos,width,height);
+      _components.at(i)->OnDraw(drawEvent);
 
 	//Всплывающие подсказки рисуются поверх компонент
 	for(unsigned int i=0; i<_components.size(); i++)
-		_components.at(i)->OnDrawInfo(screen,xPos,yPos,width,height);
+      _components.at(i)->OnDrawInfo(drawEvent);
 
 	//Загаловок формы
-	string font = getFont();
-	if(font != "")
-	GCP_Draw::renderText(_sCaption,xPos+width/2-65,yPos+xpanel->height/5,screen,&drawdata,c_white,font,20);
+   //GCP_Draw::Render()->Draw_Text(_sCaption, xPos + width / 2 - 65, yPos + xpanel->height / 5, getStyle(), &drawdata);
 
 	//Рисуем Контекстные меню
 	_isContextMenuOpened = false;
 	for(unsigned int i=0; i<_contextmenus.size(); i++){
 		_contextmenus.at(i)->setLock(_isContextMenuOpened);
-		_contextmenus.at(i)->OnDraw(screen,_swidth,_sheight,xPos,yPos,width,height);
-		if(_contextmenus.at(i)->isVisible && _contextmenus.at(i)->isContextMenuBlocking)
+      _contextmenus.at(i)->OnDraw(drawEvent);
+		if(_contextmenus.at(i)->isVisible() && _contextmenus.at(i)->isContextMenuBlocking)
 			_isContextMenuOpened = true;	//будем блокировать компоненты пока открыто это меню
 	}
 
-	basicOnDraw(screen,xPos,yPos,width,height);
+   basicOnDraw(drawEvent);
 
 	//Сообщения можно сделать с потоками. тогда они могут блокировать всю программу пока не нажмешь кнопку ОК
 	//Но тогда надо отделять интерфейс от главного потока обработки событий SDL
 	if(messages.size())
-		if(messagebox->isVisible == false){
+		if(messagebox->isVisible() == false){
 			messagebox->messagelabel->text = messages.pop_first();
-			messagebox->isVisible = true;
+			messagebox->setVisible(true);
 		}
 
 	//!!! Сортировку тоже надо один раз сообразить
     GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_DRAWORDER);
 	bool isHavingSubformsThatLocking = false;
 	for(unsigned int i=0; i<_subForms.size(); i++){
-		_subForms.at(i)->OnDraw(screen, width, height);
-		if(_subForms.at(i)->isParentLocking && _subForms.at(i)->isVisible)
+      _subForms.at(i)->OnDraw(drawEvent);
+		if(_subForms.at(i)->isParentLocking && _subForms.at(i)->isVisible())
 			isHavingSubformsThatLocking = true;
 	}
 
@@ -244,7 +245,7 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 	if(isHavingSubformsThatLocking||isLocked)
 		_isLocked = true;
 
-	return true;
+	return;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,13 +253,13 @@ bool GCP_Form::OnDraw(SDL_Renderer* screen, int w, int h)
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////OnKeyDown
 ////////////////////////////////////////////////////////////////////////////////////////////
-bool GCP_Form::OnTextInput(SDL_TextInputEvent text)
+bool GCP_Form::OnTextInput(const GCP_Event& event)
 {
-	if(!isVisible)
+	if(!_isVisible)
 		return false;
 
 	for(unsigned int i=0; i<_subForms.size(); i++){
-		_subForms.at(i)->OnTextInput(text);
+		_subForms.at(i)->OnTextInput(event);
 	}
 
 	if(_isLocked)
@@ -266,20 +267,20 @@ bool GCP_Form::OnTextInput(SDL_TextInputEvent text)
 
 	if(!_isContextMenuOpened)
 		for(unsigned int i=0; i<_components.size(); i++)
-			_components.at(i)->OnTextInput(text);
+         _components.at(i)->OnTextInput(event);
 
-	basicOnTextInput(text);
+   basicOnTextInput(event);
 
 	return true;
 }
 
-bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
+bool GCP_Form::OnTextEdit(const GCP_Event& event)
 {
-	if(!isVisible)
+	if(!_isVisible)
 		return false;
 
 	for(unsigned int i=0; i<_subForms.size(); i++){
-		_subForms.at(i)->OnTextEdit(edit);
+		_subForms.at(i)->OnTextEdit(event);
 	}
 
 	if(_isLocked)
@@ -287,33 +288,35 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 
 	if(!_isContextMenuOpened)
 		for(unsigned int i=0; i<_components.size(); i++)
-			_components.at(i)->OnTextEdit(edit);
+			_components.at(i)->OnTextEdit(event);
 
-	basicOnTextEdit(edit);
+	basicOnTextEdit(event);
 	return true;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////OnEvent
 ////////////////////////////////////////////////////////////////////////////////////////////
-		gcp_formEvent GCP_Form::OnEvent( const int GCP_EVENT, sdl_events events)
+   gcp_formEvent GCP_Form::OnEvent(const GCP_Event &cevent)
 		{
 			//Будем возвращать где находился курсор когда произошло событие
 			gcp_formEvent evt, other_evt;
-			evt.isEventInsideForm = events.isPassingOnlyGlobalEvent;
+			evt.isEventInsideForm = cevent.isPassingOnlyGlobalEvent;
 			evt.isEventOnFormHead = false;
 
-			if(!isVisible)
+         GCP_Event event = cevent;  //Чуть подправим событие.
+
+			if(!_isVisible)
 				return evt;
 
 			//WHY?  EVENTORDER = DRAWORDER^-1
             GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
 			//Передаем всем дочерним формам глобальное событие
 			for(unsigned int i=0; i<_subForms.size(); i++){
-				other_evt = _subForms.at(i)->OnEvent(GCP_EVENT, events);
+				other_evt = _subForms.at(i)->OnEvent(event);
 				//Запоминаем если это событие произошло внутри хоть одной из активных форм
 				evt.isEventInsideForm = evt.isEventInsideForm || other_evt.isEventInsideForm;
 				//Все остальные формы получат только глобальные события если хоть на одной мы обработаем локальные
-				events.isPassingOnlyGlobalEvent = events.isPassingOnlyGlobalEvent || evt.isEventInsideForm;
+				event.isPassingOnlyGlobalEvent = event.isPassingOnlyGlobalEvent || evt.isEventInsideForm;
 			}
 
 			if(_isLocked){
@@ -322,7 +325,7 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 				return evt;
 			}
 
-			if(GCP_EVENT == GCP_ON_MOUSE_GUP){
+         if (event.eventType == GCP_ON_MOUSE_GUP){
 				_isDragStarted = false;
 				isDraggingSomeComponent = false;
 			}
@@ -338,17 +341,17 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 			bool isMouseOverSomeComponent = false;
 			if(!_isContextMenuOpened && !isDraggingSomeComponent){
 				for(unsigned int i=0; i<_components.size(); i++){
-					_components.at(i)->OnEvent(GCP_EVENT, events);		//Вызываем глобальное событие у наших компонент
+					_components.at(i)->OnEvent(event);		//Вызываем глобальное событие у наших компонент
 
 					//Если глобальное событие произошло над дочерней формой, локальные события для наших компонент не обрабатываем
 					if(!isLocalEventsLocked)
 					if(!isMouseOverSomeComponent && !evt.isEventInsideForm)	{
-						if(_components.at(i)->checkCollisionBox(events.mousex, events.mousey)){
-							_components.at(i)->OnEvent(GCP_EVENT+1, events);
-							if(GCP_EVENT == GCP_ON_MOUSE_GLDOWN)
+						if(_components.at(i)->checkCollisionBox(event.mousex, event.mousey)){
+							_components.at(i)->OnEvent(MakeEventLocal(event));
+							if(event.eventType == GCP_ON_MOUSE_GLDOWN)
 								_componentThatWasLeftClicked = _components.at(i);
 
-							if(_components.at(i)->isLocalEventsUnderneathBlocking)
+                     if (_components.at(i)->isEventUnderneathBloacking())
 								isMouseOverSomeComponent = true;
 							//Передали локальное событие компоненту по этим координатам.
 							//Далее локальные события более не передаем
@@ -357,26 +360,26 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 				}
 			}
 
-			events.isPassingOnlyGlobalEvent = evt.isEventInsideForm;
+			event.isPassingOnlyGlobalEvent = evt.isEventInsideForm;
 			if(!isLocalEventsLocked)
 			for(unsigned int i=0; i<_contextmenus.size(); i++)
-				_contextmenus.at(i)->OnEvent(GCP_EVENT, events);
+				_contextmenus.at(i)->OnEvent(event);
 
-			if(GCP_EVENT == GCP_ON_MOUSE_GUP)
+			if(event.eventType == GCP_ON_MOUSE_GUP)
 				_componentThatWasLeftClicked = 0;
-			if(GCP_EVENT == GCP_ON_MOUSE_GLDOWN)
+         if (event.eventType == GCP_ON_MOUSE_GLDOWN)
 				_isClickedOnTopHeader = false;
 
 			//Обрабатываем глобальное и локальные события для формы
-			basicOnEvent(GCP_EVENT, events);
-			if (!events.isPassingOnlyGlobalEvent)
-			if (checkCollisionBox(events.mousex, events.mousey)){
-				mouse_x = events.mousex;
-				mouse_y =  events.mousey;
+			basicOnEvent(event);
+			if (!event.isPassingOnlyGlobalEvent)
+			if (checkCollisionBox(event.mousex, event.mousey)){
+				mouse_x = event.mousex;
+				mouse_y =  event.mousey;
 				evt.isEventInsideForm = true;
-				basicOnEvent(GCP_EVENT+1, events);
-				if(events.mousey<yPos+xpanel->height){
-					if(GCP_EVENT == GCP_ON_MOUSE_GLDOWN)
+				basicOnEvent(MakeEventLocal(event));
+				if(event.mousey<_position.y()+xpanel->getPosition().height()){
+					if(event.eventType == GCP_ON_MOUSE_GLDOWN)
 						_isClickedOnTopHeader = true;
 					evt.isEventOnFormHead = true;
 				}
@@ -386,12 +389,16 @@ bool GCP_Form::OnTextEdit(SDL_TextEditingEvent edit)
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////OnMouseGlobalLeftHoldMotion
 ////////////////////////////////////////////////////////////////////////////////////////////
-gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion) {
+ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(const GCP_Event& cevent)
+ {
 	gcp_formEvent evt;
 	evt.isEventInsideForm = false;
 	evt.isFormDragged = false;
-	if(!isVisible)
+	if(!_isVisible)
 		return evt;
+
+   GCP_Event event = cevent;
+   event.drawRect = GCP_Rect(_position.x(), _position.y(), _position.width(), _position.height());
 
 	//WHY?  EVENTORDER = DRAWORDER^-1
     GCP_Math::quickSort<gcp_spForm>(&_subForms,0,_subForms.size()-1, GCP_SORTBY_EVENTORDER);
@@ -399,7 +406,7 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 	bool isEventInsideChildForm = false;
 	if(!_isDragStarted || _isLocked){
 	for(unsigned int i=0; i<_subForms.size(); i++){
-		evt = _subForms.at(i)->OnMouseGlobalLeftHoldMotion(motion);
+		evt = _subForms.at(i)->OnMouseGlobalLeftHoldMotion(event);
 		isDragged = evt.isFormDragged; //If child form is dragged
 		isEventInsideChildForm = evt.isEventInsideForm;
 
@@ -416,24 +423,28 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 	}
 
 	if(!_isContextMenuOpened){
-		if (!isDragged && isDragable){
+		if (!isDragged && isDragable()){
 			if (_isClickedOnTopHeader || _isDragStarted){
-					int xPosStart = xPos, yPosStart = yPos;
-					xPos += motion.xrel;
-					yPos += motion.yrel;
-					xPos = max(0,min(_swidth-width,(int)xPos));
-					yPos = max(0,min(_sheight-height,(int)yPos));
+					int xPosStart = _position.x(), yPosStart = _position.y();
+               _position.topLeft.X += event.iMouseXRel;
+					_position.topLeft.Y += event.iMouseYRel;
+               _position.topLeft.X = (int)std::fmax(0, std::fmin(_swidth - _position.width(), _position.x()));
+               _position.topLeft.Y = (int)std::fmax(0, std::fmin(_sheight - _position.height(), _position.y()));
 
-					int deltaX = xPos - xPosStart;
-					int deltaY = yPos - yPosStart;
-					for(unsigned int i=0; i<_components.size(); i++){
-						SPoint previousPos = _components.at(i)->getPosition();
-						_components.at(i)->setPosition(previousPos.x+deltaX,previousPos.y+deltaY);
+					int deltaX = _position.x() - xPosStart;
+               int deltaY = _position.y() - yPosStart;
+					for(unsigned int i=0; i<_components.size(); i++)
+               {
+						GCP_Rect previousPos = _components.at(i)->getPosition();
+						_components.at(i)->setPosition(previousPos.x()+deltaX,previousPos.y()+deltaY);
 					}
-					for(unsigned int i=0; i<_contextmenus.size(); i++){
-						if(!_contextmenus.at(i)->isContextMenuBlocking)		{
-						SPoint previousPos = _contextmenus.at(i)->getPosition();
-						_contextmenus.at(i)->setPosition(previousPos.x+deltaX,previousPos.y+deltaY);
+
+					for(unsigned int i=0; i<_contextmenus.size(); i++)
+               {
+						if(!_contextmenus.at(i)->isContextMenuBlocking)		
+                  {
+                     GCP_Rect previousPos = _contextmenus.at(i)->getPosition();
+						   _contextmenus.at(i)->setPosition(previousPos.x()+deltaX,previousPos.y()+deltaY);
 						}
 					}
 					_isDragStarted = true;
@@ -447,10 +458,10 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 		bool isComponentClicked = false;
 		if(!_isDragStarted){
 			for(unsigned int i=0; i<_components.size(); i++){
-				_components.at(i)->OnMouseGlobalLeftHoldMotion(motion,xPos,yPos+xpanel->height,width,height-xpanel->height);
+				_components.at(i)->OnMouseGlobalLeftHoldMotion(event);
 				/*if(!isComponentClicked && !isDraggingSomeComponent)
 				if(_components.at(i)==_componentThatWasLeftClicked){
-					_components.at(i)->OnMouseLeftHoldMotion(motion,xPos,yPos+xpanel->height,width,height-xpanel->height);
+					_components.at(i)->OnMouseLeftHoldMotion(motion,_position.x() yPos+xpanel->height,width,height-xpanel->height);
 					isComponentClicked = true;
 					isDraggingSomeComponent = true;
 				}*/
@@ -458,8 +469,10 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 
 			///REFACTOR THIS!!!!
 			if(_componentThatWasLeftClicked)
-				if(_componentThatWasLeftClicked->isDragable&& !isComponentClicked && !isDraggingSomeComponent){
-					_componentThatWasLeftClicked->OnMouseLeftHoldMotion(motion,xPos,yPos+xpanel->height,width,height-xpanel->height);
+				if(_componentThatWasLeftClicked->isDragable()&& !isComponentClicked && !isDraggingSomeComponent)
+            {               
+               event.drawRect = GCP_Rect(_position.x(), _position.y() + xpanel->getPosition().height(), _position.width(), _position.height() - xpanel->getPosition().height());
+               _componentThatWasLeftClicked->OnMouseLeftHoldMotion(event);
 					isComponentClicked = true;
 					isDraggingSomeComponent = true;
 				}
@@ -469,12 +482,12 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion)
 
 	}
 
-	if (checkCollisionBox(motion.x,motion.y)&&!isEventInsideChildForm){
+	if (checkCollisionBox(event.drawRect.x(),event.drawRect.y())&&!isEventInsideChildForm){
 		evt.isEventInsideForm = true;
-		basicOnMouseLeftHoldMotion(motion,xPos,yPos,width,height);
+		basicOnMouseLeftHoldMotion(event);
 	}
 
-	basicOnMouseGlobalLeftHoldMotion(motion,xPos,yPos,width,height);
+	basicOnMouseGlobalLeftHoldMotion(event);
 
 	evt.isFormDragged = _isDragStarted;
 	return evt;

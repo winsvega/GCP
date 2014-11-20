@@ -68,8 +68,8 @@
 		 GCP_Point GCP_Math::normalizePointInRect(GCP_Point point, GCP_Point pmin, GCP_Point pmax)
 		{
 			GCP_Point normPoint;
-			normPoint.X = max(min(point.X,(double)pmax.X),(double)pmin.X);
-			normPoint.Y = max(min(point.Y,(double)pmax.Y),(double)pmin.Y);
+         normPoint.X = std::fmax(std::fmin(point.X, (double)pmax.X), (double)pmin.X);
+         normPoint.Y = std::fmax(std::fmin(point.Y, (double)pmax.Y), (double)pmin.Y);
 			return normPoint;
 		}
 /////////////////////////////////////////////////////////////////////////
@@ -340,8 +340,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 		 bool GCP_Math::isPointInLine(GCP_Line line, GCP_Point checkPoint)
 		{
-			GCP_Point TopLeft(min(line.pointA.X,line.pointB.X),min(line.pointA.Y,line.pointB.Y));
-			GCP_Point BottomRight(max(line.pointA.X,line.pointB.X),max(line.pointA.Y,line.pointB.Y));
+          GCP_Point TopLeft(std::fmin(line.pointA.X, line.pointB.X), std::fmin(line.pointA.Y, line.pointB.Y));
+          GCP_Point BottomRight(std::fmax(line.pointA.X, line.pointB.X), std::fmax(line.pointA.Y, line.pointB.Y));
 			return isPointInRect(TopLeft,BottomRight,checkPoint);
 		}
 ////////////////////////////////////////////////////////////////////////////////////////////

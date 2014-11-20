@@ -5,188 +5,44 @@
 #include "GCP_Delegate.h"
 #include "GCP_SPointer.h"
 
-
-
-
-
 class GCP_FormComponent;
-typedef GCP_SPointer<GCP_FormComponent> gcp_spFormCmpnt;
-//template<class T>
-//GCP_SPointer<T>::operator GCP_SPointer<GCP_FormComponent> ()
-//{
-//	GCP_SPointer<GCP_FormComponent> sliced = GCP_SPointer<GCP_FormComponent>(static_cast<GCP_FormComponent>_pointee);
-//	return sliced;
-//}
-
-//Информация о стиле
-struct SStyle : public GCP_SPointerBase
-{
-	public:
-	SStyle(){}
-	SStyle(GCP_Color cBackColor_,GCP_Color cTextColor_,GCP_Color cBackColorHover_,GCP_Color cTextColorHover_,
-		  GCP_Color  cBorderColor_ = c_black, GCP_Color colorHeadMenuBackground_ = c_black,
-		  GCP_Color colorHeadMenuFade_ = c_grey, GCP_Color colorButtonBackground_ = c_white)
-	{
-		setColor(cBackColor_, cTextColor_, cBackColorHover_, cTextColorHover_);
-		iBorderWidth = 2;
-		iRoundCff = 7;
-		//Афтоинициализация параметров для формы
-		cBorderColor = cBorderColor_;
-		colorHeadMenuBackground = colorHeadMenuBackground_;
-		colorHeadMenuFade = colorHeadMenuFade_;
-		colorButtonBackground = colorButtonBackground_;
-	}
-
-	void setColor(GCP_Color cBackColor_,GCP_Color cTextColor_,GCP_Color cBackColorHover_,GCP_Color cTextColorHover_)
-	{
-		cBackColor = cBackColor_;
-		cTextColor = cTextColor_;
-		cBackColorHover = cBackColorHover_;
-		cTextColorHover = cTextColorHover_;
-	}
-
-	GCP_Color cBackColor;				//Фон
-	GCP_Color cTextColor;				//Цвет текста
-	GCP_Color cBackColorHover;			//Фон при наведении
-	GCP_Color cTextColorHover;			//Цвет текста при наведении
-	GCP_Color cBorderColor;				//Цвет рамки
-
-	int iBorderWidth;					//Толщина рамки
-	Uint16 iRoundCff;					//Округление углов
-
-	int iTextSize, iMaxTextLength;		//Параметры текста в едитах
-	GCP_Color cTextFieldBackColor;		//Фон поля ввода текстов
-
-										//Параметры для форм
-	GCP_Color colorHeadMenuBackground, colorHeadMenuFade, colorButtonBackground;
-
-	//string sFontDir;					//Путь к шрифтам !!!REV
-	static string sFontDir;
-};
-
-//Сделать как цветовые константы!!//REV
-struct defaultStyles
-{
-	public:
-		defaultStyles()/*:
-			defaultbuttonStyle (new SStyle(c_white,c_black,c_aquadark,c_white)),
-			defaultbuttonInvStyle ( new SStyle(c_black,c_white,c_aquadark,c_white)),
-			defaultMenuStyle  ( new SStyle(c_white, c_black,c_aquadark,c_white)),
-			defaultMenuStyleBlack  ( new SStyle(c_white, c_black,c_aquadark,c_black)),
-			defaultFormHeaderStyle  ( new SStyle(c_black, c_black,c_black,c_black)),
-			defaultFormStyle  (new SStyle(c_white, c_black, c_white, c_black))*/
-		{
-			/*defaultbuttonStyle = new SStyle(c_white,c_black,c_aquadark,c_white);
-			defaultbuttonInvStyle = new SStyle(c_black,c_white,c_aquadark,c_white);
-			defaultMenuStyle  = new SStyle(c_white, c_black,c_aquadark,c_white);
-			defaultMenuStyleBlack  = new SStyle(c_white, c_black,c_aquadark,c_black);
-			defaultFormHeaderStyle  = new SStyle(c_black, c_black,c_black,c_black);
-			defaultFormStyle  =new SStyle(c_white, c_black, c_white, c_black);*/
-
-			defaultbuttonStyle = SStyle(c_white,c_black,c_aquadark,c_white);
-			defaultbuttonInvStyle =  SStyle(c_black,c_white,c_aquadark,c_white);
-			defaultMenuStyle  = SStyle(c_white, c_black,c_aquadark,c_white);
-			defaultMenuStyleBlack  = SStyle(c_white, c_black,c_aquadark,c_black);
-			defaultFormHeaderStyle  =  SStyle(c_black, c_black,c_black,c_black);
-			defaultFormStyle  =SStyle(c_white, c_black, c_white, c_black);
-		}
-		~defaultStyles()
-		{
-			//delete defaultMenuStyle, defaultMenuStyleBlack, defaultFormHeaderStyle, defaultbuttonStyle, defaultFormStyle;
-			//delete defaultbuttonInvStyle;
-		}
-	//Make Private!!!
-	SStyle defaultMenuStyle;
-	SStyle defaultMenuStyleBlack;
-	SStyle defaultFormHeaderStyle;
-	SStyle defaultbuttonStyle, defaultbuttonInvStyle;
-	SStyle defaultFormStyle;
-};
-extern defaultStyles defStyles;
-
-
-
-//Информация о компоненте
-struct SPoint
-{
-	int x,y;
-	int width,height;
-	std::string icon;
-};
-
-//Структура для сортировки компонетнов
-struct SComponent
-{
-	int draw_order;
-};
-
-//событие внутри формы. возвращает состояние самой формы
-struct gcp_formEvent
-{
-	bool isFormDragged;
-	bool isEventInsideForm;
-	bool isEventOnFormHead;
-};
-
-//Сдлные события
-struct sdl_events
-{
-	SDL_KeyboardEvent keyboard;
-	SDL_MouseButtonEvent mousebutton;
-	SDL_TextEditingEvent textediting;
-	SDL_TextInputEvent textinput;
-	SDL_MouseWheelEvent mouswheel;
-	SDL_MouseMotionEvent mousemotion;
-	int mousex;
-	int mousey;
-	bool isPassingOnlyGlobalEvent;
-};
-
-//Константы
-const int GCP_SORTBY_DRAWORDER = 1;
-const int GCP_SORTBY_EVENTORDER = 2;
-
-//event - глобальное событие event+1 - локальное событие
-const int GCP_ON_GLEFT_CLICK = 1;
-const int GCP_ON_LEFT_CLICK = 2;
-const int GCP_ON_GRIGHT_CLICK = 3;
-const int GCP_ON_RIGHT_CLICK = 4;
-const int GCP_ON_WHELL_GUP = 5;
-const int GCP_ON_WHELL_UP = 6;
-const int GCP_ON_WHELL_GDOWN = 7;
-const int GCP_ON_WHELL_DOWN = 8;
-const int GCP_ON_MOUSE_GDOWN = 9;
-const int GCP_ON_MOUSE_DOWN = 10;
-const int GCP_ON_MOUSE_GLDOWN = 11;
-const int GCP_ON_MOUSE_LDOWN = 12;
-const int GCP_ON_MOUSE_GUP = 13;
-const int GCP_ON_MOUSE_UP = 14;
-const int GCP_ON_MOUSE_GMOTION = 15;
-const int GCP_ON_MOUSE_MOTION = 16;
-const int GCP_ON_GKEYDOWN = 17;
-const int GCP_ON_KEYDOWN = 18;
-const int GCP_ON_GDRAG = 19;
-const int GCP_ON_DRAG = 20;
-const int GCP_ON_MOUSE_GLHMOTION = 21;
-const int GCP_ON_MOUSE_LHMOTION = 22;
-const int GCP_MAX_FUNC_NUM = 23;
-
+typedef GCP_SPointer<GCP_FormComponent> gcp_spFormComponent;
 
 class GCP_FormComponent: public GCP_SPointerBase
 {
-	protected:
-		std::string _sCaption;						//Надпись
-		IContainer* FUNCTIONS[GCP_MAX_FUNC_NUM];	//Функции навешаные на события
+	protected:		
+      bool _isLocalEventsUnderneathBlocking;
+      bool _isVisible, _isDragable;
+      bool _isStartPositionSet;
+		bool _isMouseOver;                        //Триггер мышь над объектом
+		bool _isMouseHold;                        //Триггер левая клавиша мыши зажата над объектом
+		bool _isDragStarted;                      //Триггер начали перетаскивать объект		
+		int _timeMouseOver;							   //Таймер для всплывающей подсказки
 
-		bool _isMouseOver;
-		bool _isMouseHold;
-		bool _isDragStarted;
-		string _sTextInput;
-		int _timeMouseOver;							//Таймер мыши для всплывающей подсказки
-		SStyle *style;
+		gcp_spStyle pStyle;
+      GCP_Rect _position;
+      IContainer* FUNCTIONS[GCP_MAX_FUNC_NUM];	//Функции навешаные на события
+
+      static const GCP_Event MakeEventLocal(const GCP_Event& event)
+      {
+         GCP_Event evt = event;
+         evt.eventType++;
+         return evt;
+      }
+
+   public:
+      int collisionRadius;
+      int xPosStart, yPosStart;
+      int collisionBox;
+
+      SComponent options;
+      std::string icon;					//Путь к иконке кнопки
+      std::string INFO;					//Всплывающая подсказка
+
+      GCP_DrawData drawdata;
+      GCP_DrawData drawdatainfo;
 
 	public:
-		static void initStyles(){defStyles = defaultStyles();}
 		bool compare(const GCP_FormComponent* right, int compare, int criteria = -1)
 		{
 			//Метод по которому сравниваются елементы в сортировке кусорт
@@ -216,40 +72,30 @@ class GCP_FormComponent: public GCP_SPointerBase
 			return false;
 		}
 
-
-
-
+      
 		GCP_FormComponent()
-		{
-			_sCaption = "";									//Надпись
-			_sTextInput = "";								//Введенный текст
-			style = NULL;
-			//sFontDir = "data\\arial.ttf";					//Путь к шрифту (умолчание)
-			INFO = "";										//Всплывающая подсказка
-			options.draw_order = 0;							//Порядок отрисовки
-			_isMouseOver = false;  _isMouseHold = false;
-			isLocalEventsUnderneathBlocking = true;			//Блокировать обработку локальных событий у других компонет, которые находятся по этим
-
-
-			isDragable = false;								//Перетаскивание
+		{         
+         pStyle = GCP_DefaultStyle;
+			options.draw_order = 0;						      //Порядок отрисовки
+			_isMouseOver = false;
+         _isMouseHold = false;
+         _isStartPositionSet = false;
+			_isLocalEventsUnderneathBlocking = true;		//Блокировать обработку локальных событий у других компонет, которые находятся по этим         
+			_isDragable = false;								   //Перетаскивание
 			_isDragStarted = false;
+         INFO = "";
 
 			for(int i=0; i<GCP_MAX_FUNC_NUM; i++)			//Функции надо обнулить иначе память тютю
 				FUNCTIONS[i] = 0;
 
 			collisionBox = GCP_COLLISIONBOX_RECTANGLE;		//Обработка столкновений
-			isVisible = true;
-			//icon = "";										//Путь к картинке
-			width = 100;
-			height = 20;
-			xPos = 0;
-			yPos = 0;
-			xPosStart = xPos; //!
-			yPosStart = yPos;
-			//iRoundCff = 2;									//Округление границ
+			_isVisible = true;
+			
+         _position = GCP_Rect(0, 0, 100, 20);
+			xPosStart = 0; 
+			yPosStart = 0;			
 			collisionRadius = 5;							//Если рисуется круг
-			_timeMouseOver = 0;
-			//setColor(c_black,c_white,c_aquadark,c_white);	//Задает цвета
+			_timeMouseOver = 0;			
 		}
 
 		virtual ~GCP_FormComponent()
@@ -260,7 +106,10 @@ class GCP_FormComponent: public GCP_SPointerBase
 					delete FUNCTIONS[i];
 		}
 
-		virtual void OnDraw(SDL_Renderer* screen, int screen_w, int screen_h, int fx, int fy, int fw, int fh){basicOnDraw(screen, fx, fy, fw, fh);};
+      virtual void OnDraw(const GCP_Event &event)
+      {
+         basicOnDraw(event);
+      };
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////SET AND BASIC FUNCTIONS
@@ -369,12 +218,10 @@ class GCP_FormComponent: public GCP_SPointerBase
 		}
 
 		//РИСУЕМ ВСПЛЫВЮЩУЮ ПОДСКАЗКУ
-		void OnDrawInfo(SDL_Renderer* screen, int formx, int formy, int formw, int formh) {
+		void OnDrawInfo(const GCP_Event &event) {
 			//ПОКА ЧТО КРИВО НО РАБОТАЕТ
 			if(INFO!="" && _isMouseOver){
 				int mess_w, mess_h;
-				string fonts = getFont().c_str();
-				TTF_Font* font = TTF_OpenFont(getFont().c_str(), 14);
 
 				//Вычисление ширины и высоты текста
 				GCP_Vector<string>* strings = GCP_Math::strToLines(INFO);
@@ -391,68 +238,71 @@ class GCP_FormComponent: public GCP_SPointerBase
 				if(!hasIndex)
 					return;
 
-				TTF_SizeUTF8(font, strings->at(maxSizeIndex).c_str(), &mess_w, &mess_h);
+            GCP_Draw::Render()->GetTextSize(strings->at(maxSizeIndex), mess_w, mess_h, gcp_spStyle(pStyle));
 				mess_w += 5;	mess_h += 5;
 				//mess_w /= strings->size();
 				mess_h *= strings->size();
 				delete strings;
 
+            GCP_Point normPos = GCP_Math::normalizeRectInRect(GCP_Point(event.drawRect.x(), event.drawRect.y()),
+               GCP_Point(event.drawRect.x() + event.drawRect.width(), event.drawRect.y() + event.drawRect.height()), _position.x() + 10, _position.y() + 10, mess_w, mess_h, 1);
 
-				TTF_CloseFont(font);
-				GCP_Point normPos = GCP_Math::normalizeRectInRect(GCP_Point(formx,formy),
-									GCP_Point(formx+formw,formy+formh),xPos+10,yPos+10,mess_w,mess_h,1);
-
-				SDL_SetRenderDrawBlendMode(screen,SDL_BLENDMODE_BLEND);
+            GCP_Draw::Render()->SetBlendMode(E_BLEND_ADD);
 				GCP_Color c_white_a(255,255,255,210);
-				GCP_Draw::Draw_FillRect(screen,(Sint16)normPos.X,(Sint16)normPos.Y,mess_w,mess_h,c_white_a);
-				SDL_SetRenderDrawBlendMode(screen,SDL_BLENDMODE_NONE);
-				GCP_Draw::Draw_Rect(screen,(Sint16)normPos.X,(Sint16)normPos.Y,mess_w,mess_h,c_black);
-				GCP_Draw::renderText(INFO,(int)normPos.X+3,(int)normPos.Y+3,screen,&drawdatainfo,c_black,getFont(),14);
+            GCP_Draw::Render()->Draw_FillRect((Sint16)normPos.X, (Sint16)normPos.Y, mess_w, mess_h, c_white_a);
+            GCP_Draw::Render()->SetBlendMode(E_BLEND_NONE);
+            GCP_Draw::Render()->Draw_Rect((Sint16)normPos.X, (Sint16)normPos.Y, mess_w, mess_h, c_black);
+            GCP_Draw::Render()->Draw_Text(INFO, (int)normPos.X + 3, (int)normPos.Y + 3, pStyle, &drawdatainfo);
 			}
 
 		}
 
-		void basicOnDraw(SDL_Renderer* screen, int formx, int formy, int formw, int formh) {	}
+      void basicOnDraw(const GCP_Event &event) {	}
 
-		void basicOnTextInput(SDL_TextInputEvent text)
+      void basicOnTextInput(const GCP_Event& event)
 		{
-			_sTextInput += text.text;
+
 		}
-		void basicOnTextEdit(SDL_TextEditingEvent edit)
+      void basicOnTextEdit(const GCP_Event& event)
 		{
-			_sTextInput = edit.text;
+
 		}
 
-		void basicOnMouseLeftHoldMotion(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh)
+      void basicOnMouseLeftHoldMotion(const GCP_Event& event)
 		{
 			if(FUNCTIONS[GCP_ON_MOUSE_LHMOTION] != 0)
 			FUNCTIONS[GCP_ON_MOUSE_LHMOTION]->Call((void*)this);
 		}
 
-		void basicOnDrag(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh)
+      void basicOnDrag(const GCP_Event& event)
 		{
 			if(FUNCTIONS[GCP_ON_DRAG] != 0)
 			FUNCTIONS[GCP_ON_DRAG]->Call((void*)this);
 		}
 
-		void basicOnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh)
+      void basicOnMouseGlobalLeftHoldMotion(const GCP_Event& event)
 		{
 			if(_isDragStarted){
-				xPos = motion.x;
-				yPos = motion.y;
+            _position.topLeft.X = event.mousex;
+            _position.topLeft.Y = event.mousey;
 				_isMouseHold = true;
+
+            int fx = event.drawRect.x();
+            int fy = event.drawRect.y();
+            int fw = event.drawRect.width();
+            int fh = event.drawRect.height();
 
 				switch(collisionBox){
 					case GCP_COLLISIONBOX_RECTANGLE:
-						xPos = max(fx,min(fx+fw-width,(int)xPos));
-						yPos = max(fy,min(fy+fh-height,(int)yPos));
+                  _position.topLeft.X = (int)std::fmax(fx, std::fmin(fx + fw - _position.width(), _position.x()));
+                  _position.topLeft.Y = (int)std::fmax(fy, std::fmin(fy + fh - _position.height(), _position.y()));
 						break;
 					case GCP_COLLISIONBOX_ROUNDCIRCLE:
-						xPos = max(fx+collisionRadius+10,min(fx+fw-collisionRadius-10,(int)xPos));
-						yPos = max(fy+collisionRadius+10,min(fy+fh-collisionRadius-10,(int)yPos));
+                  _position.topLeft.X = (int)std::fmax(fx + collisionRadius + 10, std::fmin(fx + fw - collisionRadius - 10, _position.x()));
+                  _position.topLeft.Y = (int)std::fmax(fy + collisionRadius + 10, std::fmin(fy + fh - collisionRadius - 10, _position.y()));
 						break;
 				}
-				basicOnDrag(motion, fx, fy, fw, fh);
+				basicOnDrag(event);
 			}
 			if(FUNCTIONS[GCP_ON_MOUSE_GLHMOTION] != 0)
 			FUNCTIONS[GCP_ON_MOUSE_GLHMOTION]->Call((void*)this);
@@ -463,9 +313,9 @@ class GCP_FormComponent: public GCP_SPointerBase
 
 		////////////////////////////////////////////////////////////////////
 
-		void basicOnEvent(const int GCP_EVENT, sdl_events events)
+      void basicOnEvent(const GCP_Event &event)
 		{
-			switch(GCP_EVENT)
+         switch (event.eventType)
 			{
 				case GCP_ON_MOUSE_GMOTION:
 					if (_isMouseHold == false)
@@ -481,86 +331,86 @@ class GCP_FormComponent: public GCP_SPointerBase
 				case GCP_ON_MOUSE_GLDOWN:
 					_isDragStarted = false;
 					break;
-
-
 			}
 
-			if(FUNCTIONS[GCP_EVENT] != 0)
-			FUNCTIONS[GCP_EVENT]->Call((void*)this);
+         if (FUNCTIONS[event.eventType] != 0)
+            FUNCTIONS[event.eventType]->Call((void*)this);
 		}
 
-		virtual gcp_formEvent OnEvent(const int GCP_EVENT, sdl_events events)
+		virtual gcp_formEvent OnEvent(const GCP_Event &event)
 		{
-			basicOnEvent(GCP_EVENT, events);
-			gcp_formEvent evt; evt.isEventInsideForm = false; return evt;
+         basicOnEvent(event);
+			gcp_formEvent evt; 
+         evt.isEventInsideForm = false; 
+         return evt;
 		}
 
-		virtual bool OnTextEdit(SDL_TextEditingEvent edit){basicOnTextEdit(edit); return true;}
-		virtual bool OnTextInput(SDL_TextInputEvent text){basicOnTextInput(text); return true;}
-		virtual bool OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh)	{	basicOnMouseGlobalLeftHoldMotion(motion, fx, fy, fw, fh);	return true;}
-		virtual bool OnMouseLeftHoldMotion(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh)	{
-			if (isDragable)
+      virtual bool OnTextEdit(const GCP_Event& event){ basicOnTextEdit(event); return true; }
+      virtual bool OnTextInput(const GCP_Event& event){ basicOnTextInput(event); return true; }
+      virtual gcp_formEvent OnMouseGlobalLeftHoldMotion(const GCP_Event& event)	{ basicOnMouseGlobalLeftHoldMotion(event); return gcp_formEvent();}
+      virtual bool OnMouseLeftHoldMotion(const GCP_Event& event)	{
+			if (_isDragable)
 				_isDragStarted = true;
-			basicOnMouseLeftHoldMotion(motion,fx,fy,fw,fh);
+			basicOnMouseLeftHoldMotion(event);
 			return true;
 		}
-
-
-		virtual void setIcon(std::string path)
-		{
-			icon = path;
+      
+		virtual void setPosition(int x, int y)		
+      {	
+         _position.topLeft.X = x;
+         _position.topLeft.Y = y;
+         if (!_isStartPositionSet)
+         {
+            xPosStart = x;
+            yPosStart = y;
+            _isStartPositionSet = true;
+         }
 		}
 
-		virtual void setCaption(std::string str)	{	_sCaption = str;	}
-		virtual void setPosition(int x, int y)		{	xPos = x; 	yPos = y;
-			xPosStart   = x;
-			yPosStart   = y;///!
-		}
-		virtual void setWidthHeight(int w, int h)	{	width = w; 	height = h;	}
-		virtual void setVisible(bool visibility)	{	isVisible = visibility;	}
-		virtual void setFont(string dir)			{	//if(style!= NULL) style->sFontDir = dir;	//!REV
-													}
-		virtual void setStyle(SStyle *style_)	{
-			style = style_;
-		}
-		virtual SStyle *getStyle()				{
-			if (style!= NULL)
-			return style;
-			else return &defStyles.defaultbuttonStyle;
+      virtual void setPosition(int x, int y, int width, int height )
+      {         
+         _position.bottomRight.X = width;
+         _position.bottomRight.Y = height;
+         setPosition(x, y);
+      }
+      
+
+		virtual void setWidthHeight(int w, int h)	
+      {	
+         _position.bottomRight.X = w;
+         _position.bottomRight.Y = h;
+      }
+
+		virtual void setVisible(bool visibility) { _isVisible = visibility; }
+      virtual bool isVisible() { return _isVisible; }
+      virtual void setDragable(bool dragable) { _isDragable = dragable; }
+      virtual bool isDragable() { return _isDragable; }
+      virtual const GCP_Rect& getPosition()	const     { return _position; }
+      virtual bool isEventUnderneathBloacking() const { return _isLocalEventsUnderneathBlocking; }
+
+		virtual void setStyle(const gcp_spStyle& style_)	
+      {
+			pStyle = style_;
 		}
 
+      virtual const gcp_spStyle &getStyle()				
+      {
+         return pStyle;
+		}      
 
-		virtual string getFont()			{
-													//Если есть стиль
-													//Если в стиле указан шрифт, используем его
-													//Иначе стиль по умолчанию
-													if (style!= NULL) return style->sFontDir; //!REV
-													return SStyle::sFontDir;
-		}
 
-		virtual std::string getCaption()	{	return _sCaption;	}
-
-		virtual SPoint getPosition()		{
-			SPoint Position;
-			Position.x = xPos;
-			Position.y = yPos;
-			Position.width = width;
-			Position.height = height;
-			Position.icon = icon;
-			return Position;
-		}
+	
 
 		bool checkCollisionBox(double mousex, double mousey)
 		{
-			SPoint compPos = getPosition();
 			bool flag = false;
 			switch(collisionBox){
 				case GCP_COLLISIONBOX_RECTANGLE:
-					if(GCP_Math::isInRect(mousex,mousey,compPos.x,compPos.y,compPos.width,compPos.height))
+               if (GCP_Math::isInRect(mousex, mousey, _position.x(), _position.y(), _position.width(), _position.height()))
 						flag = true;
 					break;
 				case GCP_COLLISIONBOX_ROUNDCIRCLE:
-					if (GCP_Math::isInRadius(compPos.x, compPos.y, mousex, mousey, collisionRadius))
+               if (GCP_Math::isInRadius(_position.x(), _position.y(), mousex, mousey, collisionRadius))
 						flag = true;
 					break;
 			}
@@ -576,23 +426,6 @@ class GCP_FormComponent: public GCP_SPointerBase
 			drawdata.twidth = width;
 			drawdata.theight = height;			*/
 		}
-
-
-		Sint16 width, height, collisionRadius;
-		int xPos, yPos, xPosStart, yPosStart;
-		int collisionBox;
-
-		bool isVisible, isDragable;
-		bool isLocalEventsUnderneathBlocking;
-		SComponent options;
-
-		std::string icon;					//Путь к иконке кнопки
-		std::string INFO;					//Всплывающая подсказка
-
-		GCP_DrawData drawdata;
-		GCP_DrawData drawdatainfo;
-
-
 };
 
 #endif

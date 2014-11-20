@@ -11,9 +11,9 @@ class GCP_CheckBox: public GCP_FormComponent
 
 		GCP_CheckBox();
 
-		void OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh);
+      void OnDraw(const GCP_Event &event);
 		bool OnMouseLeftClick(SDL_MouseButtonEvent mousebutton);
-		gcp_formEvent OnEvent( const int GCP_EVENT, sdl_events events);
+      gcp_formEvent OnEvent(const GCP_Event &event);
 };
 
 #endif

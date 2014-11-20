@@ -13,7 +13,8 @@ String to Int/Double Convertion
 
 
 ### Working Example: ###
-https://github.com/winsvega/GCP/issues/1  
+See main.cpp
+https://github.com/winsvega/GCP/issues/1  (old version)
 
 ### Screenshots: ###
 https://forums.libsdl.org/viewtopic.php?p=42697  

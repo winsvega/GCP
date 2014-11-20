@@ -22,12 +22,11 @@ class GCP_ContextMenu: public GCP_FormComponent
 		void open(int x, int y);
 		void initTexture(SDL_Renderer *screen);
 		void close(void* obj);
-		void setFont(std::string str);
 		gcp_formEvent OnMouseGlobalMotion(SDL_MouseMotionEvent motion);
 		bool OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh);
 		gcp_formEvent OnMouseGlobalLeftClick(SDL_MouseButtonEvent mousebutton);
 		bool OnMouseGlobalRightClick(SDL_MouseButtonEvent mousebutton);
-		gcp_formEvent OnEvent( const int GCP_EVENT, sdl_events events);
-		void OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh);
+      gcp_formEvent OnEvent(const GCP_Event &event);
+      void OnDraw(const GCP_Event &event);
 };
 #endif

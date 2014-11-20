@@ -20,7 +20,7 @@ class GCP_Select: public GCP_FormComponent
 		{
 			_iSelectedItem = -1;
 			_isDrawingDropDown = false;
-            _dropdownButton = GCP_SPointer<GCP_Button>(new GCP_Button());
+         _dropdownButton = GCP_SPointer<GCP_Button>(new GCP_Button());
 			_dropdownButton->setWidthHeight(15,15);
 			_dropdownButton->setCaption("\\/");
 			_dropdownButton->setOnMouseLeftClick(this,&GCP_Select::OnDropDown);
@@ -34,27 +34,15 @@ class GCP_Select: public GCP_FormComponent
 
 		void addItem(string s)
 		{
-            gcp_spButton button = GCP_SPointer<GCP_Button>(new GCP_Button());
-			button->setWidthHeight(width,height);
-			button->setStyle(&defStyles.defaultbuttonStyle);
-			button->setCaption(s);
-			button->setFont(getFont());
-			button->isVisible = true;
-			button->setOnMouseLeftClick(this, &GCP_Select::OnDroppedButtonClick);
-			button->setFont(getFont());
+         gcp_spButton button = GCP_SPointer<GCP_Button>(new GCP_Button());
+         button->setWidthHeight(_position.width(), _position.height());
+         button->setStyle(GCP_ButtonBlackStyle);
+			button->setCaption(s);			
+			button->setVisible(true);
+			button->setOnMouseLeftClick(this, &GCP_Select::OnDroppedButtonClick);			
 			items.push_back(button);
 		}
-
-		void setFont(std::string str)
-		{
-			unsigned int iMenuSize = items.size();
-			for(unsigned int i=0; i<iMenuSize; i++){
-				items.at(i)->setFont(str);
-			}
-			_dropdownButton->setFont(str);
-			//setFont(str);
-		}
-
+      
 		void selectItem(unsigned int i)
 		{
 			if(i<items.size() && i>=0)
@@ -64,11 +52,11 @@ class GCP_Select: public GCP_FormComponent
 			}
 		}
 
-		string getSelectedItem()
+		const string& getSelectedItem()
 		{
 			if(_iSelectedItem != -1)
 				return items.at(_iSelectedItem)->getCaption();
-				return "";
+			return "";
 		}
 
 		int getSelectedItemIndex()
@@ -97,75 +85,78 @@ class GCP_Select: public GCP_FormComponent
 			_isDrawingDropDown = !_isDrawingDropDown;
 			if(!_isDrawingDropDown)
 				for(unsigned int i=0; i<items.size(); i++)
-					items.at(i)->isVisible = false;
+					items.at(i)->setVisible(false);
 		}
 
-		void OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh)
+      void OnDraw(const GCP_Event &event)
 		{
-			if(!isVisible)
+			if(!isVisible())
 			return;
 
-			_dropdownButton->setWidthHeight(height,height);
-			_dropdownButton->setPosition(xPos+width-_dropdownButton->width,yPos);
-			_dropdownButton->setStyle(&defStyles.defaultMenuStyleBlack);
-			//_dropdownButton->setFont(GCP_FormComponent::_szukoZapomniUjeDirToYourFont);
-			GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1, getStyle()->cBorderColor);
-			GCP_Draw::Draw_FillRound(screen, xPos+getStyle()->iBorderWidth, yPos+getStyle()->iBorderWidth, width-getStyle()->iBorderWidth*2, height-getStyle()->iBorderWidth*2, 1, getStyle()->cBackColor);
+         _dropdownButton->setWidthHeight(_position.height(), _position.height());
+         _dropdownButton->setPosition(_position.x() + _position.width() - _dropdownButton->getPosition().width(), _position.y());
+			_dropdownButton->setStyle(GCP_ButtonBlackStyle); //!!!REV
+			
+			GCP_Draw::Render()->Draw_FillRound(_position, 1, getStyle()->borderColor);
+
+         int iBorderWidth = getStyle()->borderWidth;
+         GCP_Draw::Render()->Draw_FillRound(_position.x() + iBorderWidth, _position.y() + iBorderWidth, _position.width() - iBorderWidth * 2, _position.height() - iBorderWidth * 2, 1, getStyle()->backgroundColor);
 
 			if(_isDrawingDropDown){
-				GCP_Draw::Draw_FillRect(screen,xPos,yPos+25,width,25*(items.size()),getStyle()->cBackColor);
+            GCP_Draw::Render()->Draw_FillRect(_position.x(), _position.y() + 25, _position.width(), 25 * (items.size()), getStyle()->backgroundColor);
 				for(unsigned int i=0; i<items.size(); i++)
 				{
-					items.at(i)->isVisible = true;
-					items.at(i)->setPosition(xPos,yPos+25*(i+1));
-					items.at(i)->OnDraw(screen,w,h,formx,formy,formw,formh);
+               items.at(i)->setVisible(true);
+               items.at(i)->setPosition(_position.x(), _position.y() + 25 * (i + 1));
+					items.at(i)->OnDraw(event);
 				}
 			}
 			else
 				for(unsigned int i=0; i<items.size(); i++)
-					items.at(i)->isVisible = false;
+					items.at(i)->setVisible(false);
 
 
 
+         iBorderWidth = getStyle()->borderWidth;
+         GCP_Draw::Render()->Draw_Text(_sSelectedText, _position.x() + iBorderWidth * 2, _position.y() + iBorderWidth * 2, getStyle(), &drawdata);
 
-			GCP_Draw::renderText(_sSelectedText,xPos+getStyle()->iBorderWidth*2,yPos+getStyle()->iBorderWidth*2,screen,&drawdata,getStyle()->cTextColor,getStyle()->sFontDir,14);
-
-			_dropdownButton->OnDraw(screen,w,h,formx,formy,formw,formh);
-			basicOnDraw(screen, formx, formy, formw, formh);
+			_dropdownButton->OnDraw(event);
+			basicOnDraw(event);
 		}
 
-		gcp_formEvent OnEvent( const int GCP_EVENT, sdl_events events)
+		gcp_formEvent OnEvent(const GCP_Event &event)
 		{
 			gcp_formEvent evt;
 			evt.isEventInsideForm = false;
 			evt.isEventOnFormHead = false;
 			evt.isFormDragged = false;
-			if(!isVisible)
+			if(!isVisible())
 				return evt;
 
 
-			if(GCP_EVENT%2 !=0)
+         if (event.eventType% 2 != 0) //if Event is Global
 			{
-				_dropdownButton->OnEvent(GCP_EVENT, events);
-				if(!events.isPassingOnlyGlobalEvent)
-				if(_dropdownButton->checkCollisionBox(events.mousex, events.mousey))
-					_dropdownButton->OnEvent(GCP_EVENT+1, events);
+            _dropdownButton->OnEvent(event);
+				if(!event.isPassingOnlyGlobalEvent)
+				if(_dropdownButton->checkCollisionBox(event.mousex, event.mousey))
+               _dropdownButton->OnEvent(MakeEventLocal(event));
 
 				for(unsigned int i=0; i<items.size(); i++){
-						items.at(i)->OnEvent(GCP_EVENT,events);
-						if(!events.isPassingOnlyGlobalEvent)
-						if(items.at(i)->isVisible)
-						if(items.at(i)->checkCollisionBox(events.mousex, events.mousey)){
-							items.at(i)->OnEvent(GCP_EVENT+1,events);
+						items.at(i)->OnEvent(event);
+						if(!event.isPassingOnlyGlobalEvent)
+						if(items.at(i)->isVisible())
+						if(items.at(i)->checkCollisionBox(event.mousex, event.mousey))
+                  {
+                     items.at(i)->OnEvent(MakeEventLocal(event));
 						}
 				}
 
-				if(GCP_EVENT == GCP_ON_MOUSE_GUP)
+            if (event.eventType == GCP_ON_MOUSE_GUP)
 					_isDrawingDropDown = false;
 
 			}
 
-			basicOnEvent(GCP_EVENT, events);
+			basicOnEvent(event);
 			return evt;
 		}
 };

@@ -33,9 +33,9 @@ typedef GCP_SPointer<GCP_Form> gcp_spForm;
 class GCP_Form: public GCP_FormComponent
 {
 	protected:
-        GCP_Vector<gcp_spForm> _subForms;
-        GCP_Vector<gcp_spFormCmpnt> _components;
-        GCP_Vector<gcp_spContextMenu> _contextmenus;
+      GCP_Vector<gcp_spForm> _subForms;
+      GCP_Vector<gcp_spFormComponent> _components;
+      GCP_Vector<gcp_spContextMenu> _contextmenus;
 		GCP_SPointer<GCP_FormComponent> _componentThatWasLeftClicked;
 		int _swidth, _sheight;
 		bool _isLocked, _isClickedOnTopHeader, _isContextMenuOpened, _isComponentClicked;
@@ -56,27 +56,29 @@ class GCP_Form: public GCP_FormComponent
 		bool isLocked;
 
 		GCP_Form(){/*Õ”∆≈Õ ƒÀﬂ Ã≈——¿ƒ∆ ¡Œ —*/};
-		GCP_Form(SDL_Renderer* screen, int _width, int _height);
+		GCP_Form(int _width, int _height);
 		void setBufferSize(int screenw, int screenh);
 		void setFont(string dir);
 		~GCP_Form();	
 
-        void addComponent(GCP_SPointer<GCP_ContextMenu> const &component);
-        void addComponent(GCP_SPointer<GCP_FormComponent> const &component);
-        void removeComponent(GCP_SPointer<GCP_FormComponent> const &component);
-		void setPosition(int x, int y);
+      void addComponent(GCP_SPointer<GCP_ContextMenu> const &component);
+      void addComponent(GCP_SPointer<GCP_FormComponent> const &component);
+      void removeComponent(GCP_SPointer<GCP_FormComponent> const &component);
+		void setPosition(int x, int y, int width, int height);
+      void setPosition(int x, int y);
 
 		void toggleVisibility(void* obj);
 		void addSubForm(GCP_SPointer<GCP_Form> &form);
 		void showmessage(string text, bool block = false);
 		void showmessage(int text, bool block = false);
 
-		bool OnDraw(SDL_Renderer* screen, int w, int h);
-		gcp_formEvent OnEvent( const int GCP_EVENT, sdl_events events);
+      void OnDraw(const GCP_Event &event);
+      void setCaption(const std::string& str);
+      gcp_formEvent OnEvent(const GCP_Event &event);
 
 		
-		bool OnTextInput(SDL_TextInputEvent text);
-		bool OnTextEdit(SDL_TextEditingEvent edit);
-		gcp_formEvent OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion);
+      bool OnTextInput(const GCP_Event& event);
+      bool OnTextEdit(const GCP_Event& event);
+		gcp_formEvent OnMouseGlobalLeftHoldMotion(const GCP_Event &event);
 };
 #endif

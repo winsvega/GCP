@@ -9,29 +9,27 @@ GCP_Edit::GCP_Edit()
 	_iDrawDash = 0;					//Переменная для таймера для вывода текста
 	_iTextDrawIndex = 0;			//С какого индекса выводим текст (если он слишком длинный)
 	inputType = GCP_EDIT_ALL;		//Формат ввода данных
-	style=NULL;
-	setStyle(&defStyles.defaultMenuStyle);
+	setStyle(GCP_ButtonWhiteStyle);
 }
 
-void GCP_Edit::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh)
+void GCP_Edit::OnDraw(const GCP_Event &event)
 {
-	if(!isVisible)
+	if(!isVisible())
 		return;
-
-
+   
 	//Выводим текст в рамочке
-	//
+   GCP_Draw::Render()->Draw_FillRound(_position, 1, getStyle()->backgroundColor);
+   GCP_Draw::Render()->Draw_Round(_position, 1, getStyle()->borderColor);
 
-	GCP_Draw::Draw_FillRound(screen, xPos, yPos, width, height, 1, getStyle()->cBackColor);
-	GCP_Draw::Draw_Round(screen, xPos, yPos, width, height, 1, getStyle()->cBorderColor);
-	GCP_Draw::Draw_FillRound(screen, xPos+getStyle()->iBorderWidth, yPos+getStyle()->iBorderWidth, width-getStyle()->iBorderWidth*2, height-getStyle()->iBorderWidth*2, 1, getStyle()->cTextFieldBackColor);
+   int iBorderWidth = getStyle()->borderWidth;
+   GCP_Draw::Render()->Draw_FillRound(_position.x() + iBorderWidth, _position.y() + iBorderWidth, _position.width() - iBorderWidth * 2, _position.height() - iBorderWidth * 2, 1, getStyle()->textFieldColor);
 	//TTF_Font* font = TTF_OpenFont(getFont().c_str(),14);
 
-	SDL_Rect rect = {xPos+getStyle()->iBorderWidth,yPos+getStyle()->iBorderWidth*2,width-getStyle()->iBorderWidth*2,height-getStyle()->iBorderWidth*2 };
+	SDL_Rect rect = {_position.x()+iBorderWidth,_position.y()+iBorderWidth*2,_position.width()-iBorderWidth*2,_position.height()-iBorderWidth*2 };
 	SDL_SetTextInputRect(&rect); //хз вообще зачем и что оно дает
 	//!! размер шрифта !!!
-	GCP_Draw::renderText(_sTextInputDraw,xPos+getStyle()->iBorderWidth*2,yPos+getStyle()->iBorderWidth*2,screen,&drawdata,getStyle()->cTextColor,getFont().c_str(),14);
-	basicOnDraw(screen, formx, formy, formw, formh);
+   GCP_Draw::Render()->Draw_Text(_sTextInputDraw, _position.x() + iBorderWidth * 2, _position.y() + iBorderWidth * 2, getStyle(), &drawdata);
+	basicOnDraw(event);
 
 
 	_iDrawDash++;
@@ -39,31 +37,28 @@ void GCP_Edit::OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, i
 	{
 		//MAKE THIS AS A GCP_DRAW FUNCTION
 		int sw,sh;
-		TTF_Font *font = NULL;
-		font = TTF_OpenFont(getFont().c_str(), 14);
-		TTF_SizeUTF8(font, _sTextInputDraw.c_str(), &sw, &sh);  //ASSUME ENGLISH CHARS ONLY
 		//тут могут быть проблемы с определением размера строки с русскими или юникод чарактерами когда те представлены в разной кодировке (1 или 2 байта)
 		//Сайчас они обрабатываются в нормальную кодировку функцией CP1251TOUTF но это работатет не на всех устройствах
-
+      GCP_Draw::Render()->GetTextSize(_sTextInputDraw, sw, sh, getStyle());
 		//Рисуем подчеркивание
-		GCP_Draw::Draw_Line(screen,xPos+sw+getStyle()->iBorderWidth*2,yPos+getStyle()->iBorderWidth*2,xPos+sw+getStyle()->iBorderWidth*2,yPos+getStyle()->iBorderWidth*2+sh,getStyle()->cTextColor);
-		TTF_CloseFont(font);
+      int iBorderWidth = getStyle()->borderWidth;
+      GCP_Draw::Render()->Draw_Line(_position.x() + sw + iBorderWidth * 2, _position.y() + iBorderWidth * 2, _position.x() + sw + iBorderWidth * 2, _position.y() + iBorderWidth * 2 + sh, getStyle()->textColor);
 		if(_iDrawDash>20)	//!!! таймер мерцания
 			_iDrawDash = 0;
 	}
 
 }
 
-gcp_formEvent GCP_Edit::OnEvent( const int GCP_EVENT, sdl_events events)
+gcp_formEvent GCP_Edit::OnEvent(const GCP_Event &event)
 {
 	gcp_formEvent evt;
 	evt.isEventInsideForm = false;
 	evt.isEventOnFormHead = false;
 	evt.isFormDragged = false;
-	if(!isVisible)
+	if(!isVisible())
 		return evt;
 
-	switch(GCP_EVENT)
+	switch(event.eventType)
 	{
 		case GCP_ON_LEFT_CLICK:
 			_isEditingText = true;
@@ -72,11 +67,11 @@ gcp_formEvent GCP_Edit::OnEvent( const int GCP_EVENT, sdl_events events)
 			_isEditingText = false;
 			break;
 		case GCP_ON_GKEYDOWN:
-			OnKeyDown(events.keyboard);
+			OnKeyDown(event);
 			break;
 	}
 
-	basicOnEvent(GCP_EVENT, events);
+	basicOnEvent(event);
 	return evt;
 }
 /*bool GCP_Edit::OnMouseLeftClick(SDL_MouseButtonEvent mousebutton)	{
@@ -104,11 +99,11 @@ gcp_formEvent GCP_Edit::OnEvent( const int GCP_EVENT, sdl_events events)
 	return evt;
 }*/
 
-void GCP_Edit::OnKeyDown(SDL_KeyboardEvent keybevent){
-	if(!isVisible || !_isEditingText)
+void GCP_Edit::OnKeyDown(const GCP_Event &event){
+	if(!isVisible() || !_isEditingText)
 		return;
 
-	switch (keybevent.keysym.sym)
+	/*switch (keybevent.keysym.sym)
     {
         case SDLK_RETURN:
 			 _sTextInput = "";
@@ -122,7 +117,7 @@ void GCP_Edit::OnKeyDown(SDL_KeyboardEvent keybevent){
 				corelateText();
              }
              break;
-    }
+    }*/
 }
 
 
@@ -160,14 +155,16 @@ union rusdigit
 //////////////////////////////////////////
 
 
-bool GCP_Edit::OnTextInput(SDL_TextInputEvent textevent)
+bool GCP_Edit::OnTextInput(const GCP_Event &event)
 {
-	if(!isVisible || !_isEditingText)
+	if(!isVisible() || !_isEditingText)
 		return false;
 
-	unsigned int i = 0;
-	while(textevent.text[i]!=0)
-		i++;
+   return false;
+
+	//unsigned int i = 0;
+	//while(textevent.text[i]!=0)
+	//	i++;
 
 
 	///This convert two digits from unicode input to one digit that point to russian ASCI
@@ -194,7 +191,7 @@ bool GCP_Edit::OnTextInput(SDL_TextInputEvent textevent)
 	}*/
 
 
-	string s =  textevent.text;
+	/*string s =  textevent.text;
 	switch(inputType)
 	{
 		case GCP_EDIT_DIGITONLY:
@@ -220,31 +217,25 @@ bool GCP_Edit::OnTextInput(SDL_TextInputEvent textevent)
 	}
 	_sTextInput.append(s.c_str());
 	corelateText();
-
+   */
 	return true;
 }
 void GCP_Edit::corelateText()
 {
 	//Если текст слишком большой или наоборот уменьшился после редактирования
 	//Смащаем индекс стартовой позиции с которой он выводится в компоненте
-	if(getStyle() == NULL)
-		return;
-	if(getStyle()->sFontDir == "")
+	if(getStyle().getPointer() == NULL)
 		return;
 
 	_sTextInputDraw = _sTextInput;
 	_iTextDrawIndex = 0;
 
-	//MAKE THIS AS A GCP_DRAW FUNCTION
-		int sw,sh;
-		TTF_Font *font = NULL;
-		font = TTF_OpenFont(getFont().c_str(), 14);
-		TTF_SizeUTF8(font, _sTextInput.c_str(), &sw, &sh);  //ASSUME ENGLISH CHARS ONLY
-	//
-	//style;
-	//SStyle* a = getStyle();
-
-	while(sw>width-getStyle()->iBorderWidth*2)
+	
+	int sw,sh;
+   GCP_Draw::Render()->GetTextSize(_sTextInput, sw, sh, getStyle());
+		
+	
+	while(sw>_position.width()-getStyle()->borderWidth*2)
 	{
 		_sTextInputDraw = "";
 		_iTextDrawIndex++;
@@ -254,14 +245,13 @@ void GCP_Edit::corelateText()
 		_sTextInputDraw.append(buffer);
 
 
-		TTF_SizeUTF8(font, _sTextInputDraw.c_str(), &sw, &sh);  //ASSUME ENGLISH CHARS ONLY
+      GCP_Draw::Render()->GetTextSize(_sTextInput, sw, sh, getStyle());
 	}
-	TTF_CloseFont(font);
 
 }
-bool GCP_Edit::OnTextEdit(SDL_TextEditingEvent edit)
+bool GCP_Edit::OnTextEdit(const GCP_Event &event)
 {
-	if(!isVisible || !_isEditingText)
+	if(!isVisible() || !_isEditingText)
 		return false;
 
 	return true;

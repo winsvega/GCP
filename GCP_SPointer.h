@@ -70,11 +70,11 @@ class GCP_SPointer
             return *this;
         }
 
-        GCP_SPointer&  operator=(const int rhs)		{		_pointee = NULL;	return *this;	}
+      GCP_SPointer&  operator=(const int rhs)		{		_pointee = NULL;	return *this;	}
 
 		~GCP_SPointer(){		release();				};
 
-
+      ///
 		void setEmpty(bool empty)
 		{
 			//Застваить все окружение и все смартпоинтеры думать, что класс удален (потом пожно отключить)
@@ -85,6 +85,15 @@ class GCP_SPointer
 			}
 		}
 
+      ///
+      int getRefCount()
+      {
+         if (_pointee)
+            return _pointee->_nRef;
+         return -1;
+      }
+
+      ///
 		bool isEmpty()
 		{
 			if(_pointee != NULL)
@@ -93,14 +102,10 @@ class GCP_SPointer
 			return true;
 		}
 
-		//оператор *
-		T& operator*() const	{	return *_pointee;	}
-
-		//оператор ->
-		T* operator->() const	{	return _pointee;	}
-
-		//приведение к типу T*
-		operator T* ()	{	return _pointee;	}
+		
+		T& operator*() const	{	return *_pointee;	}//оператор *		
+		T* operator->() const	{	return _pointee;	}//оператор ->
+		operator T* ()	{	return _pointee;	}//приведение к типу T*
 
 		/*template <class D>
 		operator GCP_SPointer<D> ()

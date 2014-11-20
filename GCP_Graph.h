@@ -13,7 +13,7 @@ class GCP_Graph: public GCP_FormComponent
 	public:
 		GCP_Vector<gcp_graphdata*> *values;
 		GCP_Graph();
-		void OnDraw(SDL_Renderer* screen,int w, int h, int formx, int formy, int formw, int formh);
+      void OnDraw(const GCP_Event& event);
 };
 
 #endif

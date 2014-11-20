@@ -8,20 +8,13 @@
 #include <cstdio>
 #include <ctype.h>
 #include "GCP_Vector.h"
+#include "GCP_Delegate.h"
+
 const double GCP_RADTODEG = (double)180/3.14;
 const double GCP_DEGTORAD = (double)3.14/180;
 using namespace std;
-#include "GCP_Delegate.h"
-//typedef enum {false, true} bool;
-//#define bool int
-//#define true 1
-//#define false 0
 
-
-
-
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
+///
 struct GCP_Point
 {
 	double X,Y;
@@ -36,7 +29,8 @@ struct GCP_Point
 	}
 	~GCP_Point(){}
 };
-/////////////////////////////////////////////////////////////////////////
+
+///
 struct GCP_Line
 {
 	GCP_Point pointA, pointB;					//Структура для линии
@@ -48,6 +42,20 @@ struct GCP_Line
 	{
 		return sqrt(pow(pointA.X-pointB.X,2)+pow(pointA.Y-pointB.Y,2));
 	}
+};
+
+struct GCP_Rect
+{
+   GCP_Rect(){};
+   GCP_Rect(GCP_Point topLeft_, GCP_Point bottomRight_) :topLeft(topLeft_), bottomRight(bottomRight_){}
+   GCP_Rect(double x, double y, double width, double height) : topLeft(GCP_Point(x, y)), bottomRight(GCP_Point(width, height)) {}
+   GCP_Rect(int x, int y, int width, int height) : topLeft(GCP_Point(x, y)), bottomRight(GCP_Point(width, height)) {}
+   GCP_Point topLeft, bottomRight;
+   int x()const{ return topLeft.X; }
+   int y()const{ return topLeft.Y; }
+   int width()const{ return bottomRight.X; }
+   int height()const{ return bottomRight.Y; }
+   const GCP_Point& center()const{ return GCP_Point(topLeft.X + bottomRight.X / 2, topLeft.Y + bottomRight.Y / 2); }
 };
 /////////////////////////////////////////////////////////////////////////
 class GeneticSpecies
