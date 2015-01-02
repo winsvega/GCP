@@ -4,6 +4,9 @@ Provides an interface for gui on SDL2
 Attach functions to buttons/form components  
 SmartPointer implementation  
 
+### Dependencies ###
+SDL2 (http://libsdl.org/download-2.0.php)  
+SDL_TTF (https://www.libsdl.org/projects/SDL_ttf/)  
 
 ### GCP_Math: ###
 Reflection/Refraction  
@@ -13,7 +16,7 @@ String to Int/Double Convertion
 
 
 ### Working Example: ###
-See main.cpp
+See main.cpp  
 https://github.com/winsvega/GCP/issues/1  (old version)
 
 ### Screenshots: ###
