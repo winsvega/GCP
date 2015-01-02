@@ -51,9 +51,6 @@
     <ClInclude Include="GCP_Label.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GCP_Math.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GCP_MessageBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -73,6 +70,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GCP_Constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GCP_Math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

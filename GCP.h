@@ -28,28 +28,30 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef GCP_MainH
 #define GCP_MainH
+#define GCP_VERSION "1.01c"
 #include "GCP_Form.h"
 #include "GCP_Button.h"
 #include "SDL.h"
 
-class GCP_Controller: public GCP_SPointerBase
+namespace gcp
 {
-	protected:		
-		int _width, _height;				      //размер буфера экрана. некоторые системы валятся если пробуешь нарисовать за буфер. GCP будет учитывать это.
-		GCP_SPointer<GCP_Form> _mainForm;	//Главная форма интерфейса
-		bool _isLeftHold;					      //переключатель для события драг ен дроп      
-	public: 
-		GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height);	
-		~GCP_Controller();
-		void setFont(string directory_path_string);
-		GCP_SPointer<GCP_Form> createForm();
-		void handleEvents(SDL_Event event);
-		void draw();      
+   class GCP_Controller : public GCP_SPointerBase
+   {
+   protected:
+      int _width, _height;				      //размер буфера экрана. некоторые системы валятся если пробуешь нарисовать за буфер. GCP будет учитывать это.
+      GCP_SPointer<GCP_Form> _mainForm;	//Главная форма интерфейса
+      bool _isLeftHold;					      //переключатель для события драг ен дроп      
+   public:
+      GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height);
+      ~GCP_Controller();
+      void setFont(const string &directory_path_string);
+      GCP_SPointer<GCP_Form> createForm();
+      void handleEvents(const SDL_Event &event);
+      void draw();
       void deInit()
       {
          GCP_Draw::DeInit();
       }
-};
-
-
+   };
+}
 #endif

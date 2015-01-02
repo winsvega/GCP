@@ -1,6 +1,7 @@
 #include "GCP.h"
 #include "GCP_Form.h"
 #include "GCP_Button.h"
+using namespace gcp;
 
 string GCP_Draw::_sDefaultFontPath = "";
 GCP_Controller::GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height)
@@ -19,7 +20,7 @@ GCP_Controller::~GCP_Controller()
 }
 
 
-void GCP_Controller::setFont(string sFontPath)
+void GCP_Controller::setFont(const string &sFontPath)
 {
    GCP_Draw::setFontPath(GCPE_FontType::E_ARIAL, sFontPath);   
 }
@@ -31,7 +32,7 @@ GCP_SPointer<GCP_Form> GCP_Controller::createForm()
 	return _mainForm;
 }
 
-void GCP_Controller::handleEvents(SDL_Event event)
+void GCP_Controller::handleEvents(const SDL_Event &event)
 {
    //Обработка событий от SDL
    GCP_Event baseEvent;
@@ -45,8 +46,8 @@ void GCP_Controller::handleEvents(SDL_Event event)
 	switch(event.type)
 	{
 		case SDL_KEYDOWN:
-         baseEvent.eventType = GCP_ON_KEYDOWN;
-         //evt.keyboard = event.key;
+		 baseEvent.eventType = GCP_ON_GKEYDOWN;
+		 baseEvent.keycode = event.key.keysym.sym;
          _mainForm->OnEvent(baseEvent);
          break;			
 
@@ -54,7 +55,10 @@ void GCP_Controller::handleEvents(SDL_Event event)
 		      //	_mainForm->OnTextEdit(event.edit);	break;
 
 		case SDL_TEXTINPUT:
-			   //_mainForm->OnTextInput(event.text);	break;
+			baseEvent.eventType = GCP_ON_GTEXTINPUT;
+			baseEvent.sTextInput = event.text.text;
+			_mainForm->OnEvent(baseEvent);				
+		break;
 
 		case SDL_MOUSEMOTION:
          baseEvent.eventType = GCP_ON_MOUSE_GMOTION;
@@ -127,7 +131,7 @@ void GCP_Controller::draw()
 {
    GCP_Event drawEvent;
    drawEvent.eventType = GCP_ON_GDRAW;
-   drawEvent.drawRect = GCP_Rect(0, 0, _width, _height);
+   drawEvent.drawRect = GCP_Rect<int>(0, 0, _width, _height);
    _mainForm->OnDraw(drawEvent);
 }
 

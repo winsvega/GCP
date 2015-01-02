@@ -1,6 +1,6 @@
 #include "GCP_Edit.h"
 #include "GCP_FormComponent.h"
-
+using namespace gcp;
 
 GCP_Edit::GCP_Edit()
 {
@@ -8,7 +8,7 @@ GCP_Edit::GCP_Edit()
 	_sTextInputDraw = "";			//Текст который рисуем
 	_iDrawDash = 0;					//Переменная для таймера для вывода текста
 	_iTextDrawIndex = 0;			//С какого индекса выводим текст (если он слишком длинный)
-	inputType = GCP_EDIT_ALL;		//Формат ввода данных
+	inputType = GCPE_InputType::ALL;//Формат ввода данных
 	setStyle(GCP_ButtonWhiteStyle);
 }
 
@@ -67,13 +67,17 @@ gcp_formEvent GCP_Edit::OnEvent(const GCP_Event &event)
 			_isEditingText = false;
 			break;
 		case GCP_ON_GKEYDOWN:
-			OnKeyDown(event);
+			onKeyDown(event.keycode);
+			break;
+		case GCP_ON_GTEXTINPUT:
+			onTextInput(event.sTextInput);
 			break;
 	}
 
 	basicOnEvent(event);
 	return evt;
 }
+
 /*bool GCP_Edit::OnMouseLeftClick(SDL_MouseButtonEvent mousebutton)	{
 	if(!isVisible)
 		return false;
@@ -99,11 +103,13 @@ gcp_formEvent GCP_Edit::OnEvent(const GCP_Event &event)
 	return evt;
 }*/
 
-void GCP_Edit::OnKeyDown(const GCP_Event &event){
+void GCP_Edit::onKeyDown(int keycode)
+{
 	if(!isVisible() || !_isEditingText)
 		return;
 
-	/*switch (keybevent.keysym.sym)
+	
+	switch (keycode)
     {
         case SDLK_RETURN:
 			 _sTextInput = "";
@@ -117,7 +123,7 @@ void GCP_Edit::OnKeyDown(const GCP_Event &event){
 				corelateText();
              }
              break;
-    }*/
+    }
 }
 
 
@@ -155,12 +161,11 @@ union rusdigit
 //////////////////////////////////////////
 
 
-bool GCP_Edit::OnTextInput(const GCP_Event &event)
+bool GCP_Edit::onTextInput(const string &text)
 {
 	if(!isVisible() || !_isEditingText)
 		return false;
 
-   return false;
 
 	//unsigned int i = 0;
 	//while(textevent.text[i]!=0)
@@ -191,33 +196,33 @@ bool GCP_Edit::OnTextInput(const GCP_Event &event)
 	}*/
 
 
-	/*string s =  textevent.text;
+
 	switch(inputType)
 	{
-		case GCP_EDIT_DIGITONLY:
-			if(!GCP_Math::isNum((char*)s.c_str()))
+		case DIGITONLY:
+			if (!GCP_Math::isNum((char*)text.c_str()))
 				return false;
 			break;
 
-		case GCP_EDIT_DOUBLEDIGIT:
-			if(!GCP_Math::isNum((char*)s.c_str()) && s[0]!= '.')
+		case DOUBLEDIGIT:
+			if (!GCP_Math::isNum((char*)text.c_str()) && text[0] != '.')
 				return false;
-			if(s[0]== '.'){
+			if (text[0] == '.'){
 				for(unsigned int i=0; i<_sTextInput.size(); i++)
 					if(_sTextInput.at(i) == '.')
 						return false;
 			}
 			break;
 
-		case GCP_EDIT_TEXTONLY:
-			if(GCP_Math::isNum((char*)s.c_str()) && s[0]!= ' ')
+		case TEXTONLY:
+			if (GCP_Math::isNum((char*)text.c_str()) && text[0] != ' ')
 				return false;
 			break;
 		//case GCP_Edit_InputType_Enum::ALL:
 	}
-	_sTextInput.append(s.c_str());
+	_sTextInput.append(text.c_str());
 	corelateText();
-   */
+   
 	return true;
 }
 void GCP_Edit::corelateText()
@@ -249,15 +254,15 @@ void GCP_Edit::corelateText()
 	}
 
 }
-bool GCP_Edit::OnTextEdit(const GCP_Event &event)
+/*bool GCP_Edit::OnTextEdit(const GCP_Event &event)
 {
 	if(!isVisible() || !_isEditingText)
 		return false;
 
 	return true;
-}
+}*/
 
-void GCP_Edit::setCaption(std::string str)
+void GCP_Edit::setCaption(const std::string &str)
 {
 	_sTextInput = str;
 	corelateText();

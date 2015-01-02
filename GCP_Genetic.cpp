@@ -1,4 +1,5 @@
 #include "GCP_Math.h"
+using namespace gcp;
 
 //ГЕНЕТИЧЕСКИЙ АЛГОРИТМ ОБЩИЙ СЛУЧАЙ
 void GeneticSpecies::breed(GeneticSpecies *other, int devideblocks)
@@ -29,7 +30,7 @@ void GeneticSpecies::breed(GeneticSpecies *other, int devideblocks)
 		}
 
 
-		for(int i=0; i<oursBlocks.size(); i++)
+		for(unsigned int i=0; i<oursBlocks.size(); i++)
 		{
 			int ourBlockNum = oursBlocks.at(i);
 			int otherBlockNum = othersBlocks.at(i);
@@ -127,7 +128,7 @@ string GCP_Math::integersToBinaryString(int *arr, int size)
 
 /// @brief Бинарная строка в массив
 ///< Конвертирует бинарную строку в массив чисел <255 берет за число каждые 8 бит.
-int *GCP_Math::binaryStringTointegers(string binary, int size, int *arr)
+int *GCP_Math::binaryStringTointegers(const string &binary, int size, int *arr)
 {
 	for(int i=0; i<size; i++)
 	{

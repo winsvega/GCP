@@ -1,7 +1,7 @@
 #include "GCP_ContextMenu.h"
 #include "GCP_Button.h"
 #include "GCP_Vector.h"
-
+using namespace gcp;
 
 //Контекстное меню это набор кнопок, которые открываются например на правый клик по формочке
 GCP_ContextMenu::GCP_ContextMenu(){
@@ -24,18 +24,19 @@ void GCP_ContextMenu::setLock(bool flag)
 }
 
 
-void GCP_ContextMenu::initTexture(SDL_Renderer* screen)
+/*void GCP_ContextMenu::initTexture(SDL_Renderer* screen)
 {
 	unsigned int iMenuSize = menu.size();
 	for(unsigned int i=0; i<iMenuSize; i++)
 		menu.at(i)->initTexture(screen);	//Сечас эта функция не делает ничего. но по хорошему должна осуществлять предзагрузку картинок кнопок
-}
+}*/
 
-void GCP_ContextMenu::addButton(GCP_SPointer<GCP_Button> &button)	{
+void GCP_ContextMenu::addButton(const GCP_SPointer<GCP_Button> &button)	{
 	menu.push_back(button);
 }
 
-void GCP_ContextMenu::addButton(string type)	{
+void GCP_ContextMenu::addButton(const string &type)
+{
 	_iSeparators.push_back( menu.size());	//В меню можно добавлять разделители. Разделитель не кнопка, а отступ / либо линия
 }
 
@@ -52,9 +53,9 @@ void GCP_ContextMenu::close(void *obj)
 }
 
 
-bool GCP_ContextMenu::OnMouseGlobalLeftHoldMotion(SDL_MouseMotionEvent motion, int fx, int fy, int fw, int fh)	{
+gcp_formEvent GCP_ContextMenu::OnMouseGlobalLeftHoldMotion(const GCP_Event &event)	{
 	//Context menu is not dragable
-	return false;
+	return gcp_formEvent();
 }
 
 gcp_formEvent GCP_ContextMenu::OnEvent(const GCP_Event &event)
@@ -86,11 +87,6 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 	if(!isVisible())
 		return;
 
-   int formx = event.drawRect.x();
-   int formy = event.drawRect.y();
-   int formw = event.drawRect.width();
-   int formh = event.drawRect.height();
-
 	//Вывод кнопок на экран
 	//Calculate Size For OutOfSurface Correlation
 	int maxMenuWidth = 0;							//Максимальная ширина компонентов в меню
@@ -115,8 +111,9 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 	}
 
 	//Двигаем меню если оно выходит за буфер / форму
-	GCP_Point normPos = GCP_Math::normalizeRectInRect(GCP_Point(formx,formy),
-						GCP_Point(formx+formw,formy+formh),_position.x(), _position.y(), stackWidth+iMenuSize,stackHeight+iMenuSize,1);
+   GCP_Point<int> normPos = GCP_Math::normalizeRectInRect<int>(
+      GCP_Rect<int>(_position.x(), _position.y(), stackWidth + iMenuSize, stackHeight + iMenuSize),
+      event.drawRect, 1);
 	_position.topLeft.X = (int)normPos.X;
    _position.topLeft.Y = (int)normPos.Y;
 

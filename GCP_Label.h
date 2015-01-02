@@ -2,17 +2,19 @@
 #define GCP_LabelH
 #include "GCP_FormComponent.h"
 
-class GCP_Label: public GCP_FormComponent
+namespace gcp
 {
-	public:
-		int iTextSize, iMaxTextLength;
-		string text;
+   class GCP_Label : public GCP_FormComponent
+   {
+   public:
+      int iTextSize, iMaxTextLength;
+      string text;
 
-		GCP_Label();
+      GCP_Label();
 
       void OnDraw(const GCP_Event &event);
-};
-
+   };
+}
 #endif
 
 

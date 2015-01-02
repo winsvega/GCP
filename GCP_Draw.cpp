@@ -1,10 +1,9 @@
-#include "../sdl2_ttflib/source/SDL_ttf.h"
 #include "GCP_Math.h"
 #include "GCP_Draw.h"
 #include "SDL_ttf.h"
+using namespace gcp;
 
-
-void GCP_Draw_SDL2::Draw_Line(const GCP_Point &A, const GCP_Point &B, const GCP_Color &color, short bold) const
+void GCP_Draw_SDL2::Draw_Line(const GCP_Point<int> &A, const GCP_Point<int> &B, const GCP_Color &color, short bold) const
 {
    Draw_Line(A.X, A.Y, B.X, B.Y, color, bold);
 }
@@ -40,12 +39,12 @@ void GCP_Draw_SDL2::Draw_Round(int x, int y, int width, int height, short scale,
 	SDL_RenderDrawRect(_screen,&recta);
 	SDL_SetRenderDrawColor(_screen,r,g,b,a);
 }
-void GCP_Draw_SDL2::Draw_Round(const GCP_Rect& rect, short scale, const GCP_Color &color) const
+void GCP_Draw_SDL2::Draw_Round(const GCP_Rect<int>& rect, short scale, const GCP_Color &color) const
 {
    Draw_Round(rect.x(), rect.y(), rect.width(), rect.height(), scale, color);
 }
 
-void GCP_Draw_SDL2::Draw_FillRound(const GCP_Rect& rect, int scale, const GCP_Color &color) const
+void GCP_Draw_SDL2::Draw_FillRound(const GCP_Rect<int>& rect, int scale, const GCP_Color &color) const
 {
    Draw_FillRound(rect.x(), rect.y(), rect.width(), rect.height(), scale, color);
 }
@@ -60,7 +59,7 @@ void GCP_Draw_SDL2::Draw_FillRound(int x, int y, int width, int height, int scal
 	SDL_SetRenderDrawColor(_screen,r,g,b,a);
 }
 
-void GCP_Draw_SDL2::Draw_Rect(const GCP_Rect &rect, const GCP_Color &color) const
+void GCP_Draw_SDL2::Draw_Rect(const GCP_Rect<int> &rect, const GCP_Color &color) const
 {
    Draw_Rect(rect.x(), rect.y(), rect.width(), rect.height(), color);
 }
@@ -75,7 +74,7 @@ void GCP_Draw_SDL2::Draw_Rect(int x, int y, int width, int height, const GCP_Col
 	SDL_SetRenderDrawColor(_screen,r,g,b,a);
 }
 	
-void GCP_Draw_SDL2::Draw_FillRect(const GCP_Rect &rect, const GCP_Color &color) const
+void GCP_Draw_SDL2::Draw_FillRect(const GCP_Rect<int> &rect, const GCP_Color &color) const
 {
    Draw_FillRect(rect.x(), rect.y(), rect.width(), rect.height(), color);
 }
@@ -302,7 +301,7 @@ for(it = iteration, i = x+distance, draw_point=0;  draw_point < tmp_data_size;
 		percent /= max;
 		_y2 = y + height/2 - percent*(height-20)/200;				
 
-		drawLine(GCP_Point(_x,_y),GCP_Point(_x2,_y2),c_red,0);
+		drawLine(GCP_Point<int>(_x,_y),GCP_Point<int>(_x2,_y2),c_red,0);
 
 		if(insert_sum > 1)		{
 			insert_sum = insert_sum-1;
@@ -321,17 +320,17 @@ SDL_Main::DrawLine(screen,PointD(x,y+height/2),PointD(x+width,y+height/2),c_blac
 /////////////////////////////////////////////////////////////////////////
 ///////////////////////DRAW RECTANGLE
 /////////////////////////////////////////////////////////////////////////
-void GCP_Draw_SDL2::drawRect(GCP_Point pointTopLeft, GCP_Point pointBottomRight, const GCP_Color &color, int bold) const
+void GCP_Draw_SDL2::drawRect(const GCP_Point<int> &pointTopLeft, const GCP_Point<int> &pointBottomRight, const GCP_Color &color, int bold) const
 {
-	drawLine( pointTopLeft, GCP_Point(pointBottomRight.X,pointTopLeft.Y),color,bold); 
-	drawLine( pointTopLeft, GCP_Point(pointTopLeft.X,pointBottomRight.Y),color,bold);
-	drawLine( pointBottomRight, GCP_Point(pointBottomRight.X,pointTopLeft.Y),color,bold);
-	drawLine( pointBottomRight, GCP_Point(pointTopLeft.X,pointBottomRight.Y),color,bold);
+	drawLine( pointTopLeft, GCP_Point<int>(pointBottomRight.X,pointTopLeft.Y),color,bold); 
+   drawLine(pointTopLeft, GCP_Point<int>(pointTopLeft.X, pointBottomRight.Y), color, bold);
+   drawLine(pointBottomRight, GCP_Point<int>(pointBottomRight.X, pointTopLeft.Y), color, bold);
+   drawLine(pointBottomRight, GCP_Point<int>(pointTopLeft.X, pointBottomRight.Y), color, bold);
 }
 /////////////////////////////////////////////////////////////////////////
 ////////////////////////DRAW LINE
 /////////////////////////////////////////////////////////////////////////
-void GCP_Draw_SDL2::drawLine(GCP_Point pointA, GCP_Point pointB, const GCP_Color &color, int bold) const
+void GCP_Draw_SDL2::drawLine(const GCP_Point<int> &pointA, const GCP_Point<int> &pointB, const GCP_Color &color, int bold) const
 {
 	/////////////////////////////////////ЗАКОММЕНТИРОВАНА ПРОВЕРКА ВЫХОДА ЛИНИИ ЗА БУФЕР
 	/////////////////////////////////////(НЕ ТРЕБУЕТСЯ В SDL2.0)
@@ -382,7 +381,7 @@ void GCP_Draw_SDL2::drawLine(GCP_Point pointA, GCP_Point pointB, const GCP_Color
 	//pointA_norm = GCP_Math::normalizePointInRect(pointA_norm,GCP_Point(bs,bs),GCP_Point(w-bs,h-bs));
 	//pointB_norm = GCP_Math::normalizePointInRect(pointB_norm,GCP_Point(bs,bs),GCP_Point(w-bs,h-bs));
 	//SLD2 автоматически обрабатывает исключение если мы рисуем линию за пределами буфера
-	GCP_Point pointA_norm,pointB_norm;
+	GCP_Point<int> pointA_norm,pointB_norm;
 	pointA_norm = pointA;
 	pointB_norm = pointB;
 	switch(bold)
@@ -413,7 +412,7 @@ void GCP_Draw_SDL2::applySurface(int x, int y, SDL_Texture *tex, SDL_Renderer* r
    SDL_RenderCopy(render, tex, NULL, &pos);
 }
 
-SDL_Texture* GCP_Draw_SDL2::renderText(GCP_DrawData* drawdata, std::string &message, const gcp_spStyle &style) const
+SDL_Texture* GCP_Draw_SDL2::renderText(GCP_DrawData* drawdata, const std::string &message, const gcp_spStyle &style) const
 {
 
 	//!!!!!!!!!!!!!!!
@@ -502,13 +501,17 @@ void GCP_Draw_SDL2::SetBlendMode(GCPE_BlendMode mode)
 }
 
 void GCP_Draw_SDL2::Draw_Image(const string &path, int x, int y) const
-{   
+{	
    SDL_Surface *bmp = SDL_LoadBMP(path.c_str());
    if(bmp != NULL){
       //SDL_Rect recta = {(int)xPos+2,(int)yPos+2,width,height};
       //SDL_BlitSurface( hello, NULL, screen, &recta );
       //грузим картинку в текстуру и выводим ее на буфер
+	  
+	  //SDL_SetColorKey(bmp, true, SDL_MapRGB(bmp->format, 255, 255, 255));
       SDL_Texture *tex = SDL_CreateTextureFromSurface(_screen, bmp);
+	  //SDL_SetTextureAlphaMod(tex, 233);
+	  
       applySurface(x, y, tex, _screen);
       SDL_FreeSurface( bmp );
       SDL_DestroyTexture(tex); //Create texture should be once !!!!!!!!! not dynamic!!!!!
@@ -526,20 +529,20 @@ void GCP_Draw_SDL2::GetTextSize(const std::string &text, int &width, int &height
 }
 
 ///
-void GCP_Draw_SDL2::Draw_Text(const std::string &text, const GCP_Rect &pos, const gcp_spStyle &pStyle, GCP_DrawData* drawdata) const
+void GCP_Draw_SDL2::Draw_Text(const std::string &text, const GCP_Rect<int> &pos, const gcp_spStyle &pStyle, GCP_DrawData* drawdata) const
 {
    int iX, iY;
    switch (pStyle->font.align)
    {
       case E_LEFT:
-         iX = pos.topLeft.X + 3;
-         iY = pos.topLeft.Y + 3;
+         iX = pos.x() + 3;
+         iY = pos.y() + 3;
          break;
       case E_CENTER:
          int width, height;
          GetTextSize(text, width, height, pStyle);
-         iX = pos.topLeft.X + (pos.bottomRight.X  - width)/2;
-         iY = pos.topLeft.Y + 3;
+		 iX = pos.x() + (pos.width() - width) / 2;
+         iY = pos.y() + 3;
          break;
       case E_RIGHT:
          break;
@@ -648,7 +651,8 @@ void GCP_Draw::initConstants()
 	c_green =  GCP_Color( 10, 135, 3);
 	c_aqua = GCP_Color( 64, 244, 231); 
 	c_orange = GCP_Color( 255, 130, 5);
-	c_grey = GCP_Color( 107, 107, 107);
+	c_grey = GCP_Color( 125, 125, 125);
+	c_dkgrey = GCP_Color(75, 75, 75);
       
    GCP_DefaultStyle = gcp_spStyle(new GCP_Style(GCPE_StyleType::E_DEFAULT));
    GCP_ButtonBlackStyle = gcp_spStyle(new GCP_Style(GCPE_StyleType::E_BUTTON));
@@ -657,24 +661,28 @@ void GCP_Draw::initConstants()
 }
 
 //does not work when entry point defined
-GCP_Color c_white = GCP_Color(255, 255, 255);
-GCP_Color c_black = GCP_Color( 0, 0, 0);
-GCP_Color c_aquadark = GCP_Color( 121, 188, 255);
-GCP_Color c_yellow = GCP_Color( 255, 255, 128);
-GCP_Color c_red = GCP_Color( 255, 23, 23);
-GCP_Color c_blue = GCP_Color( 29, 23, 255);
-GCP_Color c_lime = GCP_Color( 60, 240, 50); 
-GCP_Color c_green =  GCP_Color( 10, 135, 3);
-GCP_Color c_aqua = GCP_Color( 64, 244, 231); 
-GCP_Color c_orange = GCP_Color( 255, 130, 5);
-GCP_Color c_grey = GCP_Color( 107, 107, 107);
+namespace gcp
+{
+   GCP_Color c_white = GCP_Color(255, 255, 255);
+   GCP_Color c_black = GCP_Color(0, 0, 0);
+   GCP_Color c_aquadark = GCP_Color(121, 188, 255);
+   GCP_Color c_yellow = GCP_Color(255, 255, 128);
+   GCP_Color c_red = GCP_Color(255, 23, 23);
+   GCP_Color c_dkred = GCP_Color(225, 23, 23);
+   GCP_Color c_blue = GCP_Color(29, 23, 255);
+   GCP_Color c_lime = GCP_Color(60, 240, 50);
+   GCP_Color c_green = GCP_Color(10, 135, 3);
+   GCP_Color c_aqua = GCP_Color(64, 244, 231);
+   GCP_Color c_orange = GCP_Color(255, 130, 5);
+   GCP_Color c_grey = GCP_Color(125, 125, 125);
+   GCP_Color c_dkgrey = GCP_Color(75, 75, 75);
 
-GCP_SPointer<GCP_Style> GCP_DefaultStyle;
-GCP_SPointer<GCP_Style> GCP_ButtonBlackStyle;
-GCP_SPointer<GCP_Style> GCP_ButtonWhiteStyle;
-GCP_SPointer<GCP_Style> GCP_PanelBlackStyle;
-GCP_Draw_Base* GCP_Draw::_drawbase = NULL;
-		
+   GCP_SPointer<GCP_Style> GCP_DefaultStyle;
+   GCP_SPointer<GCP_Style> GCP_ButtonBlackStyle;
+   GCP_SPointer<GCP_Style> GCP_ButtonWhiteStyle;
+   GCP_SPointer<GCP_Style> GCP_PanelBlackStyle;
+   GCP_Draw_Base* GCP_Draw::_drawbase = NULL;
+}
 ////////////////////////////////////////////////////////////////
 ////////////////////////TO SDL COLOR
 ////////////////////////////////////////////////////////////////
