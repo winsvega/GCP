@@ -122,8 +122,8 @@ void GCP_Form::addComponent(GCP_SPointer<GCP_ContextMenu> const &component)
 void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> const &component)
 {
 	for (unsigned int i = 0; i < _components.size(); i++)
-	if (component == _components.at(i))			//ƒва раза одно и тоже не принимаем
-		return;
+		if (component == _components.at(i))			//ƒва раза одно и тоже не принимаем
+			return;
 
 	// оординаты компонента идут оносительно левого верхнего угла формы
 	const GCP_Rect<int> formPos = _position;
@@ -138,10 +138,10 @@ void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> const &component)
 void GCP_Form::removeComponent(GCP_SPointer<GCP_FormComponent> const &component)
 {
 	for (unsigned int i = 0; i < _components.size(); i++)
-	if (_components.at(i) == component){
-		_components.erase(i);
-		break;
-	}
+		if (_components.at(i) == component){
+			_components.erase(i);
+			break;
+		}
 }
 
 void GCP_Form::toggleVisibility(void* obj)
@@ -204,7 +204,7 @@ void GCP_Form::OnDraw(const GCP_Event &event)
 
 	
 	if (isTransparent)
-	{	
+	{
 		if (getStyle()->backgroundColor.a != 255)
 		{
 			GCP_Draw::Render()->SetBlendMode(E_BLEND_ADD);
@@ -215,7 +215,7 @@ void GCP_Form::OnDraw(const GCP_Event &event)
 	else
 	{
 		GCP_Draw::Render()->Draw_FillRound(_position, 1, getStyle()->backgroundColor);
-	}	
+	}
 	GCP_Draw::Render()->Draw_Round(_position, 1, getStyle()->headBackground);
 	
 
@@ -246,18 +246,18 @@ void GCP_Form::OnDraw(const GCP_Event &event)
 	//—ообщени€ можно сделать с потоками. тогда они могут блокировать всю программу пока не нажмешь кнопку ќ 
 	//Ќо тогда надо отдел€ть интерфейс от главного потока обработки событий SDL
 	if (_messages.size())
-	if (messagebox->isVisible() == false){
-		messagebox->messagelabel->text = _messages.pop_first();
-		messagebox->setCaption(_messages_caption.pop_first());
-		messagebox->setVisible(true);
-	}
+		if (messagebox->isVisible() == false){
+			messagebox->messagelabel->text = _messages.pop_first();
+			messagebox->setCaption(_messages_caption.pop_first());
+			messagebox->setVisible(true);
+		}
 
 	//!!! —ортировку тоже надо один раз сообразить
 	GCP_Math::quickSortComponent<gcp_spForm>(&_subForms, 0, _subForms.size() - 1, GCP_SORTBY_DRAWORDER);
 	unsigned int blockingFormIndex = -1;
 	_pBlockingForm = NULL;
 	onParentFormEndBlocking();
-	bool isHavingSubformsThatLocking = false;		
+	bool isHavingSubformsThatLocking = false;
 	for (unsigned int i = 0; i < _subForms.size(); i++){
 		gcp_spForm ptrSubForm = _subForms.at(i);
 		ptrSubForm->OnDraw(drawEvent);
@@ -310,11 +310,11 @@ gcp_formEvent GCP_Form::OnEvent(const GCP_Event &cevent)
 	
 	//ѕередаем всем дочерним формам глобальное событие
 	for (unsigned int i = 0; i < _subForms.size(); i++)
-	{	
+	{
 		if (_subForms.at(i) == _pBlockingForm)
 			continue;
 		other_evt = _subForms.at(i)->OnEvent(event);
-		evt.isEventInsideForm = evt.isEventInsideForm || other_evt.isEventInsideForm; //«апоминаем если это событие произошло внутри хоть одной из активных форм			
+		evt.isEventInsideForm = evt.isEventInsideForm || other_evt.isEventInsideForm; //«апоминаем если это событие произошло внутри хоть одной из активных форм
 		event.isPassingOnlyGlobalEvent = event.isPassingOnlyGlobalEvent || evt.isEventInsideForm; //¬се остальные формы получат только глобальные событи€ если хоть на одной мы обработаем локальные
 	}
 
@@ -352,27 +352,27 @@ gcp_formEvent GCP_Form::OnEvent(const GCP_Event &cevent)
 
 			//≈сли глобальное событие произошло над дочерней формой, локальные событи€ дл€ наших компонент не обрабатываем
 			if (!isLocalEventsLocked)
-			if (!isMouseOverSomeComponent && !evt.isEventInsideForm)	
-			{
-				if (_components.at(i)->checkCollisionBox(event.mousex, event.mousey))
+				if (!isMouseOverSomeComponent && !evt.isEventInsideForm)
 				{
-					_components.at(i)->OnEvent(MakeEventLocal(event));
-					if (event.eventType == GCP_ON_MOUSE_GLDOWN)
-						_componentThatWasLeftClicked = _components.at(i);
+					if (_components.at(i)->checkCollisionBox(event.mousex, event.mousey))
+					{
+						_components.at(i)->OnEvent(MakeEventLocal(event));
+						if (event.eventType == GCP_ON_MOUSE_GLDOWN)
+							_componentThatWasLeftClicked = _components.at(i);
 
-					if (_components.at(i)->isEventUnderneathBloacking())
-						isMouseOverSomeComponent = true;
-					//ѕередали локальное событие компоненту по этим координатам.
-					//ƒалее локальные событи€ более не передаем
+						if (_components.at(i)->isEventUnderneathBloacking())
+							isMouseOverSomeComponent = true;
+						//ѕередали локальное событие компоненту по этим координатам.
+						//ƒалее локальные событи€ более не передаем
+					}
 				}
-			}
 		}
 	}
 
 	event.isPassingOnlyGlobalEvent = evt.isEventInsideForm;
 	if (!isLocalEventsLocked)
-	for (unsigned int i = 0; i < _contextmenus.size(); i++)
-		_contextmenus.at(i)->OnEvent(event);
+		for (unsigned int i = 0; i < _contextmenus.size(); i++)
+			_contextmenus.at(i)->OnEvent(event);
 
 	if (event.eventType == GCP_ON_MOUSE_GUP)
 		_componentThatWasLeftClicked = 0;
@@ -382,17 +382,17 @@ gcp_formEvent GCP_Form::OnEvent(const GCP_Event &cevent)
 	//ќбрабатываем глобальное и локальные событи€ дл€ формы
 	basicOnEvent(event);
 	if (!event.isPassingOnlyGlobalEvent)
-	if (checkCollisionBox(event.mousex, event.mousey)){
-		mouse_x = event.mousex;
-		mouse_y = event.mousey;
-		evt.isEventInsideForm = true;
-		basicOnEvent(MakeEventLocal(event));
-		if (event.mousey < _position.y() + xpanel->getPosition().height()){
-			if (event.eventType == GCP_ON_MOUSE_GLDOWN)
-				_isClickedOnTopHeader = true;
-			evt.isEventOnFormHead = true;
+		if (checkCollisionBox(event.mousex, event.mousey)){
+			mouse_x = event.mousex;
+			mouse_y = event.mousey;
+			evt.isEventInsideForm = true;
+			basicOnEvent(MakeEventLocal(event));
+			if (event.mousey < _position.y() + xpanel->getPosition().height()){
+				if (event.eventType == GCP_ON_MOUSE_GLDOWN)
+					_isClickedOnTopHeader = true;
+				evt.isEventOnFormHead = true;
+			}
 		}
-	}
 	return evt;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -428,7 +428,7 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(const GCP_Event& cevent)
 				isDraggingSomeComponent = true; //Consider sub form as dragging component
 				break;
 			}
-		}		
+		}
 	}
 
 	if (_isLocked){
@@ -444,8 +444,8 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(const GCP_Event& cevent)
 				int xPosStart = _position.x(), yPosStart = _position.y();
 				_position.topLeft.X += event.iMouseXRel;
 				_position.topLeft.Y += event.iMouseYRel;
-				_position.topLeft.X = (int)std::fmax(0, std::fmin(_swidth - _position.width(), _position.x()));
-				_position.topLeft.Y = (int)std::fmax(0, std::fmin(_sheight - _position.height(), _position.y()));
+				_position.topLeft.X = (int)GCP_Math::Max(0, GCP_Math::Min(_swidth - _position.width(), _position.x()));
+				_position.topLeft.Y = (int)GCP_Math::Max(0, GCP_Math::Min(_sheight - _position.height(), _position.y()));
 
 				int deltaX = _position.x() - xPosStart;
 				int deltaY = _position.y() - yPosStart;
@@ -485,13 +485,13 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(const GCP_Event& cevent)
 
 			///REFACTOR THIS!!!!
 			if (_componentThatWasLeftClicked)
-			if (_componentThatWasLeftClicked->isDragable() && !isComponentClicked && !isDraggingSomeComponent)
-			{
-				event.drawRect = GCP_Rect<int>(_position.x(), _position.y() + xpanel->getPosition().height(), _position.width(), _position.height() - xpanel->getPosition().height());
-				_componentThatWasLeftClicked->OnMouseLeftHoldMotion(event);
-				isComponentClicked = true;
-				isDraggingSomeComponent = true;
-			}
+				if (_componentThatWasLeftClicked->isDragable() && !isComponentClicked && !isDraggingSomeComponent)
+				{
+					event.drawRect = GCP_Rect<int>(_position.x(), _position.y() + xpanel->getPosition().height(), _position.width(), _position.height() - xpanel->getPosition().height());
+					_componentThatWasLeftClicked->OnMouseLeftHoldMotion(event);
+					isComponentClicked = true;
+					isDraggingSomeComponent = true;
+				}
 
 		}
 

@@ -4,16 +4,16 @@
 
 namespace gcp
 {
-   class GCP_Label : public GCP_FormComponent
-   {
-   public:
-      int iTextSize, iMaxTextLength;
-      string text;
+	class GCP_Label : public GCP_FormComponent
+	{
+	public:
+		int iTextSize, iMaxTextLength;
+		string text;
 
-      GCP_Label();
+		GCP_Label();
 
-      void OnDraw(const GCP_Event &event);
-   };
+		void OnDraw(const GCP_Event &event);
+	};
 }
 #endif
 

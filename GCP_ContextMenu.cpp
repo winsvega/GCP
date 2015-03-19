@@ -44,7 +44,7 @@ void GCP_ContextMenu::open(int x, int y)
 {
 	_isVisible = true;						//Открыть менб в заданых координатах
 	_position.topLeft.X = x;
-   _position.topLeft.Y = y;
+	_position.topLeft.Y = y;
 }
 
 void GCP_ContextMenu::close(void *obj)
@@ -69,12 +69,12 @@ gcp_formEvent GCP_ContextMenu::OnEvent(const GCP_Event &event)
 
 	unsigned int iMenuSize = menu.size();
 	for(unsigned int i=0; i<iMenuSize; i++){
-         menu.at(i)->OnEvent(event);				//Глобальное событие
-			if(!event.isPassingOnlyGlobalEvent)
+		menu.at(i)->OnEvent(event);				//Глобальное событие
+		if(!event.isPassingOnlyGlobalEvent)
 			if(menu.at(i)->checkCollisionBox(event.mousex, event.mousey)){
 				menu.at(i)->OnEvent(MakeEventLocal(event));		//локальное событие
 			}
-		}
+	}
 
 	basicOnEvent(event);
 	return evt;
@@ -95,9 +95,9 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 	unsigned int iMenuSize = menu.size();
 	for(unsigned int i=0; i<iMenuSize; i++)	{
 		if (menu.at(i)->getPosition().height()>maxMenuHeight)
-         maxMenuHeight = menu.at(i)->getPosition().height();
-      if (menu.at(i)->getPosition().height()>maxMenuWidth)
-         maxMenuWidth = menu.at(i)->getPosition().width();
+			maxMenuHeight = menu.at(i)->getPosition().height();
+		if (menu.at(i)->getPosition().height()>maxMenuWidth)
+			maxMenuWidth = menu.at(i)->getPosition().width();
 
 		if(iType==GCP_MENU_MVERTICAL){
 			stackHeight += menu.at(i)->getPosition().height();
@@ -111,11 +111,11 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 	}
 
 	//Двигаем меню если оно выходит за буфер / форму
-   GCP_Point<int> normPos = GCP_Math::normalizeRectInRect<int>(
-      GCP_Rect<int>(_position.x(), _position.y(), stackWidth + iMenuSize, stackHeight + iMenuSize),
-      event.drawRect, 1);
+	GCP_Point<int> normPos = GCP_Math::normalizeRectInRect<int>(
+				GCP_Rect<int>(_position.x(), _position.y(), stackWidth + iMenuSize, stackHeight + iMenuSize),
+				event.drawRect, 1);
 	_position.topLeft.X = (int)normPos.X;
-   _position.topLeft.Y = (int)normPos.Y;
+	_position.topLeft.Y = (int)normPos.Y;
 
 
 	//Теперь когда мы его подвинули нам надо подвинуть все компоненты уже с учетом того что сдвинули наше меню
@@ -127,27 +127,27 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 
 		if(iType==GCP_MENU_MVERTICAL){
 			if(currentSeparator < _iSeparators.size())
-			if(i==_iSeparators.at(currentSeparator))	{
-				stackHeight += 5; currentSeparator++;
-			}
-         menu.at(i)->setPosition(_position.x(), _position.y() + stackHeight);
+				if(i==_iSeparators.at(currentSeparator))	{
+					stackHeight += 5; currentSeparator++;
+				}
+			menu.at(i)->setPosition(_position.x(), _position.y() + stackHeight);
 			stackHeight += menu.at(i)->getPosition().height()+1;
 			stackWidth = maxMenuWidth;
 		}
 
 		if(iType==GCP_MENU_MHORIZONTAL){
 			if(currentSeparator < _iSeparators.size())
-			if(i==_iSeparators.at(currentSeparator)){
-				stackWidth += 5;currentSeparator++;
-			}
-         menu.at(i)->setPosition(_position.x() + stackWidth, _position.y());
+				if(i==_iSeparators.at(currentSeparator)){
+					stackWidth += 5;currentSeparator++;
+				}
+			menu.at(i)->setPosition(_position.x() + stackWidth, _position.y());
 			stackWidth += menu.at(i)->getPosition().width()+1;
 			stackHeight =  maxMenuHeight;
 		}
 	}
 
 	//if(!isContextMenuBlocking)
-		//_isContextMenuOpened = false;
+	//_isContextMenuOpened = false;
 
 	//Рисуем все наши компоненты
 	for(unsigned int i=0; i<iMenuSize; i++){

@@ -1,5 +1,5 @@
 #include "GCP_FormComponent.h"
-#include "GCP_Checkbox.h"
+#include "GCP_CheckBox.h"
 using namespace gcp;
 
 GCP_CheckBox::GCP_CheckBox()	{
@@ -11,7 +11,7 @@ GCP_CheckBox::GCP_CheckBox()	{
 void GCP_CheckBox::OnDraw(const GCP_Event &event)
 {
 	if(!isVisible())
-		return;						
+		return;
 	
 
 	GCP_Point<int> pointA,pointB;
@@ -19,10 +19,10 @@ void GCP_CheckBox::OnDraw(const GCP_Event &event)
 	
 	GCP_Draw::Render()->Draw_Rect(_position.x() , _position.y() , 15,15,c_black);
 	if(isChecked())
-      GCP_Draw::Render()->Draw_FillEllipse(_position.x() + 7, _position.y() + 7, 4, 4, c_black);
+		GCP_Draw::Render()->Draw_FillEllipse(_position.x() + 7, _position.y() + 7, 4, 4, c_black);
 
 	//надпись у чекбокса
-   GCP_Draw::Render()->Draw_Text(_text, _position.x() + 18, _position.y(), getStyle(), &drawdata);
+	GCP_Draw::Render()->Draw_Text(_text, _position.x() + 18, _position.y(), getStyle(), &drawdata);
 	
 	basicOnDraw(event);
 
@@ -36,9 +36,9 @@ gcp_formEvent GCP_CheckBox::OnEvent(const GCP_Event &event)
 	evt.isEventOnFormHead = false;
 	evt.isFormDragged = false;
 	if(!isVisible())
-		return evt;	
+		return evt;
 
-   if (event.eventType == GCP_ON_LEFT_CLICK)		//чекбокс случает только левую кнопку (локально)
+	if (event.eventType == GCP_ON_LEFT_CLICK)		//чекбокс случает только левую кнопку (локально)
 		_isChecked = !isChecked();
 
 	basicOnEvent(event);

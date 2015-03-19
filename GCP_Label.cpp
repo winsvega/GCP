@@ -10,10 +10,10 @@ void GCP_Label::OnDraw(const GCP_Event &event)
 {
 	//isVisible = false;
 	if(!isVisible())
-		return;						
+		return;
 	
-   const GCP_Rect<int> pos = getPosition();
-   GCP_Draw::Render()->Draw_Text(text, pos.x(), pos.y(), getStyle(), &drawdata);
+	const GCP_Rect<int> pos = getPosition();
+	GCP_Draw::Render()->Draw_Text(text, pos.x(), pos.y(), getStyle(), &drawdata);
 	
 	basicOnDraw(event);
 

@@ -8,7 +8,7 @@ GCP_Edit::GCP_Edit()
 	_sTextInputDraw = "";			//Текст который рисуем
 	_iDrawDash = 0;					//Переменная для таймера для вывода текста
 	_iTextDrawIndex = 0;			//С какого индекса выводим текст (если он слишком длинный)
-	inputType = GCPE_InputType::ALL;//Формат ввода данных
+	inputType = ALL;//Формат ввода данных
 	setStyle(GCP_ButtonWhiteStyle);
 }
 
@@ -16,19 +16,19 @@ void GCP_Edit::OnDraw(const GCP_Event &event)
 {
 	if(!isVisible())
 		return;
-   
-	//Выводим текст в рамочке
-   GCP_Draw::Render()->Draw_FillRound(_position, 1, getStyle()->backgroundColor);
-   GCP_Draw::Render()->Draw_Round(_position, 1, getStyle()->borderColor);
 
-   int iBorderWidth = getStyle()->borderWidth;
-   GCP_Draw::Render()->Draw_FillRound(_position.x() + iBorderWidth, _position.y() + iBorderWidth, _position.width() - iBorderWidth * 2, _position.height() - iBorderWidth * 2, 1, getStyle()->textFieldColor);
+	//Выводим текст в рамочке
+	GCP_Draw::Render()->Draw_FillRound(_position, 1, getStyle()->backgroundColor);
+	GCP_Draw::Render()->Draw_Round(_position, 1, getStyle()->borderColor);
+
+	int iBorderWidth = getStyle()->borderWidth;
+	GCP_Draw::Render()->Draw_FillRound(_position.x() + iBorderWidth, _position.y() + iBorderWidth, _position.width() - iBorderWidth * 2, _position.height() - iBorderWidth * 2, 1, getStyle()->textFieldColor);
 	//TTF_Font* font = TTF_OpenFont(getFont().c_str(),14);
 
 	SDL_Rect rect = {_position.x()+iBorderWidth,_position.y()+iBorderWidth*2,_position.width()-iBorderWidth*2,_position.height()-iBorderWidth*2 };
 	SDL_SetTextInputRect(&rect); //хз вообще зачем и что оно дает
 	//!! размер шрифта !!!
-   GCP_Draw::Render()->Draw_Text(_sTextInputDraw, _position.x() + iBorderWidth * 2, _position.y() + iBorderWidth * 2, getStyle(), &drawdata);
+	GCP_Draw::Render()->Draw_Text(_sTextInputDraw, _position.x() + iBorderWidth * 2, _position.y() + iBorderWidth * 2, getStyle(), &drawdata);
 	basicOnDraw(event);
 
 
@@ -39,10 +39,10 @@ void GCP_Edit::OnDraw(const GCP_Event &event)
 		int sw,sh;
 		//тут могут быть проблемы с определением размера строки с русскими или юникод чарактерами когда те представлены в разной кодировке (1 или 2 байта)
 		//Сайчас они обрабатываются в нормальную кодировку функцией CP1251TOUTF но это работатет не на всех устройствах
-      GCP_Draw::Render()->GetTextSize(_sTextInputDraw, sw, sh, getStyle());
+		GCP_Draw::Render()->GetTextSize(_sTextInputDraw, sw, sh, getStyle());
 		//Рисуем подчеркивание
-      int iBorderWidth = getStyle()->borderWidth;
-      GCP_Draw::Render()->Draw_Line(_position.x() + sw + iBorderWidth * 2, _position.y() + iBorderWidth * 2, _position.x() + sw + iBorderWidth * 2, _position.y() + iBorderWidth * 2 + sh, getStyle()->textColor);
+		int iBorderWidth = getStyle()->borderWidth;
+		GCP_Draw::Render()->Draw_Line(_position.x() + sw + iBorderWidth * 2, _position.y() + iBorderWidth * 2, _position.x() + sw + iBorderWidth * 2, _position.y() + iBorderWidth * 2 + sh, getStyle()->textColor);
 		if(_iDrawDash>20)	//!!! таймер мерцания
 			_iDrawDash = 0;
 	}
@@ -60,18 +60,18 @@ gcp_formEvent GCP_Edit::OnEvent(const GCP_Event &event)
 
 	switch(event.eventType)
 	{
-		case GCP_ON_LEFT_CLICK:
-			_isEditingText = true;
-			break;
-		case GCP_ON_GLEFT_CLICK:
-			_isEditingText = false;
-			break;
-		case GCP_ON_GKEYDOWN:
-			onKeyDown(event.keycode);
-			break;
-		case GCP_ON_GTEXTINPUT:
-			onTextInput(event.sTextInput);
-			break;
+	case GCP_ON_LEFT_CLICK:
+		_isEditingText = true;
+		break;
+	case GCP_ON_GLEFT_CLICK:
+		_isEditingText = false;
+		break;
+	case GCP_ON_GKEYDOWN:
+		onKeyDown(event.keycode);
+		break;
+	case GCP_ON_GTEXTINPUT:
+		onTextInput(event.sTextInput);
+		break;
 	}
 
 	basicOnEvent(event);
@@ -110,20 +110,20 @@ void GCP_Edit::onKeyDown(int keycode)
 
 	
 	switch (keycode)
-    {
-        case SDLK_RETURN:
-			 _sTextInput = "";
-             break;
-        case SDLK_BACKSPACE:
-             {
-				//!!! тут не учитывается сколько байт в символе. надо добавить массив в котором хранилась бы инфа о том сколько на каждый символ выделяется байт
-				//Сейчас удаляется только один байт. т.е  русские буквы стираются за 2 нажатия бакспейс
-				if(_sTextInput.size()>0)
-					_sTextInput.erase(_sTextInput.size() - 1);
-				corelateText();
-             }
-             break;
-    }
+	{
+	case SDLK_RETURN:
+		_sTextInput = "";
+		break;
+	case SDLK_BACKSPACE:
+	{
+		//!!! тут не учитывается сколько байт в символе. надо добавить массив в котором хранилась бы инфа о том сколько на каждый символ выделяется байт
+		//Сейчас удаляется только один байт. т.е  русские буквы стираются за 2 нажатия бакспейс
+		if(_sTextInput.size()>0)
+			_sTextInput.erase(_sTextInput.size() - 1);
+		corelateText();
+	}
+		break;
+	}
 }
 
 
@@ -199,30 +199,30 @@ bool GCP_Edit::onTextInput(const string &text)
 
 	switch(inputType)
 	{
-		case DIGITONLY:
-			if (!GCP_Math::isNum((char*)text.c_str()))
-				return false;
-			break;
+	case DIGITONLY:
+		if (!GCP_Math::isNum((char*)text.c_str()))
+			return false;
+		break;
 
-		case DOUBLEDIGIT:
-			if (!GCP_Math::isNum((char*)text.c_str()) && text[0] != '.')
-				return false;
-			if (text[0] == '.'){
-				for(unsigned int i=0; i<_sTextInput.size(); i++)
-					if(_sTextInput.at(i) == '.')
-						return false;
-			}
-			break;
+	case DOUBLEDIGIT:
+		if (!GCP_Math::isNum((char*)text.c_str()) && text[0] != '.')
+			return false;
+		if (text[0] == '.'){
+			for(unsigned int i=0; i<_sTextInput.size(); i++)
+				if(_sTextInput.at(i) == '.')
+					return false;
+		}
+		break;
 
-		case TEXTONLY:
-			if (GCP_Math::isNum((char*)text.c_str()) && text[0] != ' ')
-				return false;
-			break;
+	case TEXTONLY:
+		if (GCP_Math::isNum((char*)text.c_str()) && text[0] != ' ')
+			return false;
+		break;
 		//case GCP_Edit_InputType_Enum::ALL:
 	}
 	_sTextInput.append(text.c_str());
 	corelateText();
-   
+
 	return true;
 }
 void GCP_Edit::corelateText()
@@ -237,8 +237,8 @@ void GCP_Edit::corelateText()
 
 	
 	int sw,sh;
-   GCP_Draw::Render()->GetTextSize(_sTextInput, sw, sh, getStyle());
-		
+	GCP_Draw::Render()->GetTextSize(_sTextInput, sw, sh, getStyle());
+
 	
 	while(sw>_position.width()-getStyle()->borderWidth*2)
 	{
@@ -250,7 +250,7 @@ void GCP_Edit::corelateText()
 		_sTextInputDraw.append(buffer);
 
 
-      GCP_Draw::Render()->GetTextSize(_sTextInput, sw, sh, getStyle());
+		GCP_Draw::Render()->GetTextSize(_sTextInput, sw, sh, getStyle());
 	}
 
 }

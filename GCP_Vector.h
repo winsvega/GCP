@@ -22,6 +22,34 @@ namespace gcp
 			delete[]_mElems;
 			_mElems = newElems;
 		}
+
+		void quickSort(GCP_Vector<T> *a, int l, int r)
+		{
+			if (a->size() < 2)
+				return;
+			T x = a->at(l + (r - l) / 2);
+			//запись эквивалентна (l+r)/2,
+			//но не вызввает переполнения на больших данных
+			int i = l;
+			int j = r;
+			//код в while обычно выносят в процедуру particle
+			while (i <= j)
+			{
+				while (a->compareAltB(a->at(i), x)) i++;    //a(i) < x
+				while (a->compareAgtB(a->at(j), x)) j--;    //a(j) > x
+				if (i <= j)
+				{
+					a->swap(i, j);
+					i++;
+					j--;
+				}
+			}
+			if (i < r)
+				quickSort(a, i, r);
+
+			if (l < j)
+				quickSort(a, l, j);
+		}
 	public:
 		GCP_Vector()		{
 			_startsize = 4;
@@ -43,8 +71,7 @@ namespace gcp
 
 		void sort()
 		{
-			if (size() >= 2)
-				GCP_Math::quickSort<T>(this, 0, size() - 1);
+			quickSort(this, 0, size() - 1);
 		}
 
 		bool compareAltB(T a, T b)
@@ -81,10 +108,11 @@ namespace gcp
 		bool has_value(T val)
 		{
 			for (unsigned int i = 0; i < _iSize; i++)
-			if (_mElems[i] == val)
-				return true;
+				if (_mElems[i] == val)
+					return true;
 			return false;
 		}
+
 		void erase(unsigned int x)		{
 			if (x >= _iSize)
 				return;
@@ -112,7 +140,7 @@ namespace gcp
 		T &at(unsigned int x) const
 		{
 			if (x >= _iSize)
-			{				
+			{
 				//assert(!"Value out of range!");
 				x = _iSize - 1;
 			}
@@ -140,13 +168,12 @@ namespace gcp
 			}
 		}
 
-
-
 		T &operator[](unsigned int x){
 			if (x >= _iSize)
 				x = _iSize;
 			return (_mElems[x]);
 		}
+
 		void swap(unsigned int i, unsigned int j)
 		{
 			if (i >= _iSize || j >= _iSize)
@@ -159,4 +186,5 @@ namespace gcp
 		}
 	};
 }
+
 #endif

@@ -35,23 +35,23 @@
 
 namespace gcp
 {
-   class GCP_Controller : public GCP_SPointerBase
-   {
-   protected:
-      int _width, _height;				      //размер буфера экрана. некоторые системы валятся если пробуешь нарисовать за буфер. GCP будет учитывать это.
-      GCP_SPointer<GCP_Form> _mainForm;	//Главная форма интерфейса
-      bool _isLeftHold;					      //переключатель для события драг ен дроп      
-   public:
-      GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height);
-      ~GCP_Controller();
-      void setFont(const string &directory_path_string);
-      GCP_SPointer<GCP_Form> createForm();
-      void handleEvents(const SDL_Event &event);
-      void draw();
-      void deInit()
-      {
-         GCP_Draw::DeInit();
-      }
-   };
+	class GCP_Controller : public GCP_SPointerBase
+	{
+	protected:
+		int _width, _height;				      //размер буфера экрана. некоторые системы валятся если пробуешь нарисовать за буфер. GCP будет учитывать это.
+		GCP_SPointer<GCP_Form> _mainForm;	//Главная форма интерфейса
+		bool _isLeftHold;					      //переключатель для события драг ен дроп
+	public:
+		GCP_Controller(SDL_Renderer *sdlRenderer, int width, int height);
+		~GCP_Controller();
+		void setFont(const string &directory_path_string);
+		GCP_SPointer<GCP_Form> createForm();
+		void handleEvents(const SDL_Event &event);
+		void draw();
+		void deInit()
+		{
+			GCP_Draw::DeInit();
+		}
+	};
 }
 #endif
