@@ -12,6 +12,14 @@ namespace gcp
 		unsigned int _iSize;
 		int _startsize;
 		int _mulsize;
+		void initValues()
+		{
+			_startsize = 4;
+			_mulsize = 2;
+			_mSize = _startsize;
+			_iSize = 0;
+			_mElems = new T[_mSize];
+		}
 		void resize(int newSize){
 			T* newElems = new T[newSize];
 
@@ -27,12 +35,11 @@ namespace gcp
 		{
 			if (a->size() < 2)
 				return;
-			T x = a->at(l + (r - l) / 2);
-			//запись эквивалентна (l+r)/2,
-			//но не вызввает переполнения на больших данных
+
+			T x = a->at(l + (r - l) / 2); //(l+r)/2,
 			int i = l;
 			int j = r;
-			//код в while обычно выносят в процедуру particle
+
 			while (i <= j)
 			{
 				while (a->compareAltB(a->at(i), x)) i++;    //a(i) < x
@@ -52,24 +59,59 @@ namespace gcp
 		}
 	public:
 		GCP_Vector()		{
-			_startsize = 4;
-			_mulsize = 2;
-			_mSize = _startsize;
-			_iSize = 0;
-			_mElems = new T[_mSize];
+			initValues();
+		}
+		GCP_Vector (GCP_Vector const &rhs)
+		{
+			initValues();
+			clear();
+			int size = rhs.size();
+			for (int i = 0; i < size; i++)
+				push_back(rhs.at(i));
 		}
 		~GCP_Vector()	{
 			delete[]_mElems;
 		}
 
 		void push_back(T element)		{
+			//cause SP to trouble if copying instance is another vector!!!
 			_mElems[_iSize] = element;
 			_iSize++;
 			if (_iSize >= _mSize)
 				resize(_mSize*_mulsize);
 		}
 
-		void sort()
+		void slectDistinct()
+		{
+			int k = 0;
+			int *toDelete = new int[_iSize];
+			for (unsigned int i = 0; i < _iSize; i++)
+			{
+				for (unsigned int j = i + 1; j < _iSize; j++)
+				{
+					if (_mElems[j] == _mElems[i])
+					{
+						toDelete[k] = j;
+						k++;
+					}
+				}
+			}
+
+			//!REV
+			for (unsigned int i = 0; i < k; i++)
+			{
+				erase(toDelete[i]);
+				for (unsigned int j = i + 1; j < k; j++)
+				{
+					if (toDelete[j] > toDelete[i])
+						toDelete[j]--;
+				}
+			}
+
+			delete toDelete;
+		}
+
+		void qsort()
 		{
 			quickSort(this, 0, size() - 1);
 		}
@@ -113,13 +155,23 @@ namespace gcp
 			return false;
 		}
 
-		void erase(unsigned int x)		{
-			if (x >= _iSize)
+		void erase(unsigned int _index)		{
+			if (_index >= _iSize)
 				return;
 
+			//memory loss?  do like resize operation
+			//for (unsigned int i = _index; i < _iSize - 1; i++)
+			//	_mElems[i] = _mElems[i + 1];
 
-			for (unsigned int i = x; i < _iSize - 1; i++)
-				_mElems[i] = _mElems[i + 1];
+			T* newElems = new T[_mSize];
+			for (unsigned int i = 0; i < _index; i++)
+				newElems[i] = _mElems[i];
+
+			for (unsigned int i = _index+1; i < _iSize; i++)
+				newElems[i-1] = _mElems[i];
+
+			delete[]_mElems;
+			_mElems = newElems;
 
 			_iSize--;
 		}
@@ -137,7 +189,7 @@ namespace gcp
 			_mElems = new T[_mSize];
 		}
 
-		T &at(unsigned int x) const
+		T& at(unsigned int x) const
 		{
 			if (x >= _iSize)
 			{
@@ -147,13 +199,24 @@ namespace gcp
 			return (_mElems[x]);
 		}
 
-		GCP_Vector &operator=(const GCP_Vector &rhs)
-		{
-			//! NOT WORKING
-			clear();
-			for (int i = 0; i < rhs.size(); i++)
+		T& operator[](unsigned int x){
+			if (x >= _iSize)
 			{
-				push_back(rhs.at(i));
+				//assert(!"Value out of range!");
+				x = _iSize-1;
+			}
+			return (_mElems[x]);
+		}
+
+		GCP_Vector& operator=(GCP_Vector const &rhs)
+		{
+			if (this != &rhs)
+			{
+				clear();
+				for (int i = 0; i < rhs.size(); i++)
+				{
+					push_back(rhs.at(i));
+				}
 			}
 			return *this;
 		}
@@ -166,12 +229,6 @@ namespace gcp
 			{
 				push_back(rhs->pop_first());
 			}
-		}
-
-		T &operator[](unsigned int x){
-			if (x >= _iSize)
-				x = _iSize;
-			return (_mElems[x]);
 		}
 
 		void swap(unsigned int i, unsigned int j)

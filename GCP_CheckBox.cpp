@@ -22,7 +22,7 @@ void GCP_CheckBox::OnDraw(const GCP_Event &event)
 		GCP_Draw::Render()->Draw_FillEllipse(_position.x() + 7, _position.y() + 7, 4, 4, c_black);
 
 	//надпись у чекбокса
-	GCP_Draw::Render()->Draw_Text(_text, _position.x() + 18, _position.y(), getStyle(), &drawdata);
+	GCP_Draw::Render()->Draw_Text(_text, GCP_Rect<int>(_position.x() + 18, _position.y(), 100, 20), getStyle(), &drawdata);
 	
 	basicOnDraw(event);
 

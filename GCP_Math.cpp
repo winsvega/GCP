@@ -8,10 +8,13 @@
 #include <string>
 #include "GCP_Vector.h"
 #include "GCP_Math.h"
+
 using namespace gcp;
 ////////////////////
 //GCP Math Functions
 ////////////////////
+
+
 
 ///
 /*std::string CP1251_TO_WCHAR(const char *str)
@@ -48,30 +51,10 @@ double GCP_Math::round(double value)
 ////////////////////
 
 ///
-bool GCP_Math::lineIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double *Px, double *Py, bool round)
+/*bool GCP_Math::lineIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double *Px, double *Py, bool round)
 {
-	//Пересечение двух линий L1(x1,y1,x2,y2) L2(x3,y3,x4,y4) в точке (Px,Py)
-	long double fDevide = (long double)((x1 - x2)*(y3 - y4)) - (long double)((y1 - y2)*(x3 - x4));
-	if (fDevide != 0)
-	{
-		long double statmentx = (x3 - x4)*((long double)x1*y2 - (long double)y1*x2)
-				- (x1 - x2)*((long double)x3*y4 - (long double)y3*x4);
-		*Px = statmentx / fDevide;
-		long double statmenty = (y3 - y4)*((long double)x1*y2 - (long double)y1*x2)
-				- (y1 - y2)*((long double)x3*y4 - (long double)y3*x4);
-		*Py = statmenty / fDevide;
 
-		if (round)		{
-			*Px = floor(*Px);
-			*Py = floor(*Py);
-		}
-		return true;
-	}
-	else {
-		*Px = 0; *Py = 0;
-		return false;
-	}
-}
+}*/
 
 
 ///
@@ -383,14 +366,13 @@ int GCP_Math::readIntegerArray(char* strline, char separator, int* arr)
 		k++;
 	}
 	return k;
-
 }
 
-
 ///
-double GCP_Math::uniqueValue()
+unsigned int GCP_Math::uniqueValue64()
 {
-	return rnd()*rnd();
+	static RandomSequenceOfUnique randUniq((unsigned int)(rand()*100000), 4294967295);
+	return randUniq.next();
 }
 
 

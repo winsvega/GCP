@@ -35,6 +35,8 @@ namespace gcp
 	class GCP_Form : public GCP_FormComponent
 	{
 	protected:
+		typedef std::pair<string, GCP_UID> childNameMap;
+		GCP_Vector<childNameMap> _childNames;   //need map here!
 		GCP_Vector<gcp_spForm> _subForms;
 		GCP_Vector<gcp_spFormComponent> _components;
 		GCP_Vector<gcp_spContextMenu> _contextmenus;
@@ -52,7 +54,8 @@ namespace gcp
 
 		void onParentFormStartBlocking();
 		void onParentFormEndBlocking();
-
+		void addToNameMap(const gcp_spFormComponent& component, const string& name);
+		void removeFromNameMap(const gcp_spFormComponent& component);
 	public:
 		bool isParentLocking;
 		bool isShowTopRightButtons;
@@ -69,15 +72,16 @@ namespace gcp
 		void setFont(string dir);
 		~GCP_Form();
 
-		void addComponent(const GCP_SPointer<GCP_ContextMenu> &component);
-		void addComponent(const GCP_SPointer<GCP_FormComponent>  &component);
+		const GCP_FormComponent* getComponent(const string& name) const;
+		void addComponent(const GCP_SPointer<GCP_ContextMenu> &component, string name = "default");
+		void addComponent(const GCP_SPointer<GCP_FormComponent>  &component, string name = "default");
 		void removeComponent(const GCP_SPointer<GCP_FormComponent>  &component);
 		void setPosition(const GCP_Rect<int>& position);
 		void setPosition(int x, int y, int width, int height);
 		void setPosition(int x, int y);
 
 		void toggleVisibility(void* obj);
-		void addSubForm(GCP_SPointer<GCP_Form> &form);
+		void addSubForm(const GCP_SPointer<GCP_Form> &form, string name = "default");
 		void showmessage(const string &text, const string &caption, bool block = false);
 		void showmessage(int text, const string &captionbool, bool block = false);
 

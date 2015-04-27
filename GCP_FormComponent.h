@@ -19,8 +19,13 @@ namespace gcp
 		bool _isMouseOver;                        //Триггер мышь над объектом
 		bool _isMouseHold;                        //Триггер левая клавиша мыши зажата над объектом
 		bool _isDragStarted;                      //Триггер начали перетаскивать объект
+		bool _isLocalEventEnabled;				  //Проверять локальные события / столкновения
 		int _timeMouseOver;						  //Таймер для всплывающей подсказки
-
+		int _timeMouseOverInit;
+		int _iInfoXoffset;
+		int _iInfoYoffset;
+		void* _memory;
+		GCP_UID _ID;
 
 		std::string _sInfo;					      //Всплывающая подсказка
 		gcp_spStyle pStyle;
@@ -85,6 +90,7 @@ namespace gcp
 			_isLocalEventsUnderneathBlocking = true;		//Блокировать обработку локальных событий у других компонет, которые находятся по этим
 			_isDragable = false;							//Перетаскивание
 			_isDragStarted = false;
+			_isLocalEventEnabled = true;
 			_sInfo = "";
 
 			for (int i = 0; i < GCP_MAX_FUNC_NUM; i++)		//Функции надо обнулить иначе память тютю
@@ -94,10 +100,9 @@ namespace gcp
 			_isVisible = true;
 
 			_position = GCP_Rect<int>(0, 0, 100, 20);
-			xPosStart = 0;
-			yPosStart = 0;
+			xPosStart = yPosStart = 0;
 			collisionRadius = 5;							 //Если рисуется круг
-			_timeMouseOver = 0;
+			_timeMouseOver = _timeMouseOverInit = -25;
 		}
 
 		virtual ~GCP_FormComponent()
@@ -217,30 +222,28 @@ namespace gcp
 
 		virtual gcp_formEvent OnEvent(const GCP_Event &event)
 		{
-			basicOnEvent(event);
+			basicOnEvent(event);			
 			gcp_formEvent evt;
 			evt.isEventInsideForm = false;
 			return evt;
 		}
 
-		virtual void setPosition(const GCP_Rect<int>& position)
+		virtual const GCP_UID& ID() const {return _ID;}
+		virtual void setPosition(GCP_Rect<int> const& position)
 		{
-			_position.widthHeight.X = position.width();
-			_position.widthHeight.Y = position.height();
+			_position.setWidthHeight(position.width(), position.height());
 			setPosition(position.x(), position.y());
 		}
 
 		virtual void setPosition(int x, int y, int width, int height)
 		{
-			_position.widthHeight.X = width;
-			_position.widthHeight.Y = height;
+			_position.setWidthHeight(width, height);
 			setPosition(x, y);
 		}
 
 		virtual void setPosition(int x, int y)
 		{
-			_position.topLeft.X = x;
-			_position.topLeft.Y = y;
+			_position.setTopLeft(x, y);
 			if (!_isStartPositionSet)
 			{
 				xPosStart = x;
@@ -251,20 +254,22 @@ namespace gcp
 
 		virtual void setWidthHeight(int w, int h)
 		{
-			_position.widthHeight.X = w;
-			_position.widthHeight.Y = h;
+			_position.setWidthHeight(w, h);
 		}
 
+		virtual void setMemory (void* mem) { _memory = mem; }
+		virtual void* getMemory () { return _memory; }
 		virtual void setVisible(bool visibility) { _isVisible = visibility; }
 		virtual bool isVisible() { return _isVisible; }
 		virtual void setEnabled(bool enabled) { _isEnabled = enabled; }
 		virtual bool isEnabled() { return _isEnabled; }
+		virtual bool isDragStarted() {return _isDragStarted; }
 
 		virtual void setDragable(bool dragable) { _isDragable = dragable; }
 		virtual bool isDragable() { return _isDragable; }
 		virtual const GCP_Rect<int>& getPosition()	const     { return _position; }
-		virtual bool isEventUnderneathBloacking() const { return _isLocalEventsUnderneathBlocking; }
-		virtual void setEventUnderneathBloacking(bool set){ _isLocalEventsUnderneathBlocking = set; }
+		virtual bool isEventUnderneathBlocking() const { return _isLocalEventsUnderneathBlocking; }
+		virtual void setEventUnderneathBlocking(bool set){ _isLocalEventsUnderneathBlocking = set; }
 
 		virtual void setStyle(const gcp_spStyle& style_)
 		{
@@ -298,44 +303,26 @@ namespace gcp
 		};
 
 		//РИСУЕМ ВСПЛЫВЮЩУЮ ПОДСКАЗКУ
-		void OnDrawInfo(const GCP_Event &event) {
-			//ПОКА ЧТО КРИВО НО РАБОТАЕТ
-			if (_sInfo != "" && _isMouseOver){
-				int mess_w, mess_h;
-
-				//Вычисление ширины и высоты текста
-				GCP_Vector<string>* strings = GCP_Math::strToLines(_sInfo);
-				bool hasIndex = false;
-				unsigned int maxSize = 0, maxSizeIndex = 0;
-				for (unsigned int i = 0; i < strings->size(); i++)
-				{
-					if (strings->at(i).length() > maxSize){
-						maxSize = strings->at(i).length();
-						maxSizeIndex = i;
-						hasIndex = true;
-					}
-				}
-				if (!hasIndex)
-					return;
-
-				GCP_Draw::Render()->GetTextSize(strings->at(maxSizeIndex), mess_w, mess_h, gcp_spStyle(pStyle));
-				mess_w += 5;	mess_h += 5;
-				//mess_w /= strings->size();
-				mess_h *= strings->size();
-				delete strings;
-
-
-				GCP_Rect <int> rectToDraw(_position.x() + 10, _position.y() + 10, mess_w, mess_h);
+		void OnDrawInfo(const GCP_Event &event)
+		{
+			if (_sInfo != "" && _isMouseOver)
+			{
+				int mess_w, mess_h, mess_l;
+				mess_l = GCP_Draw::Render()->GetTextSize(_sInfo, mess_w, mess_h, gcp_spStyle(pStyle));
+				mess_w += 6;
+				mess_h += 6 + (mess_l-1)*5;
+				GCP_Rect <int> rectToDraw(_position.x() + _iInfoXoffset, _position.y() + _iInfoYoffset, mess_w, mess_h);
 				GCP_Point<int> normPos = GCP_Math::normalizeRectInRect(rectToDraw, event.drawRect, 1);
 
 				GCP_Draw::Render()->SetBlendMode(E_BLEND_ADD);
-				GCP_Color c_white_a(255, 255, 255, 210);
-				GCP_Draw::Render()->Draw_FillRect((Sint16)normPos.X, (Sint16)normPos.Y, mess_w, mess_h, c_white_a);
+				gcpUint8 alpha = GCP_Draw::Render()->GetAlpha();
+				GCP_Draw::Render()->SetAlpha(215);
+				GCP_Draw::Render()->Draw_FillRect((Sint16)normPos.X, (Sint16)normPos.Y, mess_w, mess_h, c_white);
+				GCP_Draw::Render()->SetAlpha(alpha);
 				GCP_Draw::Render()->SetBlendMode(E_BLEND_NONE);
 				GCP_Draw::Render()->Draw_Rect((Sint16)normPos.X, (Sint16)normPos.Y, mess_w, mess_h, c_black);
-				GCP_Draw::Render()->Draw_Text(_sInfo, (int)normPos.X + 3, (int)normPos.Y + 3, pStyle, &drawdatainfo);
+				GCP_Draw::Render()->Draw_Text(_sInfo, GCP_Rect<int>(normPos.X + 3 , normPos.Y + 3, 100, 20), GCP_DefaultStyle, &drawdatainfo);
 			}
-
 		}
 
 		virtual gcp_formEvent OnMouseGlobalLeftHoldMotion(const GCP_Event& event)	{ basicOnMouseGlobalLeftHoldMotion(event); return gcp_formEvent(); }
@@ -346,9 +333,11 @@ namespace gcp
 			return true;
 		}
 
-		virtual void setInfo(const string& info)
+		virtual void setInfo(const string& info, int iXoffset = 15, int iYoffset = 10)
 		{
 			_sInfo = info;
+			_iInfoXoffset = iXoffset;
+			_iInfoYoffset = iYoffset;
 		}
 
 		virtual const string& getInfo()
@@ -377,8 +366,7 @@ namespace gcp
 		void basicOnMouseGlobalLeftHoldMotion(const GCP_Event& event)
 		{
 			if (_isDragStarted){
-				_position.topLeft.X = event.mousex;
-				_position.topLeft.Y = event.mousey;
+				_position.setTopLeft(event.mousex, event.mousey);
 				_isMouseHold = true;
 
 				int fx = event.drawRect.x();
@@ -386,14 +374,15 @@ namespace gcp
 				int fw = event.drawRect.width();
 				int fh = event.drawRect.height();
 
-				switch (collisionBox){
+				switch (collisionBox)
+				{
 				case GCP_COLLISIONBOX_RECTANGLE:
-					_position.topLeft.X = (int)GCP_Math::Max(fx, GCP_Math::Min(fx + fw - _position.width(), _position.x()));
-					_position.topLeft.Y = (int)GCP_Math::Max(fy, GCP_Math::Min(fy + fh - _position.height(), _position.y()));
+					_position.setTopLeft((int)GCP_Math::Max(fx, GCP_Math::Min(fx + fw - _position.width(), _position.x())),
+										 (int)GCP_Math::Max(fy, GCP_Math::Min(fy + fh - _position.height(), _position.y())));
 					break;
 				case GCP_COLLISIONBOX_ROUNDCIRCLE:
-					_position.topLeft.X = (int)GCP_Math::Max(fx + collisionRadius + 10, GCP_Math::Min(fx + fw - collisionRadius - 10, _position.x()));
-					_position.topLeft.Y = (int)GCP_Math::Max(fy + collisionRadius + 10, GCP_Math::Min(fy + fh - collisionRadius - 10, _position.y()));
+					_position.setTopLeft((int)GCP_Math::Max(fx + collisionRadius + 10, GCP_Math::Min(fx + fw - collisionRadius - 10, _position.x())),
+										 (int)GCP_Math::Max(fy + collisionRadius + 10, GCP_Math::Min(fy + fh - collisionRadius - 10, _position.y())));
 					break;
 				}
 				basicOnDrag(event);
@@ -418,7 +407,7 @@ namespace gcp
 				break;
 			case GCP_ON_MOUSE_MOTION:
 				_isMouseOver = true;
-				_timeMouseOver++;
+				_timeMouseOver ++;
 				break;
 			case GCP_ON_MOUSE_GUP:
 				_isMouseHold = false;

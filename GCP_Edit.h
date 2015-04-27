@@ -4,6 +4,9 @@
 
 namespace gcp
 {
+	class GCP_Edit;
+	typedef GCP_SPointer<GCP_Edit> gcp_spEdit;
+
 	class GCP_Edit : public GCP_FormComponent
 	{
 	private:
@@ -11,6 +14,7 @@ namespace gcp
 		int _iDrawDash;
 		string _sTextInputDraw, _sTextInput;
 		int _iTextDrawIndex;
+		GCP_Vector<int> _inputSizeMap;
 		void corelateText();
 		bool onTextInput(const string &text);
 		void onKeyDown(int keycode);
@@ -18,10 +22,9 @@ namespace gcp
 		SDL_Rect textRect, markedRect;
 		GCPE_InputType inputType;
 
-
 		GCP_Edit();
-		void setCaption(const std::string &str);
-		string getCaption();
+		void setText(const std::string &str, int byteperletter = 1);
+		string getText();
 		void OnDraw(const GCP_Event &event);
 		//bool OnMouseLeftClick(const GCP_Event &event);
 		//gcp_formEvent OnMouseGlobalLeftClick(const GCP_Event &event);

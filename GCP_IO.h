@@ -2,6 +2,8 @@
 #define GCP_IOH
 #include <fstream>
 #include <sstream>
+#include <string.h>
+#include "SDL.h"
 
 namespace gcp
 {
@@ -21,7 +23,7 @@ namespace gcp
 		const static int GCP_IO_INPUT = 0;
 		const static int GCP_IO_OUTPUT = 1;
 		const static int GCP_IO_OUTPUTTXT = 2;
-		GCP_IO(string filename, int mode)
+		GCP_IO(std::string filename, int mode)
 		{
 			_isClosed = false;
 			switch (mode)
@@ -72,9 +74,9 @@ namespace gcp
 			return value;
 		}
 
-		string readString()
+		std::string readString()
 		{
-			string value;
+			std::string value;
 			readString(&value);
 			return value;
 		}
@@ -94,7 +96,7 @@ namespace gcp
 			io->read(io, value, sizeof(double), 1);
 		}
 
-		void readString(string *value)
+		void readString(std::string *value)
 		{
 			char str[256];
 			io->read(io, &str, sizeof(str), 1);
@@ -111,11 +113,14 @@ namespace gcp
 			io->write(io, &value, sizeof(double), 1);
 
 		}
-		void writeString(string value)
+		void writeString(std::string value)
 		{
 			char str[256];
+#ifdef __WIN32__
+			strncpy_s(str, value.c_str(), 255);
+#else
 			strncpy(str, value.c_str(), 255);
-
+#endif
 			if (GCP_IO_OUTPUTTXT == _iMode)
 			{
 				size_t len = SDL_strlen(str);

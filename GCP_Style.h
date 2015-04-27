@@ -14,7 +14,8 @@ namespace gcp
 		E_DEFAULT,
 		E_BUTTON,
 		E_BUTTONWHITE,
-		E_PANELBLACK
+		E_PANELBLACK,
+		E_MESSAGEBOX
 	};
 
 	class GCP_Style : public GCP_SPointerBase
@@ -27,6 +28,10 @@ namespace gcp
 			backgroundColor = c_white;
 			backgroundMouseHoverColor = c_white;
 			backgroundDisabledColor = c_dkgrey;
+
+			drawTextBorder = false;
+			drawTextBackground = false;
+			drawTextBackgroundAlpha = 255;
 
 			textColor = c_black;
 			textMouseHoverColor = c_black;
@@ -49,12 +54,14 @@ namespace gcp
 				backgroundColor = c_black;
 				textMouseHoverColor = c_black;
 				backgroundMouseHoverColor = c_white;
+				font.align = E_CENTER;
 				break;
 			case E_BUTTONWHITE:
 				textColor = c_black;
 				textMouseHoverColor = c_white;
 				backgroundColor = c_white;
-				backgroundMouseHoverColor = c_black;
+				backgroundMouseHoverColor = c_aquadark;
+				font.align = E_CENTER;
 				break;
 
 			case E_PANELBLACK:
@@ -65,6 +72,11 @@ namespace gcp
 				font.size = 20;
 				font.align = E_CENTER;
 				break;
+
+			case E_MESSAGEBOX:
+				font.align = E_CENTER;
+				break;
+
 			default:
 				break;
 			}
@@ -88,6 +100,10 @@ namespace gcp
 
 		short borderWidth;                     //Толщина рамок
 		short roundCff;                        //Коэффициент округления углов
+
+		bool drawTextBorder;				   //Рисовать рамку вокруг текста
+		bool drawTextBackground;			   //Рисовать фон под текстом
+		gcpUint8 drawTextBackgroundAlpha;      //Прозрачность фона текста
 	};
 }
 #endif

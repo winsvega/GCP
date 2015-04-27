@@ -1,7 +1,26 @@
 #include "GCP_Math.h"
 #include "GCP_Draw.h"
 #include "SDL_ttf.h"
+
+#include "SDL2_gfxPrimitives.h"
 using namespace gcp;
+gcpUint8 GCP_Draw_SDL2::_currentAlpha = 255;
+gcpUint8 GCP_Draw_SDL2::_originalAlpha = 255;
+
+void GCP_Draw_SDL2::SetAlpha(gcpUint8 alpha)
+{
+	_currentAlpha = alpha;
+}
+
+gcpUint8 GCP_Draw_SDL2::GetAlpha()
+{
+	return _currentAlpha;
+}
+
+void GCP_Draw_SDL2::ResetAlpha()
+{
+	_currentAlpha = _originalAlpha;
+}
 
 void GCP_Draw_SDL2::Draw_Line(const GCP_Point<int> &A, const GCP_Point<int> &B, const GCP_Color &color, short bold) const
 {
@@ -34,7 +53,7 @@ void GCP_Draw_SDL2::Draw_Round(int x, int y, int width, int height, short scale,
 	//!!! scale не учитываеся!!!
 	Uint8 r,g,b,a;
 	SDL_GetRenderDrawColor(_screen,&r,&g,&b,&a);
-	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,color.a);
+	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,_currentAlpha);
 	SDL_Rect recta = {x,y,width,height};
 	SDL_RenderDrawRect(_screen,&recta);
 	SDL_SetRenderDrawColor(_screen,r,g,b,a);
@@ -53,7 +72,7 @@ void GCP_Draw_SDL2::Draw_FillRound(int x, int y, int width, int height, int scal
 	//!!! scale не учитываеся!!!
 	Uint8 r,g,b,a;
 	SDL_GetRenderDrawColor(_screen,&r,&g,&b,&a);
-	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,color.a);
+	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b, _currentAlpha);
 	SDL_Rect recta = {x,y,width,height};
 	SDL_RenderFillRect(_screen,&recta);
 	SDL_SetRenderDrawColor(_screen,r,g,b,a);
@@ -68,7 +87,7 @@ void GCP_Draw_SDL2::Draw_Rect(int x, int y, int width, int height, const GCP_Col
 {		
 	Uint8 r,g,b,a;
 	SDL_GetRenderDrawColor(_screen,&r,&g,&b,&a);
-	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,color.a);
+	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b, _currentAlpha);
 	SDL_Rect recta = {x,y,width,height};
 	SDL_RenderDrawRect(_screen,&recta);
 	SDL_SetRenderDrawColor(_screen,r,g,b,a);
@@ -82,11 +101,40 @@ void GCP_Draw_SDL2::Draw_FillRect(int x, int y, int width, int height, const GCP
 {		
 	Uint8 r,g,b,a;
 	SDL_GetRenderDrawColor(_screen,&r,&g,&b,&a);
-	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,color.a);
+	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,_currentAlpha);
 	SDL_Rect recta = {x,y,width,height};
 	SDL_RenderFillRect(_screen,&recta);
 	SDL_SetRenderDrawColor(_screen,r,g,b,a);
 }
+
+void GCP_Draw_SDL2::Draw_Polygon(const GCP_Vector<GCP_PointINT> &polygon, const GCP_Color &color) const
+{
+	Sint16 *xv = new Sint16[polygon.size()];
+	Sint16 *yv = new Sint16[polygon.size()];
+	for (int i = 0; i < polygon.size(); i++)
+	{
+		xv[i] = polygon.at(i).X;
+		yv[i] = polygon.at(i).Y;
+	}
+	polygonRGBA(_screen, xv, yv, polygon.size(), color.r,color.g,color.b, _currentAlpha);
+	delete xv;
+	delete yv;
+}
+
+void GCP_Draw_SDL2::Draw_FillPolygon(const GCP_Vector<GCP_PointINT> &polygon, const GCP_Color &color) const
+{
+	Sint16 *xv = new Sint16[polygon.size()];
+	Sint16 *yv = new Sint16[polygon.size()];
+	for (int i = 0; i < polygon.size(); i++)
+	{
+		xv[i] = polygon.at(i).X;
+		yv[i] = polygon.at(i).Y;
+	}
+	filledPolygonRGBA(_screen, xv, yv, polygon.size(), color.r,color.g,color.b, _currentAlpha);
+	delete xv;
+	delete yv;
+}
+
 void GCP_Draw_SDL2::Draw_FillEllipse(int x0, int y0, int Xradius, int Yradius, const GCP_Color &color) const
 {
 	//Рисуем еллипс по точкам
@@ -94,7 +142,7 @@ void GCP_Draw_SDL2::Draw_FillEllipse(int x0, int y0, int Xradius, int Yradius, c
 
 	Uint8 r,g,b,a;
 	SDL_GetRenderDrawColor(_screen,&r,&g,&b,&a);
-	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,color.a);
+	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,_currentAlpha);
 
 	Sint32 x, y;
 	Sint32 Xchange, Ychange;
@@ -172,7 +220,7 @@ void GCP_Draw_SDL2::Draw_Ellipse(int x0, int y0, int Xradius, int Yradius, const
 	//Оригинальный код взят из SDL_draw-1.2.13
 	Uint8 r,g,b,a;
 	SDL_GetRenderDrawColor(_screen,&r,&g,&b,&a);
-	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,color.a);
+	SDL_SetRenderDrawColor(_screen,color.r,color.g,color.b,_currentAlpha);
 
 	Sint32 x, y;
 	Sint32 Xchange, Ychange;
@@ -447,7 +495,7 @@ SDL_Texture* GCP_Draw_SDL2::renderText(GCP_DrawData* drawdata, const std::string
 	clr.r = style->textColor.r;
 	clr.g = style->textColor.g;
 	clr.b = style->textColor.b;
-	clr.a = style->textColor.a;
+	clr.a = _currentAlpha;
 	SDL_Surface *surf = TTF_RenderUTF8_Blended(pFont, message.c_str(), clr);
 	/*texture = SDL_CreateTexture(renderer,
 											SDL_PIXELFORMAT_ARGB8888,
@@ -521,11 +569,33 @@ void GCP_Draw_SDL2::Draw_Image(const string &path, int x, int y) const
 }
 
 
-void GCP_Draw_SDL2::GetTextSize(const std::string &text, int &width, int &height, const gcp_spStyle &style) const
+int GCP_Draw_SDL2::GetTextSize(const std::string &text, int &width, int &height, const gcp_spStyle &style) const
 {   
+	width = 0;
+	height = 20;
+	//Вычисление ширины и высоты текста
+	GCP_Vector<string>* strings = GCP_Math::strToLines(text);
+	bool hasIndex = false;
+	unsigned int maxSize = 0, maxSizeIndex = 0;
+	for (unsigned int i = 0; i < strings->size(); i++)
+	{
+		if (strings->at(i).length() > maxSize)
+		{
+			maxSize = strings->at(i).length();
+			maxSizeIndex = i;
+			hasIndex = true;
+		}
+	}
+
+	if (!hasIndex)
+		return -1;
+
 	TTF_Font* font = TTF_OpenFont(GCP_Draw::getFontPath(style->font.type).c_str(), style->font.size);
-	TTF_SizeUTF8(font, text.c_str(), &width, &height);
+	TTF_SizeUTF8(font, strings->at(maxSizeIndex).c_str(), &width, &height);
 	TTF_CloseFont(font);
+	height *= strings->size();
+	delete strings;
+	return strings->size();
 }
 
 ///
@@ -535,14 +605,14 @@ void GCP_Draw_SDL2::Draw_Text(const std::string &text, const GCP_Rect<int> &pos,
 	switch (pStyle->font.align)
 	{
 	case E_LEFT:
-		iX = pos.x() + 3;
-		iY = pos.y() + 3;
+		iX = pos.x();// + 3;
+		iY = pos.y();// + 3;
 		break;
 	case E_CENTER:
 		int width, height;
 		GetTextSize(text, width, height, pStyle);
 		iX = pos.x() + (pos.width() - width) / 2;
-		iY = pos.y() + 3;
+		iY = pos.y() + (pos.height() - height) / 2;
 		break;
 	case E_RIGHT:
 		break;
@@ -553,11 +623,15 @@ void GCP_Draw_SDL2::Draw_Text(const std::string &text, const GCP_Rect<int> &pos,
 	Draw_Text(text, iX, iY, pStyle, drawdata);
 }
 
-///
+///make this realisation private
 void GCP_Draw_SDL2::Draw_Text(const std::string &text, int x, int y, const gcp_spStyle &pStyle, GCP_DrawData* drawdata) const
 {
 	GCP_Color text_color = pStyle->textColor;
-	SDL_Color color = {text_color.r,text_color.g,text_color.b,text_color.a};
+
+	//stringRGBA (_screen, x, y, text.c_str(), text_color.r,text_color.g,text_color.b,text_color.a);
+	//return;
+
+	//SDL_Color color = {text_color.r,text_color.g,text_color.b,_currentAlpha};
 	SDL_Texture *image = NULL;
 	GCP_Vector<std::string> *strings = GCP_Math::strToLines(text);
 
@@ -655,6 +729,7 @@ void GCP_Draw::initConstants()
 	c_dkgrey = GCP_Color(75, 75, 75);
 
 	GCP_DefaultStyle = gcp_spStyle(new GCP_Style(E_DEFAULT));
+	GCP_DefaultMessageBoxStyle = gcp_spStyle(new GCP_Style(E_MESSAGEBOX));
 	GCP_ButtonBlackStyle = gcp_spStyle(new GCP_Style(E_BUTTON));
 	GCP_ButtonWhiteStyle = gcp_spStyle(new GCP_Style(E_BUTTONWHITE));
 	GCP_PanelBlackStyle = gcp_spStyle(new GCP_Style(E_PANELBLACK));
@@ -663,25 +738,26 @@ void GCP_Draw::initConstants()
 //does not work when entry point defined
 namespace gcp
 {
-GCP_Color c_white = GCP_Color(255, 255, 255);
-GCP_Color c_black = GCP_Color(0, 0, 0);
-GCP_Color c_aquadark = GCP_Color(121, 188, 255);
-GCP_Color c_yellow = GCP_Color(255, 255, 128);
-GCP_Color c_red = GCP_Color(255, 23, 23);
-GCP_Color c_dkred = GCP_Color(225, 23, 23);
-GCP_Color c_blue = GCP_Color(29, 23, 255);
-GCP_Color c_lime = GCP_Color(60, 240, 50);
-GCP_Color c_green = GCP_Color(10, 135, 3);
-GCP_Color c_aqua = GCP_Color(64, 244, 231);
-GCP_Color c_orange = GCP_Color(255, 130, 5);
-GCP_Color c_grey = GCP_Color(125, 125, 125);
-GCP_Color c_dkgrey = GCP_Color(75, 75, 75);
+	GCP_Color c_white = GCP_Color(255, 255, 255);
+	GCP_Color c_black = GCP_Color(0, 0, 0);
+	GCP_Color c_aquadark = GCP_Color(121, 188, 255);
+	GCP_Color c_yellow = GCP_Color(255, 255, 128);
+	GCP_Color c_red = GCP_Color(255, 23, 23);
+	GCP_Color c_dkred = GCP_Color(225, 23, 23);
+	GCP_Color c_blue = GCP_Color(29, 23, 255);
+	GCP_Color c_lime = GCP_Color(60, 240, 50);
+	GCP_Color c_green = GCP_Color(10, 135, 3);
+	GCP_Color c_aqua = GCP_Color(64, 244, 231);
+	GCP_Color c_orange = GCP_Color(255, 130, 5);
+	GCP_Color c_grey = GCP_Color(125, 125, 125);
+	GCP_Color c_dkgrey = GCP_Color(75, 75, 75);
 
-GCP_SPointer<GCP_Style> GCP_DefaultStyle;
-GCP_SPointer<GCP_Style> GCP_ButtonBlackStyle;
-GCP_SPointer<GCP_Style> GCP_ButtonWhiteStyle;
-GCP_SPointer<GCP_Style> GCP_PanelBlackStyle;
-GCP_Draw_Base* GCP_Draw::_drawbase = NULL;
+	GCP_SPointer<GCP_Style> GCP_DefaultStyle;
+	GCP_SPointer<GCP_Style> GCP_DefaultMessageBoxStyle;
+	GCP_SPointer<GCP_Style> GCP_ButtonBlackStyle;
+	GCP_SPointer<GCP_Style> GCP_ButtonWhiteStyle;
+	GCP_SPointer<GCP_Style> GCP_PanelBlackStyle;
+	GCP_Draw_Base* GCP_Draw::_drawbase = NULL;
 }
 ////////////////////////////////////////////////////////////////
 ////////////////////////TO SDL COLOR

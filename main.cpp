@@ -53,7 +53,7 @@ public:
 		bNew->setWidthHeight(105, 25);
 		bNew->setCaption("Example Button");
 		bNew->setPosition(SCREEN_WIDTH / 2 - bNew->getPosition().width() / 2, SCREEN_HEIGHT / 2 - bNew->getPosition().height() / 2);
-		bNew->iType = GCP_BUTTON_ROUNDRECT;
+		bNew->setButtonType(GCP_BUTTON_ROUNDRECT);
 		bNew->setOnMouseLeftClick(this, &gcpWindow::onHelloWorldButtonClick);
 		MainInterfaceForm->addComponent(GCP_SPointer<GCP_FormComponent>(bNew));
 
@@ -171,7 +171,7 @@ public:
 		bForm->setWidthHeight(105, 25);
 		bForm->setCaption("Example Form");
 		bForm->setPosition(x0, y0 + separation*i);
-		bForm->iType = GCP_BUTTON_ROUNDRECT;
+		bForm->setButtonType(GCP_BUTTON_ROUNDRECT);
 		bForm->setOnMouseLeftClick(OptionsForm.getPointer(), &GCP_Form::toggleVisibility);
 		MainInterfaceForm->addComponent(GCP_SPointer<GCP_FormComponent>(bForm));
 
@@ -183,7 +183,7 @@ public:
 		GCP_SPointer<GCP_Button> bcCreatePoint = GCP_SPointer<GCP_Button>(new GCP_Button());
 		bcCreatePoint->setWidthHeight(120, 25);
 		bcCreatePoint->setCaption("Example Menu 1");
-		bcCreatePoint->iType = GCP_BUTTON_ROUNDRECT;
+		bcCreatePoint->setButtonType(GCP_BUTTON_ROUNDRECT);
 		bcCreatePoint->setOnMouseLeftClick(this, &gcpWindow::onHelloWorldButtonClick);
 		RightButtonMenu->addButton(bcCreatePoint);
 
@@ -198,7 +198,7 @@ public:
 
 		//Hide out menu
 		RightButtonMenu->setVisible(false);
-		RightButtonMenu->iType = GCP_MENU_MVERTICAL;
+		RightButtonMenu->setMenuType(GCP_MENU_MVERTICAL);
 		MainInterfaceForm->addComponent(RightButtonMenu);
 
 		//Add Main form handlers

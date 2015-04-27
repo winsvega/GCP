@@ -1,5 +1,6 @@
 #include "GCP_Edit.h"
 #include "GCP_FormComponent.h"
+#include "GCP_Math.h"
 using namespace gcp;
 
 GCP_Edit::GCP_Edit()
@@ -27,8 +28,8 @@ void GCP_Edit::OnDraw(const GCP_Event &event)
 
 	SDL_Rect rect = {_position.x()+iBorderWidth,_position.y()+iBorderWidth*2,_position.width()-iBorderWidth*2,_position.height()-iBorderWidth*2 };
 	SDL_SetTextInputRect(&rect); //хз вообще зачем и что оно дает
-	//!! размер шрифта !!!
-	GCP_Draw::Render()->Draw_Text(_sTextInputDraw, _position.x() + iBorderWidth * 2, _position.y() + iBorderWidth * 2, getStyle(), &drawdata);
+	GCP_Rect<int> textPos(_position.x() + iBorderWidth * 2, _position.y() + iBorderWidth * 2, _position.width(), _position.height());
+	GCP_Draw::Render()->Draw_Text(_sTextInputDraw, textPos, getStyle(), &drawdata);
 	basicOnDraw(event);
 
 
@@ -108,7 +109,6 @@ void GCP_Edit::onKeyDown(int keycode)
 	if(!isVisible() || !_isEditingText)
 		return;
 
-	
 	switch (keycode)
 	{
 	case SDLK_RETURN:
@@ -116,56 +116,28 @@ void GCP_Edit::onKeyDown(int keycode)
 		break;
 	case SDLK_BACKSPACE:
 	{
-		//!!! тут не учитывается сколько байт в символе. надо добавить массив в котором хранилась бы инфа о том сколько на каждый символ выделяется байт
-		//Сейчас удаляется только один байт. т.е  русские буквы стираются за 2 нажатия бакспейс
-		if(_sTextInput.size()>0)
-			_sTextInput.erase(_sTextInput.size() - 1);
+		if(_sTextInput.size() > 0)
+		{
+			if (_inputSizeMap.size() < 1)
+				throw;
+			int letterSize = _inputSizeMap.pop_back();
+			while (letterSize > 0)
+			{
+				if(_sTextInput.size() > 0)
+					_sTextInput.erase(_sTextInput.size() - 1);
+				letterSize--;
+			}
+		}
 		corelateText();
 	}
 		break;
 	}
 }
 
-
-
-//////////////////////////////////////////
-//////////////////////////////////////////
-//Хитрая хрень. пробовал преобразовывать текст из UTF в CP1251 и обратно согласно кодировке бит в байтах
-//Не фига не получилось
-union byte
-{
-	unsigned char chr;
-	struct bit
-	{
-		bool b1;
-		bool b2;
-		bool b3;
-		bool b4;
-		bool b5;
-		bool b6;
-		bool b7;
-		bool b8;
-	}bits;
-
-};
-union rusdigit
-{
-	wchar_t letter;
-	struct b
-	{
-		byte byte1;
-		byte byte2;
-	}bytes;
-};
-//////////////////////////////////////////
-//////////////////////////////////////////
-
-
 bool GCP_Edit::onTextInput(const string &text)
 {
 	if(!isVisible() || !_isEditingText)
 		return false;
-
 
 	//unsigned int i = 0;
 	//while(textevent.text[i]!=0)
@@ -179,12 +151,11 @@ bool GCP_Edit::onTextInput(const string &text)
 	///AND LATER USE TTF_RenderUTF8_Blended TO DRAW THIS
 	///CRAP THIS WHILL REQUIRE TO PARSE _sCAption to multiple captions
 	//TTF_RenderUNICODE_Solid and TTF_RenderUTF8_Blended
-	/*wchar_t text;
+	/*wchar_t textR;
 	char mbchar;
-	mbstowcs(&text,"gh",2);
-	wctomb(&mbchar,text);*/
+	mbstowcs(&textR,text.c_str(),2);
+	wctomb(&mbchar,textR);*/
 
-	//Проблема в том что символы русские могут поступать как в виде 2 байт так и в виде 1 байта
 
 	/*if(i==2){
 		s[0] = textevent.text[1]-textevent.text[0]; //заметил что иногда эта штука есть правильное смещене из 2 байт в 1 байт русский символ
@@ -195,32 +166,43 @@ bool GCP_Edit::onTextInput(const string &text)
 		s[1] =	0;
 	}*/
 
-
-
+	//????
+	//Проблема в том что символы русские могут поступать как в виде 2 байт так и в виде 1 байта
+	//????
+	char* character = (char*)text.c_str();
 	switch(inputType)
 	{
 	case DIGITONLY:
-		if (!GCP_Math::isNum((char*)text.c_str()))
+		if (text.size() > 1 || !GCP_Math::isNum(character))
 			return false;
 		break;
 
 	case DOUBLEDIGIT:
-		if (!GCP_Math::isNum((char*)text.c_str()) && text[0] != '.')
+		if (text.size() > 1 || !GCP_Math::isNum(character) && text[0] != '.' && text[0] != '-' )
 			return false;
-		if (text[0] == '.'){
-			for(unsigned int i=0; i<_sTextInput.size(); i++)
+		if (text[0] == '.')
+		{
+			for(size_t i=0; i<_sTextInput.size(); i++)
 				if(_sTextInput.at(i) == '.')
+					return false;
+		}
+		if (text[0] == '-')
+		{
+			for(size_t i=0; i<_sTextInput.size(); i++)
+				if(_sTextInput.at(i) == '-')
 					return false;
 		}
 		break;
 
 	case TEXTONLY:
-		if (GCP_Math::isNum((char*)text.c_str()) && text[0] != ' ')
-			return false;
+		//if (text.size() == 1 && GCP_Math::isNum(character) && text[0] != ' ')
+		//	return false;
 		break;
 		//case GCP_Edit_InputType_Enum::ALL:
 	}
-	_sTextInput.append(text.c_str());
+
+	_inputSizeMap.push_back(text.size());
+	_sTextInput.append(character);
 	corelateText();
 
 	return true;
@@ -239,18 +221,20 @@ void GCP_Edit::corelateText()
 	int sw,sh;
 	GCP_Draw::Render()->GetTextSize(_sTextInput, sw, sh, getStyle());
 
-	
-	while(sw>_position.width()-getStyle()->borderWidth*2)
+	int k = 0;
+	while(sw >_position.width() - getStyle()->borderWidth*3)
 	{
 		_sTextInputDraw = "";
-		_iTextDrawIndex++;
+		_iTextDrawIndex += _inputSizeMap.at(k);
+		k++;
+
 		char buffer[100];
 		_sTextInput.copy(buffer,_sTextInput.size()-_iTextDrawIndex,_iTextDrawIndex);
 		buffer[_sTextInput.size()-_iTextDrawIndex]='\0';
 		_sTextInputDraw.append(buffer);
 
 
-		GCP_Draw::Render()->GetTextSize(_sTextInput, sw, sh, getStyle());
+		GCP_Draw::Render()->GetTextSize(_sTextInputDraw, sw, sh, getStyle());
 	}
 
 }
@@ -262,13 +246,21 @@ void GCP_Edit::corelateText()
 	return true;
 }*/
 
-void GCP_Edit::setCaption(const std::string &str)
+void GCP_Edit::setText(const std::string &str, int byteperletter)
 {
+	for(size_t i = 0; i < str.size(); i++)
+	{
+		bool isOneByte = GCP_Math::isOneByteChar(str.at(i));
+		_inputSizeMap.push_back(isOneByte ? 1 : 2);
+		if (!isOneByte)
+			i++;
+	}
+
 	_sTextInput = str;
 	corelateText();
 }
 
-string GCP_Edit::getCaption()
+string GCP_Edit::getText()
 {
 	return _sTextInput;
 }

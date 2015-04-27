@@ -28,7 +28,23 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef GCP_MainH
 #define GCP_MainH
-#define GCP_VERSION "1.01c"
+#define GCP_VERSION "1.02"
+#pragma region CHANGELOG
+//!NEW
+//!"1.01d -> 1.02"
+//GCP_Graph minor style changes
+//GCP_Vector constructors defined for GCP_Vector of GCP_Vector is now fine
+//added gfx dependence for drawing
+//text on buttons and messages align centered
+//right button click does not pass to form header
+//add uniqueValue64 and GCP_UID
+//fixed text input for Russian characters
+//add getComponent(string name) to Forms;
+//!"1.01c -> 1.01d"
+//GCP_Graph Added X (index) legend to the bottom
+//Slight Refactoring
+#pragma endregion
+
 #include "GCP_Form.h"
 #include "GCP_Button.h"
 #include "SDL.h"

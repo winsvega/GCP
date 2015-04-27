@@ -38,7 +38,7 @@ GCP_Form::GCP_Form(int _width, int _height)
 	//Крестики нолики
 	formTopRightButtons = GCP_SPointer<GCP_ContextMenu>(new GCP_ContextMenu());
 	formTopRightButtons->setPosition(_position.x() + _position.width() - 20, _position.y() + 5);
-	formTopRightButtons->iType = GCP_MENU_MHORIZONTAL;
+	formTopRightButtons->setMenuType(GCP_MENU_MHORIZONTAL);
 	formTopRightButtons->isContextMenuBlocking = false;			//Меню не блокирует другие компоненты на форме
 	formTopRightButtons->setStyle(GCP_ButtonWhiteStyle);
 	formTopRightButtons->setVisible(true);
@@ -114,13 +114,68 @@ GCP_Form::~GCP_Form()	{
 
 }
 
-void GCP_Form::addComponent(GCP_SPointer<GCP_ContextMenu> const &component)
+void GCP_Form::addToNameMap(const gcp_spFormComponent& component, const string& name)
 {
+	childNameMap namemap;
+	for (size_t i = 0;  i < _childNames.size(); i++)
+	{
+		childNameMap map = _childNames.at(i);
+		if (map.first == name)
+			throw;
+	}
+	namemap.first = name;
+	namemap.second = component->ID();
+	_childNames.push_back(namemap);
+}
+
+void GCP_Form::removeFromNameMap(const gcp_spFormComponent& component)
+{
+	for (size_t i = 0;  i < _childNames.size(); i++)
+	{
+		childNameMap map = _childNames.at(i);
+		if (map.second == component->ID())
+		{
+			_childNames.erase(i);
+			break;
+		}
+	}
+}
+
+const GCP_FormComponent* GCP_Form::getComponent(const string& name) const
+{
+	for (size_t i = 0;  i < _childNames.size(); i++)
+	{
+		childNameMap map = _childNames.at(i);
+		if (map.first == name)
+		{
+			for (size_t j = 0; j < _components.size(); j++)
+				if (_contextmenus.at(j)->ID() == map.second)
+					return ((gcp_spFormComponent)(_contextmenus.at(j))).getPointer();
+
+			for (size_t j = 0; j < _components.size(); j++)
+				if (_components.at(j)->ID() == map.second)
+					return ((gcp_spFormComponent)_components.at(j)).getPointer();
+
+			for (size_t j = 0; j < _subForms.size(); j++)
+				if (_subForms.at(j)->ID() == map.second)
+					return ((gcp_spFormComponent)_subForms.at(j)).getPointer();
+		}
+	}
+	return NULL;
+}
+
+void GCP_Form::addComponent(GCP_SPointer<GCP_ContextMenu> const &component, std::string name)
+{
+	if (name != "default")
+		addToNameMap((GCP_SPointer<GCP_FormComponent>)component.getPointer(), name);
 	_contextmenus.push_back(component);
 }
 
-void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> const &component)
+void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> const &component, std::string name)
 {
+	if (name != "default")
+		addToNameMap((GCP_SPointer<GCP_FormComponent>)component.getPointer(), name);
+
 	for (unsigned int i = 0; i < _components.size(); i++)
 		if (component == _components.at(i))			//Два раза одно и тоже не принимаем
 			return;
@@ -138,7 +193,9 @@ void GCP_Form::addComponent(GCP_SPointer<GCP_FormComponent> const &component)
 void GCP_Form::removeComponent(GCP_SPointer<GCP_FormComponent> const &component)
 {
 	for (unsigned int i = 0; i < _components.size(); i++)
-		if (_components.at(i) == component){
+		if (_components.at(i) == component)
+		{
+			removeFromNameMap(component);
 			_components.erase(i);
 			break;
 		}
@@ -149,8 +206,11 @@ void GCP_Form::toggleVisibility(void* obj)
 	setVisible(!isVisible());
 }
 
-void GCP_Form::addSubForm(GCP_SPointer<GCP_Form> &form)
+void GCP_Form::addSubForm(GCP_SPointer<GCP_Form> const &form, std::string name)
 {
+	if (name != "default")
+		addToNameMap((GCP_SPointer<GCP_FormComponent>)form.getPointer(), name);
+
 	//!!! Шрифт передаем!!!
 	//form->setFont(getFont());
 	form->setBufferSize(_swidth, _sheight);
@@ -160,15 +220,13 @@ void GCP_Form::addSubForm(GCP_SPointer<GCP_Form> &form)
 
 void GCP_Form::setPosition(const GCP_Rect<int> &position)
 {
-	_position.widthHeight.X = position.width();
-	_position.widthHeight.Y = position.height();
+	_position.setWidthHeight(position.width(), position.height());
 	setPosition(position.x(), position.y());
 }
 
 void GCP_Form::setPosition(int x, int y, int width, int height)
 {
-	_position.widthHeight.X = width;
-	_position.widthHeight.Y = height;
+	_position.setWidthHeight(width, height);
 	setPosition(x, y);
 }
 
@@ -176,8 +234,7 @@ void GCP_Form::setPosition(int x, int y)
 {
 	int deltaX = x - _position.x();
 	int deltaY = y - _position.y();
-	_position.topLeft.X = x;
-	_position.topLeft.Y = y;
+	_position.setTopLeft(x, y);
 	for (unsigned int i = 0; i < _components.size(); i++)
 		_components.at(i)->setPosition(_components.at(i)->getPosition().x() + deltaX, _components.at(i)->getPosition().y() + deltaY);
 	for (unsigned int i = 0; i < _contextmenus.size(); i++)
@@ -207,9 +264,12 @@ void GCP_Form::OnDraw(const GCP_Event &event)
 	{
 		if (getStyle()->backgroundColor.a != 255)
 		{
+			gcpUint8 alphaOrig = GCP_Draw::Render()->GetAlpha();
+			GCP_Draw::Render()->SetAlpha(getStyle()->backgroundColor.a);
 			GCP_Draw::Render()->SetBlendMode(E_BLEND_ADD);
 			GCP_Draw::Render()->Draw_FillRound(_position, 1, getStyle()->backgroundColor);
 			GCP_Draw::Render()->SetBlendMode(E_BLEND_NONE);
+			GCP_Draw::Render()->SetAlpha(alphaOrig);
 		}
 	}
 	else
@@ -318,7 +378,7 @@ gcp_formEvent GCP_Form::OnEvent(const GCP_Event &cevent)
 		event.isPassingOnlyGlobalEvent = event.isPassingOnlyGlobalEvent || evt.isEventInsideForm; //Все остальные формы получат только глобальные события если хоть на одной мы обработаем локальные
 	}
 
-	//Событие должно быть передано блокируещей форме как и как глобальное и как локальное
+	//Событие должно быть передано блокируещей форме и как глобальное и как локальное
 	if (_pBlockingForm)
 	{
 		event.isPassingOnlyGlobalEvent = false;
@@ -339,28 +399,28 @@ gcp_formEvent GCP_Form::OnEvent(const GCP_Event &cevent)
 
 	//ОПТИМИЗИРОВАТЬ КАК ТО ОБРАБОТКУ БОЛЬШОГО ЧИСЛА КОМПОНЕНТ? ВРОДЕ ДО 1000-2000 работает нормально
 	//РАСЧЕТ НА ТО ЧТО КОМПОНЕНТ БУДЕТ МНОГО > 400
-	///СОРТИРОВКА КОМПОНЕНТ И НА ВЫХОДЕ СПИСОК ТОЛЬКО ТЕХ У КОТОРЫХ КЛЮЧЕНА ПРОСЛУШКА
-	///GCP_EVENT или GCP_EVENT+1
-	///НАДО ЛИ?
 
 
 	//Предположим мы не обрабатываем никакое локальное событие у компонент
 	bool isMouseOverSomeComponent = false;
-	if (!_isContextMenuOpened && !isDraggingSomeComponent){
-		for (unsigned int i = 0; i < _components.size(); i++){
-			_components.at(i)->OnEvent(event);		//Вызываем глобальное событие у наших компонент
+	if (!_isContextMenuOpened && !isDraggingSomeComponent)
+	{
+		for (unsigned int i = 0; i < _components.size(); i++)
+		{
+			gcp_spFormComponent component = _components.at(i);
+			component->OnEvent(event);		//Вызываем глобальное событие у наших компонент
 
 			//Если глобальное событие произошло над дочерней формой, локальные события для наших компонент не обрабатываем
-			if (!isLocalEventsLocked)
-				if (!isMouseOverSomeComponent && !evt.isEventInsideForm)
+			if (!isLocalEventsLocked && component->isEnabled())
+			if (!isMouseOverSomeComponent && !evt.isEventInsideForm)
 				{
-					if (_components.at(i)->checkCollisionBox(event.mousex, event.mousey))
+					if (component->checkCollisionBox(event.mousex, event.mousey))
 					{
-						_components.at(i)->OnEvent(MakeEventLocal(event));
+						component->OnEvent(MakeEventLocal(event));
 						if (event.eventType == GCP_ON_MOUSE_GLDOWN)
-							_componentThatWasLeftClicked = _components.at(i);
+							_componentThatWasLeftClicked = component;
 
-						if (_components.at(i)->isEventUnderneathBloacking())
+						if (component->isEventUnderneathBlocking())
 							isMouseOverSomeComponent = true;
 						//Передали локальное событие компоненту по этим координатам.
 						//Далее локальные события более не передаем
@@ -386,12 +446,17 @@ gcp_formEvent GCP_Form::OnEvent(const GCP_Event &cevent)
 			mouse_x = event.mousex;
 			mouse_y = event.mousey;
 			evt.isEventInsideForm = true;
-			basicOnEvent(MakeEventLocal(event));
-			if (event.mousey < _position.y() + xpanel->getPosition().height()){
+
+			if (event.mousey < _position.y() + xpanel->getPosition().height())
+			{
 				if (event.eventType == GCP_ON_MOUSE_GLDOWN)
 					_isClickedOnTopHeader = true;
 				evt.isEventOnFormHead = true;
 			}
+
+			//не передаем GCP_ON_GRIGHT_CLICK как локальное событие если клик был по заголовку
+			if (!evt.isEventOnFormHead || event.eventType != GCP_ON_GRIGHT_CLICK)
+				basicOnEvent(MakeEventLocal(event));
 		}
 	return evt;
 }
@@ -442,10 +507,10 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(const GCP_Event& cevent)
 			if (_isClickedOnTopHeader || _isDragStarted)
 			{
 				int xPosStart = _position.x(), yPosStart = _position.y();
-				_position.topLeft.X += event.iMouseXRel;
-				_position.topLeft.Y += event.iMouseYRel;
-				_position.topLeft.X = (int)GCP_Math::Max(0, GCP_Math::Min(_swidth - _position.width(), _position.x()));
-				_position.topLeft.Y = (int)GCP_Math::Max(0, GCP_Math::Min(_sheight - _position.height(), _position.y()));
+				_position.setTopLeft(_position.x() + event.iMouseXRel,
+									 _position.y() + event.iMouseYRel);
+				_position.setTopLeft((int)GCP_Math::Max(0, GCP_Math::Min(_swidth - _position.width(), _position.x())),
+									 (int)GCP_Math::Max(0, GCP_Math::Min(_sheight - _position.height(), _position.y())));
 
 				int deltaX = _position.x() - xPosStart;
 				int deltaY = _position.y() - yPosStart;

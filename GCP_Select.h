@@ -120,7 +120,7 @@ namespace gcp
 
 
 			iBorderWidth = getStyle()->borderWidth;
-			GCP_Draw::Render()->Draw_Text(_sSelectedText, _position.x() + iBorderWidth * 2, _position.y() + iBorderWidth * 2, getStyle(), &drawdata);
+			GCP_Draw::Render()->Draw_Text(_sSelectedText, GCP_Rect<int>(_position.x() + iBorderWidth * 2, _position.y() + iBorderWidth * 2, _position.width(), 20), getStyle(), &drawdata);
 
 			_dropdownButton->OnDraw(event);
 			basicOnDraw(event);

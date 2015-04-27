@@ -41,7 +41,7 @@ namespace gcp
 
 			formTopRightButtons = GCP_SPointer<GCP_ContextMenu>(new GCP_ContextMenu());
 			formTopRightButtons->setPosition(getPosition().x() + getPosition().width() - 20, getPosition().y() + 5);
-			formTopRightButtons->iType = GCP_MENU_MHORIZONTAL;
+			formTopRightButtons->setMenuType(GCP_MENU_MHORIZONTAL);
 			formTopRightButtons->isContextMenuBlocking = false;
 			formTopRightButtons->setStyle(GCP_ButtonWhiteStyle);
 
@@ -69,8 +69,9 @@ namespace gcp
 			addComponent((GCP_SPointer<GCP_FormComponent>)buttonOk);
 
 			messagelabel = GCP_SPointer<GCP_Label>(new GCP_Label());
-			messagelabel->setPosition(25, 50);
-			messagelabel->setStyle(GCP_DefaultStyle);
+			messagelabel->setPosition(20, xpanel->getPosition().height() + 10,
+									  _width-40, _height-xpanel->getPosition().height()-75);
+			messagelabel->setStyle(GCP_DefaultMessageBoxStyle);
 			addComponent(static_cast<gcp_spFormComponent>(messagelabel));
 
 			messagebox = 0;

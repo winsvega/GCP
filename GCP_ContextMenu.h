@@ -11,10 +11,10 @@ namespace gcp
 	{
 	private:
 		bool _isLocked;
+		int _iType;
 		GCP_Vector<unsigned int> _iSeparators;
 	public:
 		GCP_Vector<gcp_spButton> menu;
-		int iType;
 		bool isContextMenuBlocking;
 
 		GCP_ContextMenu();
@@ -31,6 +31,8 @@ namespace gcp
 		//bool OnMouseGlobalRightClick(const GCP_Event& event);
 		gcp_formEvent OnEvent(const GCP_Event &event);
 		void OnDraw(const GCP_Event &event);
+		void setMenuType(int type) { _iType = type; }
+		int  getMenuType() { return _iType; }
 	};
 }
 #endif

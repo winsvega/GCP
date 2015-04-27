@@ -60,7 +60,6 @@ namespace gcp
 
 		T* getPointer() const  { return _pointee; }	//Опасно отдавать указатель наружу!
 
-
 		GCP_SPointer& operator=(GCP_SPointer const &rhs)			//Присваиваем один указатель другому
 		{
 			if (_pointee != rhs.getPointer())		//Разные указатели. Отпускаем наш указатель. Новому добавляем ссылку.

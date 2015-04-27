@@ -4,9 +4,10 @@
 using namespace gcp;
 
 //Контекстное меню это набор кнопок, которые открываются например на правый клик по формочке
-GCP_ContextMenu::GCP_ContextMenu(){
+GCP_ContextMenu::GCP_ContextMenu()
+{
 	_isVisible = false;
-	iType = GCP_MENU_MVERTICAL;		//меню может быть вертикальным либо горизонтальным
+	_iType = GCP_MENU_MVERTICAL;		//меню может быть вертикальным либо горизонтальным
 }
 
 
@@ -22,7 +23,6 @@ void GCP_ContextMenu::setLock(bool flag)
 {
 	_isLocked = flag;					//отключает обработку событий конктекстного меню. (нужно например чтобы заморозить интерфейс)
 }
-
 
 /*void GCP_ContextMenu::initTexture(SDL_Renderer* screen)
 {
@@ -43,8 +43,7 @@ void GCP_ContextMenu::addButton(const string &type)
 void GCP_ContextMenu::open(int x, int y)
 {
 	_isVisible = true;						//Открыть менб в заданых координатах
-	_position.topLeft.X = x;
-	_position.topLeft.Y = y;
+	_position.setTopLeft(x, y);
 }
 
 void GCP_ContextMenu::close(void *obj)
@@ -99,12 +98,12 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 		if (menu.at(i)->getPosition().height()>maxMenuWidth)
 			maxMenuWidth = menu.at(i)->getPosition().width();
 
-		if(iType==GCP_MENU_MVERTICAL){
+		if (_iType == GCP_MENU_MVERTICAL){
 			stackHeight += menu.at(i)->getPosition().height();
 			stackWidth = maxMenuWidth;
 		}
 
-		if(iType==GCP_MENU_MHORIZONTAL){
+		if (_iType == GCP_MENU_MHORIZONTAL){
 			stackWidth += menu.at(i)->getPosition().width();
 			stackHeight = maxMenuHeight;
 		}
@@ -114,8 +113,7 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 	GCP_Point<int> normPos = GCP_Math::normalizeRectInRect<int>(
 				GCP_Rect<int>(_position.x(), _position.y(), stackWidth + iMenuSize, stackHeight + iMenuSize),
 				event.drawRect, 1);
-	_position.topLeft.X = (int)normPos.X;
-	_position.topLeft.Y = (int)normPos.Y;
+	_position.setTopLeft((int)normPos.X, (int)normPos.Y);
 
 
 	//Теперь когда мы его подвинули нам надо подвинуть все компоненты уже с учетом того что сдвинули наше меню
@@ -125,7 +123,7 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 	unsigned int currentSeparator=0;
 	for(unsigned int i=0; i<iMenuSize; i++)	{
 
-		if(iType==GCP_MENU_MVERTICAL){
+		if (_iType == GCP_MENU_MVERTICAL){
 			if(currentSeparator < _iSeparators.size())
 				if(i==_iSeparators.at(currentSeparator))	{
 					stackHeight += 5; currentSeparator++;
@@ -135,7 +133,7 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 			stackWidth = maxMenuWidth;
 		}
 
-		if(iType==GCP_MENU_MHORIZONTAL){
+		if (_iType == GCP_MENU_MHORIZONTAL){
 			if(currentSeparator < _iSeparators.size())
 				if(i==_iSeparators.at(currentSeparator)){
 					stackWidth += 5;currentSeparator++;
@@ -167,3 +165,4 @@ void GCP_ContextMenu::OnDraw(const GCP_Event &event)
 	GCP_Draw::Render()->Draw_Round(_position.x(),  _position.y(),  stackWidth, stackHeight, getStyle()->roundCff, c_black);
 
 }//OnDraw
+

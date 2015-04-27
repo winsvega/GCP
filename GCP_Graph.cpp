@@ -2,6 +2,7 @@
 #include "GCP_Graph.h"
 #include "GCP_Math.h"
 #include "GCP_Vector.h"
+#include "GCP_Label.h"
 using namespace gcp;
 
 double GCP_Graph::getStep() const
@@ -20,13 +21,12 @@ void GCP_Graph::recalculateSize(double step)
 		return;
 
 	_resizedGraph->clear();
-	_values.sort();
+	_values.qsort();
 
 	if (step > 0)
 	{
 		unsigned int k = 0;
 		double countIndex;
-		double newValue = 0;
 		for (double i = 0; i < _maxIndex + step; i += step)
 		{
 			countIndex = i + step / 2;
@@ -50,14 +50,13 @@ void GCP_Graph::recalculateSize(double step)
 				cvalue = cvaluecell.second;
 			}
 
-			newValue = 0;
 			if (k >= _values.size())
 				break;
 		}
 	}
 
 	if (step == 0)
-		for (unsigned int i = 0; i < _values.size(); i++)
+		for (size_t i = 0; i < _values.size(); i++)
 		{
 			cell cvalue = _values.at(i);
 			_resizedGraph->setValue(cvalue.first, cvalue.second);
@@ -75,6 +74,17 @@ void GCP_Graph::checkMaxValue(double newvalue)
 
 	if (newvalue < _minValue)
 		_minValue = newvalue;
+}
+
+///
+void GCP_Graph::setIndexRange(double index_min, double index_max)
+{
+	_minIndexLegend = index_min;
+	_minIndex = _minIndexLegend;
+	_maxIndexLegend = index_max;
+	_maxIndex = _maxIndexLegend;
+	if (_resizedGraph.getRefCount() != -1)
+		_resizedGraph->setIndexRange(index_min, index_max);
 }
 
 ///
@@ -116,6 +126,10 @@ void GCP_Graph::addNewValue(double index, const double value)
 
 GCP_Graph::GCP_Graph(GCPE_GraphType type)
 {   
+	_maxIndexLegend = -1000000;
+	_minIndexLegend = 1000000;
+	legendStyle = gcp_spStyle(new GCP_Style(E_DEFAULT));
+	legendStyle->font.align = E_CENTER;
 	if (type == ETEMP_GRAPH)
 		clear();
 	else
@@ -164,6 +178,16 @@ void GCP_Graph::initButtons()
 	sizeDown->setCaption(" - ");
 	sizeDown->setOnMouseLeftClick(this, &GCP_Graph::toggleSizeDown);
 	menu.push_back(sizeDown);
+
+	ToolSetMenu = GCP_SPointer<GCP_ContextMenu>(new GCP_ContextMenu());
+	ToolSetMenu->setMenuType(GCP_MENU_MVERTICAL);
+	ToolSetMenu->isContextMenuBlocking = false;
+	ToolSetMenu->setVisible(true);
+	ToolSetMenu->addButton(circleType);
+	ToolSetMenu->addButton(normalType);
+	ToolSetMenu->addButton(sizeUp);
+	ToolSetMenu->addButton(sizeDown);
+	//ToolSetMenu->setStyle(menuStyle); //GCP_DefaultStyle
 }
 
 ///
@@ -233,11 +257,11 @@ const GCP_Graph::cell& GCP_Graph::getCell(const unsigned int i) const
 
 
 ///
-void GCP_Graph::addValue(double index, const double value)
+void GCP_Graph::addValue(double index, double value)
 {
 	checkMaxIndex(index);
 	//Search if the index has been set already
-	for (unsigned int i = 0; i < _values.size(); i++)
+	for (size_t i = 0; i < _values.size(); i++)
 	{
 		cell val = _values.at(i);
 		if (GCP_Math::compareDoubleEqual(val.first,index))
@@ -260,7 +284,7 @@ void GCP_Graph::setValue(double index, const double value)
 {
 	checkMaxIndex(index);
 	//Search if the index has been set already
-	for (unsigned int i = 0; i < _values.size(); i++)
+	for (size_t i = 0; i < _values.size(); i++)
 	{
 		cell val = _values.at(i);
 		if (GCP_Math::compareDoubleEqual(val.first,index))
@@ -285,7 +309,7 @@ void GCP_Graph::setValue(double index, const double value)
 double GCP_Graph::getValue(double index, const double defaultvalue) const
 {
 	double value = defaultvalue;
-	for (unsigned int i = 0; i < _values.size(); i++)
+	for (size_t i = 0; i < _values.size(); i++)
 	{
 		cell val = _values.at(i);
 		if (val.first == index)
@@ -301,11 +325,14 @@ double GCP_Graph::getValue(double index, const double defaultvalue) const
 void GCP_Graph::clear()
 {
 	_values.clear();
+	if (_resizedGraph.getRefCount() != -1)
+		_resizedGraph->clear();
 	_hasnegative = false;
 	_bRecalculated = false;
-	_maxIndex -= 1000000;
-	_minIndex = 1000000;
-	_maxValue -= 1000000;
+
+	_maxIndex = _maxIndexLegend;
+	_minIndex = _minIndexLegend;
+	_maxValue = -1000000;
 	_minValue = 1000000;
 	_sizeStep = 0;
 
@@ -332,7 +359,6 @@ void GCP_Graph::OnDraw(const GCP_Event& event)
 	if (!isVisible() || _maxValue == 0)
 		return;
 
-
 	if (_resizedGraph.getRefCount() == -1)
 		return;
 	else
@@ -342,11 +368,12 @@ void GCP_Graph::OnDraw(const GCP_Event& event)
 			_bRecalculated = true;
 		}
 
+
+
 	switch (type)
 	{
 	case ENORMAL_GRAPH:
 	{
-
 		sizeUp->setVisible(true);
 		sizeDown->setVisible(true);
 
@@ -366,8 +393,7 @@ void GCP_Graph::OnDraw(const GCP_Event& event)
 			GCP_Draw::Render()->Draw_Line(_position.x(), drawY, _position.x() + _position.width() - 1, drawY, c_black, 0);
 		}
 
-
-		for (unsigned int i = 0; i < _resizedGraph->size(); i++)
+		for (size_t i = 0; i < _resizedGraph->size(); i++)
 		{
 			cell val = _resizedGraph->getCell(i);
 			double X = (val.first - minIndex)*transformXCff;
@@ -388,9 +414,9 @@ void GCP_Graph::OnDraw(const GCP_Event& event)
 				if (_bMouseMoved)
 				{
 					double value = (double)(val.second);
-					setInfo(
-								"X: " + GCP_Math::doubleToString(val.first) + "\n" +
-								"Y: " + GCP_Math::doubleToString(value));
+					setInfo(	"X: " + GCP_Math::doubleToString(val.first) + "\n" +
+								"Y: " + GCP_Math::doubleToString(value),
+								10, 40);
 					_bMouseMoved = false;
 				}
 			}
@@ -400,9 +426,24 @@ void GCP_Graph::OnDraw(const GCP_Event& event)
 
 		GCP_Draw::Render()->Draw_Rect(_position, c_black);
 
+		//Подпись шкалы графика
+		if (_resizedGraph->size() > 0)
+		{
+			int iYPoint = _position.y() + _position.height() + 5;
+			for (unsigned i = 0; i <= 100; i+=25)
+			{
+				int iXPoint = _position.x()+_position.width()*i/100;
+				int iIndex = (i*maxIndexValue)/100+minIndex; //сдвигаем интервал обратно
+				string sIndex = GCP_Math::intToString(iIndex);
+				GCP_Rect<int> indexPoint(iXPoint-15, iYPoint, 30, 20);
+				GCP_Draw::Render()->Draw_Text(sIndex, indexPoint, legendStyle);
+				GCP_Draw::Render()->Draw_Line(GCP_Point<int>(iXPoint, iYPoint),GCP_Point<int>(iXPoint, iYPoint-10), c_black);
+			}
+		}
+
 		string sSizeText = "Step: " + GCP_Math::doubleToString(_sizeStep);
-		GCP_Rect<int> bottomPoint(_position.x(), _position.y() + 5, _position.width(), _position.height());
-		GCP_Draw::Render()->Draw_Text(sSizeText, bottomPoint, getStyle(), &drawdata);
+		GCP_Rect<int> stepPoint(_position.x() + 5, _position.y() + 5, _position.width(), _position.height());
+		GCP_Draw::Render()->Draw_Text(sSizeText, stepPoint, getStyle(), &drawdata);
 	}
 		break;
 
@@ -439,8 +480,7 @@ void GCP_Graph::OnDraw(const GCP_Event& event)
 				{
 					_iSphericalSelectedIndex = i;
 					double value = (double)(val.second);
-					setInfo(
-								"X: " + GCP_Math::doubleToString(val.first) + "\n" +
+					setInfo(	"X: " + GCP_Math::doubleToString(val.first) + "\n" +
 								"Y: " + GCP_Math::doubleToString(value));
 					_bMouseMoved = false;
 				}
@@ -477,9 +517,9 @@ gcp_formEvent GCP_Graph::OnEvent(const GCP_Event &event)
 	if (!isVisible())
 		return evt;
 
-
 	if (event.eventType == GCP_ON_MOUSE_MOTION)
 	{
+
 		_lastMousePos = GCP_Point<int>(event.mousex, event.mousey);
 		_dLastMouseDir = GCP_Math::round(GCP_Math::pointDirection(_position.center(), _lastMousePos));
 		setInfo("");

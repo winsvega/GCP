@@ -4,15 +4,21 @@
 
 namespace gcp
 {
+	class GCP_Label;
+	typedef GCP_SPointer<GCP_Label> gcp_spLabel;
 	class GCP_Label : public GCP_FormComponent
 	{
 	public:
-		int iTextSize, iMaxTextLength;
+		GCP_Label();
+		void setText(string _sText){	text = _sText;	}
+		void setText(const char* _sText){	text = string(_sText);	}
+		void OnDraw(const GCP_Event &event);
+
 		string text;
 
-		GCP_Label();
+	private:
+		int iTextSize, iMaxTextLength;
 
-		void OnDraw(const GCP_Event &event);
 	};
 }
 #endif

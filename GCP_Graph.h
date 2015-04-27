@@ -3,6 +3,9 @@
 #include "GCP_FormComponent.h"
 #include "GCP_Vector.h"
 #include "GCP_Button.h"
+#include "GCP_Label.h"
+#include "GCP_ContextMenu.h"
+
 
 namespace gcp
 {
@@ -24,9 +27,11 @@ namespace gcp
 		GCP_Vector<cell> _values;
 		double _maxValue;
 		double _minValue;
-		double _maxIndex;
-		double _minIndex;
+		double _maxIndex, _maxIndexLegend;
+		double _minIndex, _minIndexLegend;
 		double _sizeStep;
+
+		gcp_spStyle legendStyle;
 
 
 		double _timestepCff; // minx..maxx - > 0...360
@@ -39,6 +44,7 @@ namespace gcp
 
 		gcp_spButton sizeUp, sizeDown;
 		GCP_Vector<gcp_spButton> menu;
+		GCP_SPointer<GCP_ContextMenu> ToolSetMenu;
 		gcp_spGraph _resizedGraph;
 
 		///
@@ -67,6 +73,7 @@ namespace gcp
 		double getStep() const;
 		double getValue(double index, const double defaultvalue) const;
 		double getValueWithCurrentStep(const unsigned int i) const;
+		void setIndexRange(double index_min, double index_max);
 		void clear();
 		void getMaxMinIndex(double &max_index, double &min_index);
 		double getMaxValue();
