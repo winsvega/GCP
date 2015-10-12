@@ -6,7 +6,8 @@ SmartPointer implementation
 
 ### Dependencies ###
 SDL2 (http://libsdl.org/download-2.0.php)  
-SDL_TTF (https://www.libsdl.org/projects/SDL_ttf/)  
+SDL2_TTF (https://www.libsdl.org/projects/SDL_ttf/)
+SDL2_GFX (http://cms.ferzkopp.net/index.php/software/13-sdl-gfx)
 
 ### GCP_Math: ###
 Reflection/Refraction  
