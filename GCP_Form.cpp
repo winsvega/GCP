@@ -471,7 +471,11 @@ gcp_formEvent GCP_Form::OnMouseGlobalLeftHoldMotion(const GCP_Event& cevent)
 	evt.isEventInsideForm = false;
 	evt.isFormDragged = false;
 	if (!_isVisible || _pBlockingForm.getRefCount() > 0)
+	{
+		if (_pBlockingForm.getRefCount() > 0)
+			_pBlockingForm->OnMouseGlobalLeftHoldMotion(cevent);
 		return evt;
+	}
 
 	GCP_Event event = cevent;
 	event.drawRect = GCP_Rect<int>(_position.x(), _position.y(), _position.width(), _position.height());

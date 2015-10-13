@@ -591,6 +591,9 @@ int GCP_Draw_SDL2::GetTextSize(const std::string &text, int &width, int &height,
 		return -1;
 
 	TTF_Font* font = TTF_OpenFont(GCP_Draw::getFontPath(style->font.type).c_str(), style->font.size);
+	if (font == 0)
+		throw;
+
 	TTF_SizeUTF8(font, strings->at(maxSizeIndex).c_str(), &width, &height);
 	TTF_CloseFont(font);
 	size_t strSize = strings->size();
