@@ -304,17 +304,18 @@ int GCP_Math::findStringInVector(const string &sTextIn, GCP_Vector<string> *vect
 
 
 ///
-int GCP_Math::readIntegerArray(char* strline, char separator, int* arr)
+int GCP_Math::readIntegerArray(char* strline, char separator, GCP_Vector<int>& _arr)
 {
-	//GCP_Vector<int>* result = new GCP_Vector<int>();
-	char xx[50]; int i = 0, j = 0, k = 0;
+	char xx[50]; 
+	int i = 0, j = 0;
 	bool isExpectE = false;
 	int iPointJ = 0;
 
-	while (strline[i] != '\0'){
-		while (strline[i] != separator){
-			if ((strline[i] >= '0' && strline[i] <= '9')
-					|| strline[i] == '-')
+	while (strline[i] != '\0')
+	{
+		while (strline[i] != separator && strline[i] != '\0')
+		{
+			if ((strline[i] >= '0' && strline[i] <= '9') || strline[i] == '-')
 			{
 				xx[j] = strline[i];
 				j++;
@@ -360,12 +361,16 @@ int GCP_Math::readIntegerArray(char* strline, char separator, int* arr)
 		if (isExpectE == true)
 			j = iPointJ;
 
-		xx[j] = '\0'; j = 0; i++; isExpectE = false;	iPointJ = 0;
+		xx[j] = '\0'; 
+		j = 0; 
+		i++; 
+		isExpectE = false;
+		iPointJ = 0;
 		if (xx[0] != 0)
-			arr[k] = GCP_Math::stringToInt(xx);
-		k++;
+			_arr.push_back(GCP_Math::stringToInt(xx));
 	}
-	return k;
+
+	return _arr.size();
 }
 
 ///

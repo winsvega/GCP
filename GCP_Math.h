@@ -22,8 +22,9 @@ struct GCP_Point;
 
 template<class T>
 struct GCP_Line;
-typedef GCP_Point<int> GCP_PointINT;
-typedef GCP_Line<double> GCP_LineDOUBLE;
+typedef GCP_Point<int> GCP_PointInt;
+typedef GCP_Point<double> GCP_PointDouble;
+typedef GCP_Line<double> GCP_LineDouble;
 ///
 template<class T>
 struct GCP_Point
@@ -619,7 +620,7 @@ public:
 		else return false;
 	}
 	static int findStringInVector(const string &sTextIn, GCP_Vector<string> *vector);
-	static int readIntegerArray(char* strline, char separator, int *arr);
+	static int readIntegerArray(char* strline, char separator, GCP_Vector<int>& _arr);
 	static unsigned int uniqueValue64();
 	static size_t utf8_length(unsigned char c);
 	static char *utf8_next(char *p);

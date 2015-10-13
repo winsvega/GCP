@@ -242,6 +242,9 @@ namespace gcp
 
 		}
 	};
+
+	typedef GCP_Vector<int> GCP_VectorInt;
+	typedef GCP_Vector<double> GCP_VectorDouble;
 }
 
 #endif

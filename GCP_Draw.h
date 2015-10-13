@@ -28,8 +28,8 @@ namespace gcp
 		virtual void Draw_Rect(const GCP_Rect<int> &rect, const GCP_Color &color)const = 0;
 		virtual void Draw_FillRect(int x, int y, int width, int height, const GCP_Color &color)const = 0;
 		virtual void Draw_FillRect(const GCP_Rect<int> &rect, const GCP_Color &color) const = 0;
-		virtual void Draw_Polygon(const GCP_Vector<GCP_PointINT> &polygon, const GCP_Color &color) const = 0;
-		virtual void Draw_FillPolygon(const GCP_Vector<GCP_PointINT> &polygon, const GCP_Color &color) const = 0;
+		virtual void Draw_Polygon(const GCP_Vector<GCP_PointInt> &polygon, const GCP_Color &color) const = 0;
+		virtual void Draw_FillPolygon(const GCP_Vector<GCP_PointInt> &polygon, const GCP_Color &color) const = 0;
 		virtual void Draw_FillEllipse(int x0, int y0, int Xradius, int Yradius, const GCP_Color &color)const = 0;
 		virtual void Draw_Ellipse(int x0, int y0, int Xradius, int Yradius, const GCP_Color &color)const = 0;
 		virtual void Draw_Graphic(int* data, int data_size, int x, int y, int width, int height)const = 0;
@@ -52,8 +52,8 @@ namespace gcp
 		void Draw_Rect(const GCP_Rect<int> &rect, const GCP_Color &color) const; \
 		void Draw_FillRect(int x, int y, int width, int height, const GCP_Color &color) const;\
 		void Draw_FillRect(const GCP_Rect<int> &rect, const GCP_Color &color) const;\
-		void Draw_Polygon(const GCP_Vector<GCP_PointINT> &polygon, const GCP_Color &color) const;\
-		void Draw_FillPolygon(const GCP_Vector<GCP_PointINT> &polygon, const GCP_Color &color) const;\
+		void Draw_Polygon(const GCP_Vector<GCP_PointInt> &polygon, const GCP_Color &color) const;\
+		void Draw_FillPolygon(const GCP_Vector<GCP_PointInt> &polygon, const GCP_Color &color) const;\
 		void Draw_FillEllipse(int x0, int y0, int Xradius, int Yradius, const GCP_Color &color) const;\
 		void Draw_Ellipse(int x0, int y0, int Xradius, int Yradius,const GCP_Color &color) const;\
 		void Draw_Image(const string &path, int x, int y) const;\

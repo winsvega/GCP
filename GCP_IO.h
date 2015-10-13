@@ -116,11 +116,8 @@ namespace gcp
 		void writeString(std::string value)
 		{
 			char str[256];
-#ifdef __WIN32__
-			strncpy_s(str, value.c_str(), 255);
-#else
 			strncpy(str, value.c_str(), 255);
-#endif
+
 			if (GCP_IO_OUTPUTTXT == _iMode)
 			{
 				size_t len = SDL_strlen(str);

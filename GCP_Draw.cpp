@@ -107,7 +107,7 @@ void GCP_Draw_SDL2::Draw_FillRect(int x, int y, int width, int height, const GCP
 	SDL_SetRenderDrawColor(_screen,r,g,b,a);
 }
 
-void GCP_Draw_SDL2::Draw_Polygon(const GCP_Vector<GCP_PointINT> &polygon, const GCP_Color &color) const
+void GCP_Draw_SDL2::Draw_Polygon(const GCP_Vector<GCP_PointInt> &polygon, const GCP_Color &color) const
 {
 	Sint16 *xv = new Sint16[polygon.size()];
 	Sint16 *yv = new Sint16[polygon.size()];
@@ -121,7 +121,7 @@ void GCP_Draw_SDL2::Draw_Polygon(const GCP_Vector<GCP_PointINT> &polygon, const 
 	delete yv;
 }
 
-void GCP_Draw_SDL2::Draw_FillPolygon(const GCP_Vector<GCP_PointINT> &polygon, const GCP_Color &color) const
+void GCP_Draw_SDL2::Draw_FillPolygon(const GCP_Vector<GCP_PointInt> &polygon, const GCP_Color &color) const
 {
 	Sint16 *xv = new Sint16[polygon.size()];
 	Sint16 *yv = new Sint16[polygon.size()];
@@ -576,8 +576,8 @@ int GCP_Draw_SDL2::GetTextSize(const std::string &text, int &width, int &height,
 	//Вычисление ширины и высоты текста
 	GCP_Vector<string>* strings = GCP_Math::strToLines(text);
 	bool hasIndex = false;
-	unsigned int maxSize = 0, maxSizeIndex = 0;
-	for (unsigned int i = 0; i < strings->size(); i++)
+	size_t maxSize = 0, maxSizeIndex = 0;
+	for (size_t i = 0; i < strings->size(); i++)
 	{
 		if (strings->at(i).length() > maxSize)
 		{
@@ -593,9 +593,10 @@ int GCP_Draw_SDL2::GetTextSize(const std::string &text, int &width, int &height,
 	TTF_Font* font = TTF_OpenFont(GCP_Draw::getFontPath(style->font.type).c_str(), style->font.size);
 	TTF_SizeUTF8(font, strings->at(maxSizeIndex).c_str(), &width, &height);
 	TTF_CloseFont(font);
-	height *= strings->size();
+	size_t strSize = strings->size();
+	height *= strSize;
 	delete strings;
-	return strings->size();
+	return strSize;
 }
 
 ///
