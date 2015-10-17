@@ -201,6 +201,18 @@ void GCP_Form::removeComponent(GCP_SPointer<GCP_FormComponent> const &component)
 		}
 }
 
+void GCP_Form::removeComponent(string const& name)
+{
+	const GCP_FormComponent* component = getComponent(name);
+	for (unsigned int i = 0; i < _components.size(); i++)
+	if (_components.at(i) == component)
+	{
+		removeFromNameMap(_components.at(i));
+		_components.erase(i);
+		break;
+	}
+}
+
 void GCP_Form::toggleVisibility(void* obj)
 {
 	setVisible(!isVisible());
@@ -593,4 +605,8 @@ void GCP_Form::onParentFormEndBlocking()
 		_subForms.at(i)->setEnabled(true); //!!!!
 }
 
+void GCP_Form::toogleTopRightButtons(bool enabled)
+{
+	formTopRightButtons->setVisible(enabled);
+}
 

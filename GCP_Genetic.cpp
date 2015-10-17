@@ -64,7 +64,7 @@ void GeneticSpecies::mutation()
 ///< Переводит бинарную строку в десятичную
 int GCP_Math::bin2dec(const string* binary)
 {
-	int len,dec=0,i,exp;
+	int len,dec=0,exp;
 
 	len = binary->size();
 	exp = len - 1;
@@ -75,7 +75,7 @@ int GCP_Math::bin2dec(const string* binary)
 }
 int GCP_Math::bin2dec(const char* binary)
 {
-	int len,dec=0,i,exp;
+	int len,dec=0,exp;
 
 	len = strlen(binary);
 	exp = len - 1;

@@ -28,9 +28,13 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef GCP_MainH
 #define GCP_MainH
-#define GCP_VERSION "1.02"
+#define GCP_VERSION "1.02a"
 #pragma region CHANGELOG
 //!NEW
+//!"1.02 -> 1.02a"
+//Locking form bug fixes
+//Vector find function
+//toggle top right buttons on form
 //!"1.01d -> 1.02"
 //GCP_Graph minor style changes
 //GCP_Vector constructors defined for GCP_Vector of GCP_Vector is now fine

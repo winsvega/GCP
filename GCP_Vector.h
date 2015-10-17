@@ -73,6 +73,15 @@ namespace gcp
 			delete[]_mElems;
 		}
 
+		int find(T element)
+		{
+			for (size_t i = 0; i < _iSize; i++)
+				if (_mElems[i] == element)
+					return i;
+
+			return -1;
+		}
+
 		void push_back(T element)		{
 			//cause SP to trouble if copying instance is another vector!!!
 			_mElems[_iSize] = element;
@@ -83,7 +92,7 @@ namespace gcp
 
 		void slectDistinct()
 		{
-			int k = 0;
+			size_t k = 0;
 			int *toDelete = new int[_iSize];
 			for (unsigned int i = 0; i < _iSize; i++)
 			{
@@ -98,10 +107,10 @@ namespace gcp
 			}
 
 			//!REV
-			for (unsigned int i = 0; i < k; i++)
+			for (size_t i = 0; i < k; i++)
 			{
 				erase(toDelete[i]);
-				for (unsigned int j = i + 1; j < k; j++)
+				for (size_t j = i + 1; j < k; j++)
 				{
 					if (toDelete[j] > toDelete[i])
 						toDelete[j]--;
@@ -213,7 +222,7 @@ namespace gcp
 			if (this != &rhs)
 			{
 				clear();
-				for (int i = 0; i < rhs.size(); i++)
+				for (size_t i = 0; i < rhs.size(); i++)
 				{
 					push_back(rhs.at(i));
 				}

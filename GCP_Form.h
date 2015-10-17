@@ -76,9 +76,11 @@ namespace gcp
 		void addComponent(const GCP_SPointer<GCP_ContextMenu> &component, string name = "default");
 		void addComponent(const GCP_SPointer<GCP_FormComponent>  &component, string name = "default");
 		void removeComponent(const GCP_SPointer<GCP_FormComponent>  &component);
+		void removeComponent(string const& name);
 		void setPosition(const GCP_Rect<int>& position);
 		void setPosition(int x, int y, int width, int height);
 		void setPosition(int x, int y);
+		void toogleTopRightButtons(bool enabled);
 
 		void toggleVisibility(void* obj);
 		void addSubForm(const GCP_SPointer<GCP_Form> &form, string name = "default");
