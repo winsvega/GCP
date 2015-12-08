@@ -41,7 +41,7 @@ public:
 
 		////TTF Init (Weak point here) make sure TTF font is loaded!
 		std::stringstream directory_path;
-		directory_path << working_directory.c_str() << "arial.ttf";
+		directory_path << working_directory.c_str() << "/arial.ttf";
 		std::string directory_path_string = directory_path.str();
 		Interface->setFont(directory_path.str());
 
