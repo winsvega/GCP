@@ -23,6 +23,7 @@ namespace gcp
 		const static int GCP_IO_INPUT = 0;
 		const static int GCP_IO_OUTPUT = 1;
 		const static int GCP_IO_OUTPUTTXT = 2;
+		const static int GCP_IO_INPUTTXT = 3;
 		GCP_IO(std::string filename, int mode)
 		{
 			_isClosed = false;
@@ -34,6 +35,8 @@ namespace gcp
 				io = SDL_RWFromFile(filename.c_str(), "wb"); break;
 			case GCP_IO_OUTPUTTXT:
 				io = SDL_RWFromFile(filename.c_str(), "w"); break;
+			case GCP_IO_INPUTTXT:
+				io = SDL_RWFromFile(filename.c_str(), "r"); break;
 			}
 			_iMode = mode;
 		}
@@ -98,9 +101,24 @@ namespace gcp
 
 		void readString(std::string *value)
 		{
-			char str[256];
-			io->read(io, &str, sizeof(str), 1);
-			*value = str;
+			*value = "";
+			if (GCP_IO_INPUTTXT == _iMode)
+			{
+				char str = 0;
+				io->read(io, &str, sizeof(str), 1);
+				while (str != 10 && str != 0) //line separators, ending
+				{
+					*value += str;
+					io->read(io, &str, sizeof(str), 1);
+				}
+				return;
+			}
+			else
+			{
+				char str[256];
+				io->read(io, &str, sizeof(str), 1);
+				*value = str;
+			}
 		}
 
 		void writeInt(int value)

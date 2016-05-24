@@ -19,10 +19,13 @@ using namespace std;
 
 template<class T>
 struct GCP_Point;
+template<class T>
+struct GCP_Point3D;
 
 template<class T>
 struct GCP_Line;
 typedef GCP_Point<int> GCP_PointInt;
+typedef GCP_Point3D<float> GCP_Point3DFloat;
 typedef GCP_Point<double> GCP_PointDouble;
 typedef GCP_Line<double> GCP_LineDouble;
 ///
@@ -61,6 +64,47 @@ struct GCP_Point
 	{
 		X -= rhs.X;
 		Y -= rhs.Y;
+		return *this;
+	}
+};
+
+template<class T>
+struct GCP_Point3D
+{
+	T  X, Y, Z;
+	GCP_Point3D(){}
+	GCP_Point3D(T x, T y, T z) : X(x), Y(y), Z(z) {}
+	GCP_Point3D(GCP_Point3D* point) : X(point->X), Y(point->Y), Z(point->Z) {}
+	~GCP_Point3D(){}
+	operator GCP_Point3D<int>() { return GCP_Point3D<int>((int)X, (int)Y, (int)Z); }//приведение к типу GCP_Point3D<int>
+	inline friend bool operator == (GCP_Point3D const&  lhs, GCP_Point3D const& rhs)
+	{
+		return (lhs.X == rhs.X && lhs.Y == rhs.Y && lhs.Z == rhs.Z);
+	}
+	inline friend bool operator < (GCP_Point3D const&  lhs, GCP_Point3D const& rhs)
+	{
+		return (lhs.X < rhs.X && lhs.Y < rhs.Y && lhs.Z < rhs.Z);
+	}
+	inline friend bool operator >(GCP_Point3D const&  lhs, GCP_Point3D const& rhs)
+	{
+		return (lhs.X > rhs.X && lhs.Y > rhs.Y && lhs.Z > rhs.Z);
+	}
+	inline friend bool operator != (GCP_Point3D const&  lhs, GCP_Point3D const& rhs)
+	{
+		return (lhs.X != rhs.X && lhs.Y != rhs.Y && lhs.Z != rhs.Z);
+	}
+	GCP_Point3D& operator + (GCP_Point3D const& rhs)
+	{
+		X += rhs.X;
+		Y += rhs.Y;
+		Z += rhs.Z;
+		return *this;
+	}
+	GCP_Point3D& operator - (GCP_Point3D const& rhs)
+	{
+		X -= rhs.X;
+		Y -= rhs.Y;
+		Z -= rhs.Z;
 		return *this;
 	}
 };
@@ -620,7 +664,110 @@ public:
 		else return false;
 	}
 	static int findStringInVector(const string &sTextIn, GCP_Vector<string> *vector);
-	static int readIntegerArray(char* strline, char separator, GCP_Vector<int>& _arr);
+
+	template <class T>
+	static int readIntegerArray(char* strline, char separator, GCP_Vector<T>& _arr, bool _append = false, int _defaultLineSize = 50)
+	{
+		char* xx = new char[_defaultLineSize];
+		if (!_append)
+			_arr.clear();
+		int i = 0, j = 0;
+		bool isExpectE = false;
+		int iPointJ = 0;
+		bool isMinusBeforeDigit = false;
+
+		while (strline[i] != '\0')
+		{
+			while (strline[i] != separator && strline[i] != '\0')
+			{
+				if ((strline[i] >= '0' && strline[i] <= '9') || strline[i] == '-')
+				{
+					if (strline[i] == '-')
+						isMinusBeforeDigit = true;
+					else
+						isMinusBeforeDigit = false;
+					xx[j] = strline[i];
+					j++;
+				}
+				else
+				{
+					//прочли тире и приняли его за минус. удаляем.
+					if (isMinusBeforeDigit == true)
+					{
+						isMinusBeforeDigit = false;
+						xx[j - 1] = 0;
+						j--;
+					}
+				}
+				i++;
+
+				//Встретили точку
+				if (strline[i] == '.')
+				{
+					i++;					//Предположим, мы считываем формат вида 1.24317e+006
+					isExpectE = true;
+					iPointJ = j;
+				}
+
+				//Встретили е
+				if (strline[i] == 'e')
+				{
+					i++; //+
+					i++; //firestDigit after e+
+					char eNum[10];
+					int i2 = 0;
+					while (strline[i] >= '0' && strline[i] <= '9')
+					{
+						eNum[i2] = strline[i];
+						i++; i2++;
+					}
+
+					eNum[i2] = '\0';
+					int eParam = GCP_Math::stringToInt(eNum);
+
+					//Допишем к числу необходимое количество знаков после точки, которая для e
+					int eXtend = eParam - (j - iPointJ);
+					for (int j2 = 0; j2<eXtend; j2++)
+					{
+						xx[j] = '0'; j++;
+					}
+					isExpectE = false;
+				}
+			}
+
+			//На случай если мы встретили точку, но не встретили потом e
+			bool isDouble = false;
+			if (isExpectE == true)
+			{
+				isDouble = true;
+				char moveChar = xx[iPointJ];
+				xx[iPointJ] = '.';
+				for (int i = iPointJ + 1; i <= j + 1; i++)
+				{
+					char tmp = xx[i];
+					xx[i] = moveChar;
+					moveChar = tmp;
+				}
+				j++;
+			}
+
+
+			xx[j] = '\0';
+			j = 0;
+			i++;
+			isExpectE = false;
+			iPointJ = 0;
+			if (xx[0] != 0)
+				if (isDouble)
+					_arr.push_back(GCP_Math::stringToDouble(xx));
+				else
+					_arr.push_back(GCP_Math::stringToInt(xx));
+		}
+
+		delete xx;
+		return _arr.size();
+	}
+
 	static unsigned int uniqueValue64();
 	static size_t utf8_length(unsigned char c);
 	static char *utf8_next(char *p);
@@ -825,6 +972,7 @@ struct GCP_UID
 		io->writeInt(key_c);
 		io->writeInt(key_d);
 	}
+
 	inline friend bool operator == (const GCP_UID& lhs, const GCP_UID& rhs)
 	{
 		return (lhs.key_a == rhs.key_a && lhs.key_b == rhs.key_b && lhs.key_c == rhs.key_c && lhs.key_d == rhs.key_d);
