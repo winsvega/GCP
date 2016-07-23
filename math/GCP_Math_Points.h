@@ -1,4 +1,7 @@
 /// GCP MATH POINTS ///
+#include "GCP_Vector.h"
+using namespace gcp;
+
 template<class T>
 struct GCP_Point;
 template<class T>
@@ -132,4 +135,81 @@ public:
 	const GCP_Point<T>& center()const{ return centerPoint; }
 	inline void setTopLeft(T x, T y){ topLeftPoint.X = x; topLeftPoint.Y = y; recalcCenter(); }
 	inline void setWidthHeight(T width, T height) { widthHeight.X = width; widthHeight.Y = height; recalcCenter(); }
+};
+
+template <class T>
+class GCP_HeightMap
+{
+public:
+	GCP_HeightMap() : m_maxHeight(0), m_minHeight(0) {}
+	int getXCells() const { return m_xPixels; }
+	int getYCells() const { return m_yPixels; }
+	unsigned int getMaxXValue() const { return m_maxX; }
+	unsigned int getMaxYValue() const { return m_maxY; }
+	T getMaxHeight() const { return m_maxHeight; }
+	T getMinHeight() const { return m_minHeight; }
+
+	T getHeight(int x, int y)
+	{
+		if (checkBounds(x, y))
+			return m_map[y*m_xPixels + x];
+		return 0;
+	}
+
+	double getHeightPhysicCoord(double x, double y)
+	{
+		if (x > m_maxX || x < 0 || y > m_maxY || y < 0)
+			return 0;
+
+		double roundXpercent = x * 100 / m_maxX;
+		double roundYpercent = y * 100 / m_maxY;
+
+		double roundX = roundXpercent*(m_xPixels - 1) / 100;
+		double roundY = roundYpercent*(m_yPixels - 1) / 100;
+		return getHeightInterpolation(roundX, roundY);
+	}
+
+	double getHeightInterpolation(double x, double y)
+	{
+		int florX = floor(x);
+		int florY = floor(y);
+		int ceilX = ceil(x);
+		int ceilY = ceil(y);
+		if (checkBounds(ceilX, ceilY) && checkBounds(florX, florY))
+		{
+			double x1 = x - florX;
+			double y1 = y - florY;
+			double value = getHeight(florX, florY)*(1 - x1)*(1 - y1) +
+				getHeight(ceilX, florY)* x1 *(1 - y1) +
+				getHeight(florX, ceilY)* (1 - x1) * y1 +
+				getHeight(ceilX, ceilY)* x1 * y1;
+			return value;
+		}
+		return 0;
+	}
+
+	void setHeight(int x, int y, T z)
+	{
+		if (checkBounds(x, y))
+			m_map.at(0) = z;
+	}
+
+protected:
+	int m_xPixels;
+	int m_yPixels;
+	unsigned int m_maxX;
+	unsigned int m_maxY;
+	GCP_Vector<T> m_map;
+	T m_maxHeight;
+	T m_minHeight;
+
+private:
+
+	bool checkBounds(int x, int y)
+	{
+		if (x < m_xPixels && y < m_yPixels && x >= 0 && y >= 0)
+			if (y*m_xPixels + x < m_map.size())
+				return true;
+		return false;
+	}
 };
