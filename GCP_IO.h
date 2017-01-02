@@ -80,7 +80,7 @@ namespace gcp
 		std::string readString()
 		{
 			std::string value;
-			readString(&value);
+			readString(value);
 			return value;
 		}
 
@@ -99,17 +99,23 @@ namespace gcp
 			io->read(io, value, sizeof(double), 1);
 		}
 
-		void readString(std::string *value)
+		void readString(std::string& value)
 		{
-			*value = "";
+			value = "";
 			if (GCP_IO_INPUTTXT == _iMode)
 			{
 				char str = 0;
 				io->read(io, &str, sizeof(str), 1);
-				while (str != 10 && str != 0) //line separators, ending
+				while (str != 0) //line separators, ending
 				{
-					*value += str;
+					value += str;
 					io->read(io, &str, sizeof(str), 1);
+					if (str == 13) //0D0A
+					{
+						io->read(io, &str, sizeof(str), 1);
+						if (str == 10)
+							break;
+					}
 				}
 				return;
 			}
@@ -117,7 +123,7 @@ namespace gcp
 			{
 				char str[256];
 				io->read(io, &str, sizeof(str), 1);
-				*value = str;
+				value = str;
 			}
 		}
 
@@ -131,10 +137,11 @@ namespace gcp
 			io->write(io, &value, sizeof(double), 1);
 
 		}
-		void writeString(std::string value)
+		void writeString(std::string const value)
 		{
-			char str[256];
-			strncpy(str, value.c_str(), 255);
+			char* str = new char[value.size()];
+			strncpy(str, value.c_str(), value.size());
+			str[value.size()] = 0;
 
 			if (GCP_IO_OUTPUTTXT == _iMode)
 			{
@@ -148,7 +155,9 @@ namespace gcp
 
 		void writeln()
 		{
-			char str = '\n';
+			char str = 13;
+			SDL_RWwrite(io, &str, 1, 1);
+			str = '\n';
 			SDL_RWwrite(io, &str, 1, 1);
 		}
 
