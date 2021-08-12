@@ -24,4 +24,4 @@ https://github.com/winsvega/GCP/issues/1  (old version)
 https://forums.libsdl.org/viewtopic.php?p=42697  
 
 ### Support & Donate: ###
-Bitcoin: 13Er51KkcvDdgEmm2DutXzT8JCw9CpR2oR  
+Bitcoin: 1QEsEv5wqJanSJmbom1LhCxtYHo6o1VJ8C
